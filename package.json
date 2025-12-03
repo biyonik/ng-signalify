@@ -1,0 +1,121 @@
+{
+  "name": "ng-signalify",
+  "version": "1.0.0",
+  "description": "Angular 17+ için modern, signal-tabanlı form yönetimi, state management ve UI component kütüphanesi",
+  "author": "Ahmet ALTUN",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/biyonik/ng-signalify.git"
+  },
+  "keywords": [
+    "angular",
+    "signals",
+    "forms",
+    "state-management",
+    "components",
+    "typescript",
+    "reactive",
+    "validation",
+    "zod",
+    "crud",
+    "entity-store"
+  ],
+  "peerDependencies": {
+    "@angular/common": "^17.0.0 || ^18.0.0 || ^19.0.0",
+    "@angular/core": "^17.0.0 || ^18.0.0 || ^19.0.0",
+    "zod": "^3.22.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": false
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^17.0.0",
+    "@angular/cli": "^17.0.0",
+    "@angular/common": "^17.0.0",
+    "@angular/compiler": "^17.0.0",
+    "@angular/compiler-cli": "^17.0.0",
+    "@angular/core": "^17.0.0",
+    "@angular/platform-browser": "^17.0.0",
+    "@angular/platform-browser-dynamic": "^17.0.0",
+    "@types/jest": "^29.5.0",
+    "jest": "^29.7.0",
+    "jest-preset-angular": "^14.0.0",
+    "ng-packagr": "^17.0.0",
+    "typescript": "~5.2.0",
+    "zod": "^3.22.0"
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "build:watch": "ng-packagr -p ng-package.json --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint \"lib/**/*.ts\"",
+    "prepublishOnly": "npm run build"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "esm2022": "./dist/esm2022/ng-signalify.mjs",
+      "esm": "./dist/esm2022/ng-signalify.mjs",
+      "default": "./dist/fesm2022/ng-signalify.mjs"
+    },
+    "./fields": {
+      "types": "./dist/lib/fields/index.d.ts",
+      "default": "./dist/fesm2022/ng-signalify-fields.mjs"
+    },
+    "./schemas": {
+      "types": "./dist/lib/schemas/index.d.ts",
+      "default": "./dist/fesm2022/ng-signalify-schemas.mjs"
+    },
+    "./validators": {
+      "types": "./dist/lib/validators/index.d.ts",
+      "default": "./dist/fesm2022/ng-signalify-validators.mjs"
+    },
+    "./services": {
+      "types": "./dist/lib/services/index.d.ts",
+      "default": "./dist/fesm2022/ng-signalify-services.mjs"
+    },
+    "./store": {
+      "types": "./dist/lib/store/index.d.ts",
+      "default": "./dist/fesm2022/ng-signalify-store.mjs"
+    },
+    "./components": {
+      "types": "./dist/lib/components/index.d.ts",
+      "default": "./dist/fesm2022/ng-signalify-components.mjs"
+    },
+    "./api": {
+      "types": "./dist/lib/api/index.d.ts",
+      "default": "./dist/fesm2022/ng-signalify-api.mjs"
+    },
+    "./advanced": {
+      "types": "./dist/lib/advanced/index.d.ts",
+      "default": "./dist/fesm2022/ng-signalify-advanced.mjs"
+    },
+    "./infrastructure": {
+      "types": "./dist/lib/infrastructure/index.d.ts",
+      "default": "./dist/fesm2022/ng-signalify-infrastructure.mjs"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "fields": ["./dist/lib/fields/index.d.ts"],
+      "schemas": ["./dist/lib/schemas/index.d.ts"],
+      "validators": ["./dist/lib/validators/index.d.ts"],
+      "services": ["./dist/lib/services/index.d.ts"],
+      "store": ["./dist/lib/store/index.d.ts"],
+      "components": ["./dist/lib/components/index.d.ts"],
+      "api": ["./dist/lib/api/index.d.ts"],
+      "advanced": ["./dist/lib/advanced/index.d.ts"],
+      "infrastructure": ["./dist/lib/infrastructure/index.d.ts"]
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
