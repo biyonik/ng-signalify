@@ -223,6 +223,19 @@ export class RealtimeConnection {
   }
 
   /**
+   * TR: Bağlantıyı tamamen yok eder ve tüm kaynakları serbest bırakır.
+   * Component destroy olduğunda çağrılmalıdır (ngOnDestroy).
+   * 
+   * EN: Completely destroys the connection and releases all resources.
+   * Should be called when component is destroyed (ngOnDestroy).
+   */
+  destroy(): void {
+    this.disconnect();
+    this.subscriptions.clear();
+    this.messageQueue = [];
+  }
+
+  /**
    * TR: Sunucuya mesaj gönderir.
    * Bağlantı yoksa mesajı kuyruğa (Queue) ekler, bağlantı sağlandığında otomatik gönderir.
    *
@@ -472,6 +485,7 @@ export interface PresenceState {
   leave: () => void;
   updateStatus: (status: PresenceUser['status']) => void;
   updateMeta: (meta: Record<string, unknown>) => void;
+  destroy: () => void;
 }
 
 /**
@@ -491,23 +505,41 @@ export function createPresence(
 
   const count = computed(() => users().length);
 
+  const unsubscribers: Array<() => void> = [];
+
   // Subscribe to presence events
-  connection.on<PresenceUser[]>(`${channel}:presence:sync`, (allUsers) => {
-    users.set(allUsers);
-  });
+  unsubscribers.push(
+    connection.on<PresenceUser[]>(`${channel}:presence:sync`, (allUsers) => {
+      users.set(allUsers);
+    })
+  );
 
-  connection.on<PresenceUser>(`${channel}:presence:join`, (user) => {
-    users.update((list) => {
-      const exists = list.some((u) => u.id === user.id);
-      if (exists) {
-        return list.map((u) => (u.id === user.id ? user : u));
-      }
-      return [...list, user];
-    });
-  });
+  unsubscribers.push(
+    connection.on<PresenceUser>(`${channel}:presence:join`, (user) => {
+      users.update((list) => {
+        const exists = list.some((u) => u.id === user.id);
+        if (exists) {
+          return list.map((u) => (u.id === user.id ? user : u));
+        }
+        return [...list, user];
+      });
+    })
+  );
 
-  connection.on<string>(`${channel}:presence:leave`, (leftUserId) => {
-    users.update((list) => list.filter((u) => u.id !== leftUserId));
+  unsubscribers.push(
+    connection.on<string>(`${channel}:presence:leave`, (leftUserId) => {
+      users.update((list) => list.filter((u) => u.id !== leftUserId));
+    })
+  );
+
+  // Bağlantı koptuğunda otomatik leave yap
+  const stateEffect = effect(() => {
+    const state = connection.state();
+    if (state === 'disconnected' && currentUser()) {
+      // Sunucuya bildirim gönderemiyoruz (bağlantı yok)
+      // Sadece local state'i temizle
+      currentUser.set(null);
+    }
   });
 
   const join = (user: Omit<PresenceUser, 'lastSeen'>) => {
@@ -520,7 +552,9 @@ export function createPresence(
   };
 
   const leave = () => {
-    connection.emit(`${channel}:presence:leave`, userId);
+    if (currentUser() && connection.isConnected()) {
+      connection.emit(`${channel}:presence:leave`, userId);
+    }
     currentUser.set(null);
   };
 
@@ -536,6 +570,12 @@ export function createPresence(
     connection.emit(`${channel}:presence:update`, { userId, meta });
   };
 
+  const destroy = () => {
+    leave();
+    unsubscribers.forEach((unsub) => unsub());
+    stateEffect.destroy();
+  };
+
   return {
     users: users.asReadonly(),
     count,
@@ -544,6 +584,7 @@ export function createPresence(
     leave,
     updateStatus,
     updateMeta,
+    destroy,
   };
 }
 
