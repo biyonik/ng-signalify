@@ -74,6 +74,13 @@ export abstract class EntityStore<
   public readonly signals: EntitySignals<T>;
 
   /**
+   * TR: Devam eden refresh promise'i (Race condition önleme).
+   *
+   * EN: Ongoing refresh promise (Race condition prevention).
+   */
+  private _refreshPromise: Promise<void> | null = null;
+
+  /**
    * TR: EntityStore sınıfını başlatır.
    *
    * EN: Initializes the EntityStore class.
@@ -360,30 +367,61 @@ export abstract class EntityStore<
     }
   }
 
-  /**
+/**
    * TR: Birden fazla kaydı siler.
+   * Kısmi başarı durumunda sadece başarılı olanları state'den kaldırır.
    *
    * EN: Deletes multiple records.
+   * In case of partial success, only removes successful ones from state.
+   *
+   * @returns TR: Başarılı ve başarısız ID'lerin listesi. / EN: List of successful and failed IDs.
    */
-  async deleteMany(ids: EntityId[]): Promise<boolean> {
+  async deleteMany(ids: EntityId[]): Promise<{ success: EntityId[]; failed: EntityId[] }> {
+    if (ids.length === 0) {
+      return { success: [], failed: [] };
+    }
+
     this.setLoading('loading');
     this.clearError();
 
-    try {
-      await Promise.all(ids.map((id) => this.deleteOne(id)));
-      
+    const results = await Promise.allSettled(
+      ids.map(async (id) => {
+        await this.deleteOne(id);
+        return id;
+      })
+    );
+
+    const success: EntityId[] = [];
+    const failed: EntityId[] = [];
+    const errors: string[] = [];
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        success.push(result.value);
+      } else {
+        failed.push(ids[index]);
+        errors.push(result.reason?.message ?? 'Unknown error');
+      }
+    });
+
+    // TR: Sadece başarılı olanları state'den kaldır
+    // EN: Only remove successful ones from state
+    if (success.length > 0) {
       this._state.update((s) => ({
-        ...adapter.removeMany(s, ids),
-        loading: 'success',
+        ...adapter.removeMany(s, success),
+        loading: failed.length > 0 ? 'error' : 'success',
+        error: failed.length > 0 
+          ? `${failed.length} kayıt silinemedi: ${errors.slice(0, 3).join(', ')}${errors.length > 3 ? '...' : ''}`
+          : null,
       }));
 
-      this.pagination.setTotal(Math.max(0, this.pagination.total() - ids.length));
-
-      return true;
-    } catch (e) {
-      this.setError(e);
-      return false;
+      this.pagination.setTotal(Math.max(0, this.pagination.total() - success.length));
+    } else {
+      // Hiçbiri başarılı olmadı
+      this.setError(new Error(`Tüm silme işlemleri başarısız: ${errors[0]}`));
     }
+
+    return { success, failed };
   }
 
   // =========================================================================
@@ -736,21 +774,47 @@ export abstract class EntityStore<
 
   /**
    * TR: Veri bayatlamışsa (Cache TTL dolmuşsa) yeniler.
+   * Eşzamanlı çağrıları tek bir request'e birleştirir (Deduplication).
    *
    * EN: Refreshes data if stale (Cache TTL expired).
+   * Deduplicates concurrent calls into a single request.
    */
   async refreshIfStale(): Promise<void> {
-    if (this.signals.isStale()) {
-      await this.loadAll();
+    if (!this.signals.isStale()) {
+      return;
     }
+
+    // TR: Zaten bir refresh devam ediyorsa, ona bağlan
+    // EN: If refresh is already in progress, join it
+    if (this._refreshPromise) {
+      return this._refreshPromise;
+    }
+
+    this._refreshPromise = this.loadAll().finally(() => {
+      this._refreshPromise = null;
+    });
+
+    return this._refreshPromise;
   }
 
   /**
    * TR: Veriyi zorla yeniler.
+   * Eşzamanlı çağrıları tek bir request'e birleştirir (Deduplication).
    *
    * EN: Force refreshes data.
+   * Deduplicates concurrent calls into a single request.
    */
   async refresh(): Promise<void> {
-    await this.loadAll();
+    // TR: Zaten bir refresh devam ediyorsa, ona bağlan
+    // EN: If refresh is already in progress, join it
+    if (this._refreshPromise) {
+      return this._refreshPromise;
+    }
+
+    this._refreshPromise = this.loadAll().finally(() => {
+      this._refreshPromise = null;
+    });
+
+    return this._refreshPromise;
   }
 }
