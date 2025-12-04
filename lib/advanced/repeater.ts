@@ -183,8 +183,14 @@ export function createRepeater<T extends Record<string, unknown>>(
     collapsible = false,
   } = config;
 
-  let idCounter = 0;
-  const generateId = () => `item-${++idCounter}`;
+  const generateId = (): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let id = 'item-';
+    for (let i = 0; i < 12; i++) {
+      id += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return id;
+  };
 
   // Initialize items
   const createItem = (data: T, touched = false): RepeaterItem<T> => ({
