@@ -317,7 +317,7 @@ export function createWizard<T extends Record<string, unknown>>(
    * EN: Validates data of the specified step.
    * Runs schema and custom validation functions.
    */
-  const validateStep = async (index: number): Promise<boolean> => {
+const validateStep = async (index: number): Promise<boolean> => {
     const step = steps[index];
     const state = stepStates()[index];
     
@@ -347,7 +347,7 @@ export function createWizard<T extends Record<string, unknown>>(
         }
       }
 
-      updateStepState(index, { status: 'completed', error: null });
+      updateStepState(index, { error: null });
       return true;
     } finally {
       isValidating.set(false);
@@ -367,7 +367,7 @@ export function createWizard<T extends Record<string, unknown>>(
    * EN: Transitions to the specified step.
    * Checks navigation rules (linear, allowJump) and hooks.
    */
-  const goTo = async (indexOrId: number | string): Promise<boolean> => {
+const goTo = async (indexOrId: number | string): Promise<boolean> => {
     const targetIndex = typeof indexOrId === 'number'
       ? indexOrId
       : steps.findIndex((s) => s.id === indexOrId);
@@ -378,7 +378,6 @@ export function createWizard<T extends Record<string, unknown>>(
 
     const current = currentIndex();
     
-    // Check if can jump
     if (!allowJump && linear) {
       const targetState = stepStates()[targetIndex];
       // TR: İleriye doğru sıçrama engeli (Daha önce ziyaret edilmediyse)
@@ -388,10 +387,13 @@ export function createWizard<T extends Record<string, unknown>>(
       }
     }
 
-    // Validate current before leaving
-    if (validateOnLeave && targetIndex > current) {
-      const valid = await validateStep(current);
-      if (!valid) return false;
+    let validationPassed = false;
+    if (targetIndex > current) {
+      if (validateOnLeave) {
+        const valid = await validateStep(current);
+        if (!valid) return false;
+        validationPassed = true;
+      }
     }
 
     // Before leave hook
@@ -408,8 +410,16 @@ export function createWizard<T extends Record<string, unknown>>(
       if (!canEnter) return false;
     }
 
-    // Update states
-    updateStepState(current, { status: current < targetIndex ? 'completed' : 'pending' });
+    if (targetIndex > current) {
+      // İleri gidiyoruz
+      // Sadece validation geçtiyse 'completed', aksi halde 'pending' (yarım kaldı)
+      updateStepState(current, { 
+        status: validationPassed ? 'completed' : 'pending' 
+      });
+    } else {
+      updateStepState(current, { status: 'pending' });
+    }
+    
     updateStepState(targetIndex, { status: 'active', visited: true });
     
     currentIndex.set(targetIndex);
