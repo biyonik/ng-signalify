@@ -1,15 +1,12 @@
 import {
   Component,
-  Input,
   ChangeDetectionStrategy,
+  input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
- * SigSpinner - Loading spinner
- * 
- * Usage:
- * <sig-spinner size="md" color="primary" />
+ * SigSpinner - Signal-based loading spinner
  */
 @Component({
   selector: 'sig-spinner',
@@ -19,14 +16,14 @@ import { CommonModule } from '@angular/common';
   template: `
     <div 
       class="sig-spinner"
-      [class.sig-spinner--xs]="size === 'xs'"
-      [class.sig-spinner--sm]="size === 'sm'"
-      [class.sig-spinner--md]="size === 'md'"
-      [class.sig-spinner--lg]="size === 'lg'"
-      [class.sig-spinner--xl]="size === 'xl'"
-      [class.sig-spinner--primary]="color === 'primary'"
-      [class.sig-spinner--white]="color === 'white'"
-      [class.sig-spinner--gray]="color === 'gray'"
+      [class.sig-spinner--xs]="size() === 'xs'"
+      [class.sig-spinner--sm]="size() === 'sm'"
+      [class.sig-spinner--md]="size() === 'md'"
+      [class.sig-spinner--lg]="size() === 'lg'"
+      [class.sig-spinner--xl]="size() === 'xl'"
+      [class.sig-spinner--primary]="color() === 'primary'"
+      [class.sig-spinner--white]="color() === 'white'"
+      [class.sig-spinner--gray]="color() === 'gray'"
       role="status"
       aria-label="Yükleniyor"
     >
@@ -51,7 +48,6 @@ import { CommonModule } from '@angular/common';
       to { transform: rotate(360deg); }
     }
 
-    /* Sizes */
     .sig-spinner--xs .sig-spinner__circle {
       width: 0.75rem;
       height: 0.75rem;
@@ -82,22 +78,18 @@ import { CommonModule } from '@angular/common';
       border-width: 4px;
     }
 
-    /* Colors */
     .sig-spinner--primary { color: #3b82f6; }
     .sig-spinner--white { color: white; }
     .sig-spinner--gray { color: #9ca3af; }
   `],
 })
 export class SigSpinnerComponent {
-  @Input() size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' = 'md';
-  @Input() color: 'primary' | 'white' | 'gray' = 'primary';
+  readonly size = input<'xs' | 'sm' | 'md' | 'lg' | 'xl'>('md');
+  readonly color = input<'primary' | 'white' | 'gray'>('primary');
 }
 
 /**
- * SigLoading - Full page or container loading overlay
- * 
- * Usage:
- * <sig-loading [show]="isLoading" text="Veriler yükleniyor..." />
+ * SigLoading - Signal-based loading overlay
  */
 @Component({
   selector: 'sig-loading',
@@ -105,16 +97,16 @@ export class SigSpinnerComponent {
   imports: [CommonModule, SigSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (show) {
+    @if (show()) {
       <div 
         class="sig-loading"
-        [class.sig-loading--fullscreen]="fullscreen"
-        [class.sig-loading--transparent]="transparent"
+        [class.sig-loading--fullscreen]="fullscreen()"
+        [class.sig-loading--transparent]="transparent()"
       >
         <div class="sig-loading__content">
-          <sig-spinner [size]="spinnerSize" color="primary" />
-          @if (text) {
-            <p class="sig-loading__text">{{ text }}</p>
+          <sig-spinner [size]="spinnerSize()" color="primary" />
+          @if (text()) {
+            <p class="sig-loading__text">{{ text() }}</p>
           }
         </div>
       </div>
@@ -155,19 +147,15 @@ export class SigSpinnerComponent {
   `],
 })
 export class SigLoadingComponent {
-  @Input() show = false;
-  @Input() text = '';
-  @Input() fullscreen = false;
-  @Input() transparent = false;
-  @Input() spinnerSize: 'sm' | 'md' | 'lg' | 'xl' = 'lg';
+  readonly show = input<boolean>(false);
+  readonly text = input<string>('');
+  readonly fullscreen = input<boolean>(false);
+  readonly transparent = input<boolean>(false);
+  readonly spinnerSize = input<'sm' | 'md' | 'lg' | 'xl'>('lg');
 }
 
 /**
- * SigSkeleton - Skeleton loading placeholder
- * 
- * Usage:
- * <sig-skeleton width="200px" height="20px" />
- * <sig-skeleton variant="circle" size="48px" />
+ * SigSkeleton - Signal-based skeleton loader
  */
 @Component({
   selector: 'sig-skeleton',
@@ -177,11 +165,11 @@ export class SigLoadingComponent {
   template: `
     <div 
       class="sig-skeleton"
-      [class.sig-skeleton--circle]="variant === 'circle'"
-      [class.sig-skeleton--text]="variant === 'text'"
-      [style.width]="variant === 'circle' ? size : width"
-      [style.height]="variant === 'circle' ? size : height"
-      [style.border-radius]="variant === 'circle' ? '50%' : radius"
+      [class.sig-skeleton--circle]="variant() === 'circle'"
+      [class.sig-skeleton--text]="variant() === 'text'"
+      [style.width]="variant() === 'circle' ? size() : width()"
+      [style.height]="variant() === 'circle' ? size() : height()"
+      [style.border-radius]="variant() === 'circle' ? '50%' : radius()"
     ></div>
   `,
   styles: [`
@@ -212,24 +200,15 @@ export class SigLoadingComponent {
   `],
 })
 export class SigSkeletonComponent {
-  @Input() variant: 'rect' | 'circle' | 'text' = 'rect';
-  @Input() width = '100%';
-  @Input() height = '1rem';
-  @Input() size = '2rem';
-  @Input() radius = '0.25rem';
+  readonly variant = input<'rect' | 'circle' | 'text'>('rect');
+  readonly width = input<string>('100%');
+  readonly height = input<string>('1rem');
+  readonly size = input<string>('2rem');
+  readonly radius = input<string>('0.25rem');
 }
 
 /**
- * SigEmptyState - Empty state placeholder
- * 
- * Usage:
- * <sig-empty-state
- *   icon="📭"
- *   title="Veri bulunamadı"
- *   description="Henüz kayıt eklenmemiş"
- * >
- *   <button>İlk kaydı ekle</button>
- * </sig-empty-state>
+ * SigEmptyState - Signal-based empty state
  */
 @Component({
   selector: 'sig-empty-state',
@@ -238,14 +217,14 @@ export class SigSkeletonComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="sig-empty-state">
-      @if (icon) {
-        <div class="sig-empty-state__icon">{{ icon }}</div>
+      @if (icon()) {
+        <div class="sig-empty-state__icon">{{ icon() }}</div>
       }
-      @if (title) {
-        <h3 class="sig-empty-state__title">{{ title }}</h3>
+      @if (title()) {
+        <h3 class="sig-empty-state__title">{{ title() }}</h3>
       }
-      @if (description) {
-        <p class="sig-empty-state__description">{{ description }}</p>
+      @if (description()) {
+        <p class="sig-empty-state__description">{{ description() }}</p>
       }
       <div class="sig-empty-state__action">
         <ng-content></ng-content>
@@ -288,7 +267,7 @@ export class SigSkeletonComponent {
   `],
 })
 export class SigEmptyStateComponent {
-  @Input() icon = '';
-  @Input() title = '';
-  @Input() description = '';
+  readonly icon = input<string>('');
+  readonly title = input<string>('');
+  readonly description = input<string>('');
 }

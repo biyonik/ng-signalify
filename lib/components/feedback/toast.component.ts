@@ -1,29 +1,19 @@
 import {
   Component,
-  Input,
   ChangeDetectionStrategy,
   signal,
   computed,
   Injectable,
   inject,
-  OnInit,
-  OnDestroy,
+  input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-/** Toast type */
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-/** Toast position */
 export type ToastPosition = 
-  | 'top-left' 
-  | 'top-center' 
-  | 'top-right' 
-  | 'bottom-left' 
-  | 'bottom-center' 
-  | 'bottom-right';
+  | 'top-left' | 'top-center' | 'top-right' 
+  | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
-/** Toast configuration */
 export interface ToastConfig {
   id?: string;
   type?: ToastType;
@@ -31,96 +21,83 @@ export interface ToastConfig {
   message: string;
   duration?: number;
   closable?: boolean;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
+  action?: { label: string; onClick: () => void };
 }
 
-/**
- * TR: Toast servis yapılandırması.
- *
- * EN: Toast service configuration.
- */
-export interface ToastServiceConfig {
-  /**
-   * TR: Ekranda gösterilebilecek maksimum toast sayısı.
-   * Limit aşılırsa en eski toast otomatik silinir.
-   *
-   * EN: Maximum number of toasts that can be shown on screen.
-   * If limit is exceeded, oldest toast is automatically dismissed.
-   */
-  maxToasts?: number;
-
-  /**
-   * TR: Kuyruk modu aktif mi?
-   * Aktifse, limit aşıldığında yeni toast'lar kuyruğa alınır.
-   * Değilse, en eski toast silinir.
-   *
-   * EN: Is queue mode enabled?
-   * If enabled, new toasts are queued when limit is exceeded.
-   * Otherwise, oldest toast is dismissed.
-   */
-  queueMode?: boolean;
-
-  /**
-   * TR: Varsayılan toast süresi (ms).
-   *
-   * EN: Default toast duration (ms).
-   */
-  defaultDuration?: number;
-}
-
-/** Toast item */
 export interface Toast extends Required<Omit<ToastConfig, 'action'>> {
   action?: ToastConfig['action'];
   createdAt: number;
 }
 
+export interface ToastServiceConfig {
+  maxToasts?: number;
+  queueMode?: boolean;
+  defaultDuration?: number;
+}
+
 /**
- * Toast Service - Manage toasts globally
+ * ToastService - Signal-based toast management
  */
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  private _toasts = signal<Toast[]>([]);
-  private counter = 0;
+  private readonly _toasts = signal<Toast[]>([]);
+  private readonly _queue = signal<Toast[]>([]);
+  private readonly _timers = new Map<string, ReturnType<typeof setTimeout>>();
+  private _counter = 0;
+
+  private _config: Required<ToastServiceConfig> = {
+    maxToasts: 5,
+    queueMode: false,
+    defaultDuration: 5000,
+  };
 
   readonly toasts = this._toasts.asReadonly();
+  readonly queueCount = computed(() => this._queue().length);
 
-  private timers = new Map<string, ReturnType<typeof setTimeout>>();
+  configure(config: Partial<ToastServiceConfig>): void {
+    this._config = { ...this._config, ...config };
+  }
 
-
-  /** Show toast */
   show(config: ToastConfig): string {
-    const id = config.id ?? `toast-${++this.counter}`;
+    const id = config.id ?? `toast-${++this._counter}`;
     
     const toast: Toast = {
       id,
       type: config.type ?? 'info',
       title: config.title ?? this.getDefaultTitle(config.type ?? 'info'),
       message: config.message,
-      duration: config.duration ?? 5000,
+      duration: config.duration ?? this._config.defaultDuration,
       closable: config.closable ?? true,
       action: config.action,
       createdAt: Date.now(),
     };
 
-    this._toasts.update((toasts) => [...toasts, toast]);
-
-    // Auto dismiss
-    if (toast.duration > 0) {
-      setTimeout(() => this.dismiss(id), toast.duration);
+    const currentToasts = this._toasts();
+    
+    if (currentToasts.length >= this._config.maxToasts) {
+      if (this._config.queueMode) {
+        this._queue.update((q) => [...q, toast]);
+        return id;
+      } else {
+        const oldest = currentToasts[0];
+        if (oldest) this.dismiss(oldest.id);
+      }
     }
 
+    this._toasts.update((t) => [...t, toast]);
+    this.scheduleAutoDismiss(toast);
     return id;
   }
 
-  /** Shorthand methods */
   success(message: string, title?: string): string {
     return this.show({ type: 'success', message, title });
   }
 
-  error(message: string, title?: string): string {
+  error(message: string, title?: string, duration = 10000): string {
+    return this.show({ type: 'error', message, title, duration });
+  }
+
+  persistentError(message: string, title?: string): string {
     return this.show({ type: 'error', message, title, duration: 0 });
   }
 
@@ -132,14 +109,44 @@ export class ToastService {
     return this.show({ type: 'info', message, title });
   }
 
-  /** Dismiss toast */
-  dismiss(id: string) {
-    this._toasts.update((toasts) => toasts.filter((t) => t.id !== id));
+  dismiss(id: string): void {
+    const timer = this._timers.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      this._timers.delete(id);
+    }
+
+    this._toasts.update((t) => t.filter((toast) => toast.id !== id));
+
+    if (this._config.queueMode) {
+      setTimeout(() => this.showNextFromQueue(), 100);
+    }
   }
 
-  /** Dismiss all toasts */
-  dismissAll() {
+  dismissAll(): void {
+    this._timers.forEach((timer) => clearTimeout(timer));
+    this._timers.clear();
     this._toasts.set([]);
+    this._queue.set([]);
+  }
+
+  private scheduleAutoDismiss(toast: Toast): void {
+    if (toast.duration > 0) {
+      const timer = setTimeout(() => this.dismiss(toast.id), toast.duration);
+      this._timers.set(toast.id, timer);
+    }
+  }
+
+  private showNextFromQueue(): void {
+    const queue = this._queue();
+    if (queue.length === 0) return;
+
+    if (this._toasts().length >= this._config.maxToasts) return;
+
+    const [next, ...remaining] = queue;
+    this._queue.set(remaining);
+    this._toasts.update((t) => [...t, next]);
+    this.scheduleAutoDismiss(next);
   }
 
   private getDefaultTitle(type: ToastType): string {
@@ -154,7 +161,7 @@ export class ToastService {
 }
 
 /**
- * Single Toast Component
+ * SigToastItem - Single toast component
  */
 @Component({
   selector: 'sig-toast-item',
@@ -164,14 +171,14 @@ export class ToastService {
   template: `
     <div 
       class="sig-toast"
-      [class.sig-toast--success]="toast.type === 'success'"
-      [class.sig-toast--error]="toast.type === 'error'"
-      [class.sig-toast--warning]="toast.type === 'warning'"
-      [class.sig-toast--info]="toast.type === 'info'"
+      [class.sig-toast--success]="toast().type === 'success'"
+      [class.sig-toast--error]="toast().type === 'error'"
+      [class.sig-toast--warning]="toast().type === 'warning'"
+      [class.sig-toast--info]="toast().type === 'info'"
       role="alert"
     >
       <div class="sig-toast__icon">
-        @switch (toast.type) {
+        @switch (toast().type) {
           @case ('success') { ✓ }
           @case ('error') { ✕ }
           @case ('warning') { ⚠ }
@@ -180,22 +187,22 @@ export class ToastService {
       </div>
 
       <div class="sig-toast__content">
-        @if (toast.title) {
-          <div class="sig-toast__title">{{ toast.title }}</div>
+        @if (toast().title) {
+          <div class="sig-toast__title">{{ toast().title }}</div>
         }
-        <div class="sig-toast__message">{{ toast.message }}</div>
+        <div class="sig-toast__message">{{ toast().message }}</div>
         
-        @if (toast.action) {
+        @if (toast().action) {
           <button 
             class="sig-toast__action"
-            (click)="toast.action.onClick()"
+            (click)="toast().action!.onClick()"
           >
-            {{ toast.action.label }}
+            {{ toast().action!.label }}
           </button>
         }
       </div>
 
-      @if (toast.closable) {
+      @if (toast().closable) {
         <button
           class="sig-toast__close"
           (click)="onClose()"
@@ -205,10 +212,10 @@ export class ToastService {
         </button>
       }
 
-      @if (toast.duration > 0) {
+      @if (toast().duration > 0) {
         <div 
           class="sig-toast__progress"
-          [style.animation-duration.ms]="toast.duration"
+          [style.animation-duration.ms]="toast().duration"
         ></div>
       }
     </div>
@@ -231,14 +238,8 @@ export class ToastService {
     }
 
     @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(100%);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
     .sig-toast--success { border-color: #10b981; }
@@ -263,21 +264,9 @@ export class ToastService {
     .sig-toast--warning .sig-toast__icon { background: #fef3c7; color: #d97706; }
     .sig-toast--info .sig-toast__icon { background: #dbeafe; color: #2563eb; }
 
-    .sig-toast__content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .sig-toast__title {
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 0.25rem;
-    }
-
-    .sig-toast__message {
-      font-size: 0.875rem;
-      color: #4b5563;
-    }
+    .sig-toast__content { flex: 1; min-width: 0; }
+    .sig-toast__title { font-weight: 600; color: #111827; margin-bottom: 0.25rem; }
+    .sig-toast__message { font-size: 0.875rem; color: #4b5563; }
 
     .sig-toast__action {
       margin-top: 0.5rem;
@@ -290,9 +279,7 @@ export class ToastService {
       cursor: pointer;
     }
 
-    .sig-toast__action:hover {
-      text-decoration: underline;
-    }
+    .sig-toast__action:hover { text-decoration: underline; }
 
     .sig-toast__close {
       flex-shrink: 0;
@@ -305,10 +292,7 @@ export class ToastService {
       border-radius: 0.25rem;
     }
 
-    .sig-toast__close:hover {
-      color: #6b7280;
-      background-color: #f3f4f6;
-    }
+    .sig-toast__close:hover { color: #6b7280; background-color: #f3f4f6; }
 
     .sig-toast__progress {
       position: absolute;
@@ -327,21 +311,17 @@ export class ToastService {
   `],
 })
 export class SigToastItemComponent {
-  @Input({ required: true }) toast!: Toast;
+  readonly toast = input.required<Toast>();
+  
+  private readonly toastService = inject(ToastService);
 
-  private toastService = inject(ToastService);
-
-  onClose() {
-    this.toastService.dismiss(this.toast.id);
+  onClose(): void {
+    this.toastService.dismiss(this.toast().id);
   }
 }
 
 /**
- * Toast Container Component
- * 
- * Usage:
- * Add to app.component.html:
- * <sig-toast-container position="top-right" />
+ * SigToastContainer - Toast container
  */
 @Component({
   selector: 'sig-toast-container',
@@ -351,12 +331,12 @@ export class SigToastItemComponent {
   template: `
     <div 
       class="sig-toast-container"
-      [class.sig-toast-container--top-left]="position === 'top-left'"
-      [class.sig-toast-container--top-center]="position === 'top-center'"
-      [class.sig-toast-container--top-right]="position === 'top-right'"
-      [class.sig-toast-container--bottom-left]="position === 'bottom-left'"
-      [class.sig-toast-container--bottom-center]="position === 'bottom-center'"
-      [class.sig-toast-container--bottom-right]="position === 'bottom-right'"
+      [class.sig-toast-container--top-left]="position() === 'top-left'"
+      [class.sig-toast-container--top-center]="position() === 'top-center'"
+      [class.sig-toast-container--top-right]="position() === 'top-right'"
+      [class.sig-toast-container--bottom-left]="position() === 'bottom-left'"
+      [class.sig-toast-container--bottom-center]="position() === 'bottom-center'"
+      [class.sig-toast-container--bottom-right]="position() === 'bottom-right'"
     >
       @for (toast of toasts(); track toast.id) {
         <sig-toast-item [toast]="toast" />
@@ -374,56 +354,19 @@ export class SigToastItemComponent {
       pointer-events: none;
     }
 
-    .sig-toast-container > * {
-      pointer-events: auto;
-    }
+    .sig-toast-container > * { pointer-events: auto; }
 
-    .sig-toast-container--top-left {
-      top: 0;
-      left: 0;
-      align-items: flex-start;
-    }
-
-    .sig-toast-container--top-center {
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      align-items: center;
-    }
-
-    .sig-toast-container--top-right {
-      top: 0;
-      right: 0;
-      align-items: flex-end;
-    }
-
-    .sig-toast-container--bottom-left {
-      bottom: 0;
-      left: 0;
-      align-items: flex-start;
-      flex-direction: column-reverse;
-    }
-
-    .sig-toast-container--bottom-center {
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      align-items: center;
-      flex-direction: column-reverse;
-    }
-
-    .sig-toast-container--bottom-right {
-      bottom: 0;
-      right: 0;
-      align-items: flex-end;
-      flex-direction: column-reverse;
-    }
+    .sig-toast-container--top-left { top: 0; left: 0; align-items: flex-start; }
+    .sig-toast-container--top-center { top: 0; left: 50%; transform: translateX(-50%); align-items: center; }
+    .sig-toast-container--top-right { top: 0; right: 0; align-items: flex-end; }
+    .sig-toast-container--bottom-left { bottom: 0; left: 0; align-items: flex-start; flex-direction: column-reverse; }
+    .sig-toast-container--bottom-center { bottom: 0; left: 50%; transform: translateX(-50%); align-items: center; flex-direction: column-reverse; }
+    .sig-toast-container--bottom-right { bottom: 0; right: 0; align-items: flex-end; flex-direction: column-reverse; }
   `],
 })
 export class SigToastContainerComponent {
-  @Input() position: ToastPosition = 'top-right';
-
-  private toastService = inject(ToastService);
-
-  toasts = this.toastService.toasts;
+  readonly position = input<ToastPosition>('top-right');
+  
+  private readonly toastService = inject(ToastService);
+  readonly toasts = this.toastService.toasts;
 }

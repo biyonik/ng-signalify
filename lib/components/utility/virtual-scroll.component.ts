@@ -1,0 +1,225 @@
+import {
+  Component,
+  ChangeDetectionStrategy,
+  input,
+  output,
+  signal,
+  computed,
+  ElementRef,
+  viewChild,
+  effect,
+  TemplateRef,
+  contentChild,
+  Directive,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Directive({
+  selector: '[sigVirtualItem]',
+  standalone: true,
+})
+export class SigVirtualItemDirective {
+  constructor(public readonly template: TemplateRef<any>) {}
+}
+
+/**
+ * SigVirtualScroll - Signal-based virtual scrolling
+ * 
+ * Usage:
+ * <sig-virtual-scroll
+ *   [items]="largeList"
+ *   [itemHeight]="48"
+ *   [bufferSize]="5"
+ * >
+ *   <ng-template sigVirtualItem let-item let-index="index">
+ *     <div class="item">{{ item.name }}</div>
+ *   </ng-template>
+ * </sig-virtual-scroll>
+ */
+@Component({
+  selector: 'sig-virtual-scroll',
+  standalone: true,
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div 
+      class="sig-virtual-scroll"
+      #viewport
+      [style.height.px]="height()"
+      (scroll)="onScroll()"
+    >
+      <div 
+        class="sig-virtual-scroll__spacer"
+        [style.height.px]="totalHeight()"
+      >
+        <div 
+          class="sig-virtual-scroll__content"
+          [style.transform]="'translateY(' + offsetY() + 'px)'"
+        >
+          @for (item of visibleItems(); track trackByFn()(item.data, item.index)) {
+            <div 
+              class="sig-virtual-scroll__item"
+              [style.height.px]="itemHeight()"
+            >
+              @if (itemTemplate()) {
+                <ng-container
+                  [ngTemplateOutlet]="itemTemplate()!.template"
+                  [ngTemplateOutletContext]="{ $implicit: item.data, index: item.index }"
+                ></ng-container>
+              } @else {
+                {{ item.data }}
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (loading()) {
+        <div class="sig-virtual-scroll__loading">
+          <div class="sig-virtual-scroll__spinner"></div>
+          Yükleniyor...
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    .sig-virtual-scroll {
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sig-virtual-scroll__spacer {
+      position: relative;
+    }
+
+    .sig-virtual-scroll__content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      will-change: transform;
+    }
+
+    .sig-virtual-scroll__item {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .sig-virtual-scroll__loading {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem;
+      background-color: white;
+      border-top: 1px solid #e5e7eb;
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    .sig-virtual-scroll__spinner {
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid #e5e7eb;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  `],
+})
+export class SigVirtualScrollComponent<T = any> {
+  readonly viewport = viewChild<ElementRef>('viewport');
+  readonly itemTemplate = contentChild(SigVirtualItemDirective);
+
+  readonly items = input.required<T[]>();
+  readonly itemHeight = input<number>(48);
+  readonly height = input<number>(400);
+  readonly bufferSize = input<number>(5);
+  readonly loading = input<boolean>(false);
+  readonly trackByFn = input<(item: T, index: number) => any>((_, index) => index);
+
+  readonly scrollEnd = output<void>();
+  readonly visibleRangeChange = output<{ start: number; end: number }>();
+
+  readonly scrollTop = signal(0);
+
+  readonly totalHeight = computed(() => {
+    return this.items().length * this.itemHeight();
+  });
+
+  readonly visibleCount = computed(() => {
+    return Math.ceil(this.height() / this.itemHeight()) + this.bufferSize() * 2;
+  });
+
+  readonly startIndex = computed(() => {
+    const index = Math.floor(this.scrollTop() / this.itemHeight()) - this.bufferSize();
+    return Math.max(0, index);
+  });
+
+  readonly endIndex = computed(() => {
+    return Math.min(this.items().length, this.startIndex() + this.visibleCount());
+  });
+
+  readonly offsetY = computed(() => {
+    return this.startIndex() * this.itemHeight();
+  });
+
+  readonly visibleItems = computed(() => {
+    const items = this.items();
+    const start = this.startIndex();
+    const end = this.endIndex();
+    
+    return items.slice(start, end).map((data, i) => ({
+      data,
+      index: start + i,
+    }));
+  });
+
+  constructor() {
+    effect(() => {
+      this.visibleRangeChange.emit({
+        start: this.startIndex(),
+        end: this.endIndex(),
+      });
+    });
+  }
+
+  onScroll(): void {
+    const el = this.viewport()?.nativeElement;
+    if (!el) return;
+
+    this.scrollTop.set(el.scrollTop);
+
+    // Check if scrolled to bottom
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+      this.scrollEnd.emit();
+    }
+  }
+
+  // Public API
+  scrollToIndex(index: number, behavior: ScrollBehavior = 'auto'): void {
+    const el = this.viewport()?.nativeElement;
+    if (!el) return;
+
+    const top = index * this.itemHeight();
+    el.scrollTo({ top, behavior });
+  }
+
+  scrollToTop(behavior: ScrollBehavior = 'auto'): void {
+    this.scrollToIndex(0, behavior);
+  }
+
+  scrollToBottom(behavior: ScrollBehavior = 'auto'): void {
+    this.scrollToIndex(this.items().length - 1, behavior);
+  }
+}

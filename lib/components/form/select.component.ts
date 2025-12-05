@@ -1,12 +1,12 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
-  forwardRef,
   ChangeDetectionStrategy,
+  forwardRef,
   signal,
   computed,
+  input,
+  model,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -19,15 +19,7 @@ export interface SelectOption {
 }
 
 /**
- * SigSelect - Dropdown select with search
- * 
- * Usage:
- * <sig-select
- *   [options]="countries"
- *   [(value)]="selectedCountry"
- *   placeholder="Ülke seçin"
- *   [searchable]="true"
- * />
+ * SigSelect - Signal-based dropdown select
  */
 @Component({
   selector: 'sig-select',
@@ -45,13 +37,12 @@ export interface SelectOption {
     <div 
       class="sig-select"
       [class.sig-select--open]="isOpen()"
-      [class.sig-select--disabled]="disabled"
+      [class.sig-select--disabled]="disabled()"
     >
-      <!-- Trigger -->
       <button
         type="button"
         class="sig-select__trigger"
-        [disabled]="disabled"
+        [disabled]="disabled()"
         (click)="toggle()"
         (keydown)="onKeydown($event)"
       >
@@ -59,17 +50,15 @@ export interface SelectOption {
           @if (selectedOption()) {
             {{ selectedOption()?.label }}
           } @else {
-            <span class="sig-select__placeholder">{{ placeholder }}</span>
+            <span class="sig-select__placeholder">{{ placeholder() }}</span>
           }
         </span>
         <span class="sig-select__arrow">▼</span>
       </button>
 
-      <!-- Dropdown -->
       @if (isOpen()) {
         <div class="sig-select__dropdown">
-          <!-- Search -->
-          @if (searchable) {
+          @if (searchable()) {
             <div class="sig-select__search">
               <input
                 type="text"
@@ -81,9 +70,8 @@ export interface SelectOption {
             </div>
           }
 
-          <!-- Options -->
           <div class="sig-select__options">
-            @if (clearable && value !== null) {
+            @if (clearable() && value() !== null) {
               <button
                 type="button"
                 class="sig-select__option sig-select__option--clear"
@@ -97,19 +85,19 @@ export interface SelectOption {
               <button
                 type="button"
                 class="sig-select__option"
-                [class.sig-select__option--selected]="option.id === value"
+                [class.sig-select__option--selected]="option.id === value()"
                 [class.sig-select__option--disabled]="option.disabled"
                 [disabled]="option.disabled"
                 (click)="onSelect(option)"
               >
                 {{ option.label }}
-                @if (option.id === value) {
+                @if (option.id === value()) {
                   <span class="sig-select__check">✓</span>
                 }
               </button>
             } @empty {
               <div class="sig-select__empty">
-                {{ emptyText }}
+                {{ emptyText() }}
               </div>
             }
           </div>
@@ -162,9 +150,7 @@ export interface SelectOption {
       white-space: nowrap;
     }
 
-    .sig-select__placeholder {
-      color: #9ca3af;
-    }
+    .sig-select__placeholder { color: #9ca3af; }
 
     .sig-select__arrow {
       font-size: 0.625rem;
@@ -229,28 +215,11 @@ export interface SelectOption {
       text-align: left;
     }
 
-    .sig-select__option:hover {
-      background-color: #f3f4f6;
-    }
-
-    .sig-select__option--selected {
-      background-color: #eff6ff;
-      color: #1d4ed8;
-    }
-
-    .sig-select__option--disabled {
-      color: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    .sig-select__option--clear {
-      color: #6b7280;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .sig-select__check {
-      color: #3b82f6;
-    }
+    .sig-select__option:hover { background-color: #f3f4f6; }
+    .sig-select__option--selected { background-color: #eff6ff; color: #1d4ed8; }
+    .sig-select__option--disabled { color: #9ca3af; cursor: not-allowed; }
+    .sig-select__option--clear { color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+    .sig-select__check { color: #3b82f6; }
 
     .sig-select__empty {
       padding: 1rem;
@@ -259,41 +228,43 @@ export interface SelectOption {
       font-size: 0.875rem;
     }
   `],
-  host: {
-    '(document:click)': 'onClickOutside($event)',
-  },
 })
 export class SigSelectComponent implements ControlValueAccessor {
-  @Input() options: SelectOption[] = [];
-  @Input() value: string | number | null = null;
-  @Input() placeholder = 'Seçiniz';
-  @Input() disabled = false;
-  @Input() searchable = false;
-  @Input() clearable = false;
-  @Input() emptyText = 'Sonuç bulunamadı';
+  readonly options = input<SelectOption[]>([]);
+  readonly value = model<string | number | null>(null);
+  readonly placeholder = input<string>('Seçiniz');
+  readonly disabled = input<boolean>(false);
+  readonly searchable = input<boolean>(false);
+  readonly clearable = input<boolean>(false);
+  readonly emptyText = input<string>('Sonuç bulunamadı');
 
-  @Output() valueChange = new EventEmitter<string | number | null>();
+  readonly isOpen = signal(false);
+  readonly searchQuery = signal('');
 
-  isOpen = signal(false);
-  searchQuery = signal('');
-
-  selectedOption = computed(() => {
-    return this.options.find((o) => o.id === this.value) ?? null;
+  readonly selectedOption = computed(() => {
+    return this.options().find((o) => o.id === this.value()) ?? null;
   });
 
-  filteredOptions = computed(() => {
+  readonly filteredOptions = computed(() => {
     const query = this.searchQuery().toLowerCase();
-    if (!query) return this.options;
-    return this.options.filter((o) =>
-      o.label.toLowerCase().includes(query)
-    );
+    if (!query) return this.options();
+    return this.options().filter((o) => o.label.toLowerCase().includes(query));
   });
 
-  private onChange: (value: string | number | null) => void = () => {};
-  private onTouched: () => void = () => {};
+  private _onChange: (value: string | number | null) => void = () => {};
+  private _onTouched: () => void = () => {};
 
-  toggle() {
-    if (!this.disabled) {
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.sig-select')) {
+      this.isOpen.set(false);
+      this.searchQuery.set('');
+    }
+  }
+
+  toggle(): void {
+    if (!this.disabled()) {
       this.isOpen.update((v) => !v);
       if (!this.isOpen()) {
         this.searchQuery.set('');
@@ -301,29 +272,27 @@ export class SigSelectComponent implements ControlValueAccessor {
     }
   }
 
-  onSelect(option: SelectOption) {
+  onSelect(option: SelectOption): void {
     if (option.disabled) return;
     
-    this.value = option.id;
-    this.valueChange.emit(option.id);
-    this.onChange(option.id);
+    this.value.set(option.id);
+    this._onChange(option.id);
     this.isOpen.set(false);
     this.searchQuery.set('');
   }
 
-  onClear() {
-    this.value = null;
-    this.valueChange.emit(null);
-    this.onChange(null);
+  onClear(): void {
+    this.value.set(null);
+    this._onChange(null);
     this.isOpen.set(false);
   }
 
-  onSearch(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    this.searchQuery.set(value);
+  onSearch(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.searchQuery.set(val);
   }
 
-  onKeydown(event: KeyboardEvent) {
+  onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.toggle();
@@ -332,28 +301,17 @@ export class SigSelectComponent implements ControlValueAccessor {
     }
   }
 
-  onClickOutside(event: Event) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.sig-select')) {
-      this.isOpen.set(false);
-      this.searchQuery.set('');
-    }
-  }
-
-  // ControlValueAccessor
   writeValue(value: string | number | null): void {
-    this.value = value;
+    this.value.set(value);
   }
 
   registerOnChange(fn: (value: string | number | null) => void): void {
-    this.onChange = fn;
+    this._onChange = fn;
   }
 
   registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
+    this._onTouched = fn;
   }
 
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
+  setDisabledState(_isDisabled: boolean): void {}
 }

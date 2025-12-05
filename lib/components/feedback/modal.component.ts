@@ -1,20 +1,14 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
   ChangeDetectionStrategy,
   signal,
-  inject,
+  input,
+  output,
+  model,
   Injectable,
-  TemplateRef,
-  ViewContainerRef,
-  ComponentRef,
-  ApplicationRef,
-  createComponent,
-  EnvironmentInjector,
+  HostListener,
 } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 /** Modal configuration */
 export interface ModalConfig {
@@ -30,18 +24,7 @@ export interface ModalConfig {
 }
 
 /**
- * SigModal - Modal dialog component
- * 
- * Usage:
- * <sig-modal
- *   [open]="isModalOpen"
- *   title="Kullanıcı Ekle"
- *   size="md"
- *   (closed)="isModalOpen = false"
- *   (confirmed)="onConfirm()"
- * >
- *   <p>Modal içeriği buraya...</p>
- * </sig-modal>
+ * SigModal - Signal-based modal dialog
  */
 @Component({
   selector: 'sig-modal',
@@ -49,27 +32,25 @@ export interface ModalConfig {
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (open) {
+    @if (open()) {
       <div 
         class="sig-modal-overlay"
         (click)="onBackdropClick($event)"
-        (keydown)="onKeydown($event)"
       >
         <div 
           class="sig-modal"
-          [class.sig-modal--sm]="size === 'sm'"
-          [class.sig-modal--lg]="size === 'lg'"
-          [class.sig-modal--xl]="size === 'xl'"
-          [class.sig-modal--full]="size === 'full'"
+          [class.sig-modal--sm]="size() === 'sm'"
+          [class.sig-modal--lg]="size() === 'lg'"
+          [class.sig-modal--xl]="size() === 'xl'"
+          [class.sig-modal--full]="size() === 'full'"
           role="dialog"
           aria-modal="true"
           (click)="$event.stopPropagation()"
         >
-          <!-- Header -->
-          @if (showHeader) {
+          @if (showHeader()) {
             <div class="sig-modal__header">
-              <h3 class="sig-modal__title">{{ title }}</h3>
-              @if (closable) {
+              <h3 class="sig-modal__title">{{ title() }}</h3>
+              @if (closable()) {
                 <button
                   type="button"
                   class="sig-modal__close"
@@ -82,34 +63,32 @@ export interface ModalConfig {
             </div>
           }
 
-          <!-- Body -->
           <div class="sig-modal__body">
             <ng-content></ng-content>
           </div>
 
-          <!-- Footer -->
-          @if (showFooter) {
+          @if (showFooter()) {
             <div class="sig-modal__footer">
               <ng-content select="[modal-footer]"></ng-content>
               
-              @if (!hasCustomFooter) {
-                @if (cancelText) {
+              @if (!hasCustomFooter()) {
+                @if (cancelText()) {
                   <button
                     type="button"
                     class="sig-modal__btn sig-modal__btn--cancel"
                     (click)="onCancel()"
                   >
-                    {{ cancelText }}
+                    {{ cancelText() }}
                   </button>
                 }
-                @if (confirmText) {
+                @if (confirmText()) {
                   <button
                     type="button"
                     class="sig-modal__btn sig-modal__btn--confirm"
-                    [disabled]="confirmDisabled"
+                    [disabled]="confirmDisabled()"
                     (click)="onConfirm()"
                   >
-                    {{ confirmText }}
+                    {{ confirmText() }}
                   </button>
                 }
               }
@@ -249,67 +228,57 @@ export interface ModalConfig {
       cursor: not-allowed;
     }
   `],
-  host: {
-    '(document:keydown.escape)': 'onEscapeKey()',
-  },
 })
 export class SigModalComponent {
-  @Input() open = false;
-  @Input() title = '';
-  @Input() size: 'sm' | 'md' | 'lg' | 'xl' | 'full' = 'md';
-  @Input() closable = true;
-  @Input() closeOnBackdrop = true;
-  @Input() closeOnEsc = true;
-  @Input() showHeader = true;
-  @Input() showFooter = true;
-  @Input() confirmText = 'Onayla';
-  @Input() cancelText = 'İptal';
-  @Input() confirmDisabled = false;
-  @Input() hasCustomFooter = false;
+  // Two-way binding for open state
+  readonly open = model<boolean>(false);
+  
+  // Inputs
+  readonly title = input<string>('');
+  readonly size = input<'sm' | 'md' | 'lg' | 'xl' | 'full'>('md');
+  readonly closable = input<boolean>(true);
+  readonly closeOnBackdrop = input<boolean>(true);
+  readonly closeOnEsc = input<boolean>(true);
+  readonly showHeader = input<boolean>(true);
+  readonly showFooter = input<boolean>(true);
+  readonly confirmText = input<string>('Onayla');
+  readonly cancelText = input<string>('İptal');
+  readonly confirmDisabled = input<boolean>(false);
+  readonly hasCustomFooter = input<boolean>(false);
 
-  @Output() closed = new EventEmitter<void>();
-  @Output() confirmed = new EventEmitter<void>();
-  @Output() cancelled = new EventEmitter<void>();
+  // Outputs
+  readonly closed = output<void>();
+  readonly confirmed = output<void>();
+  readonly cancelled = output<void>();
 
-  close() {
-    if (this.closable) {
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.open() && this.closeOnEsc()) {
+      this.close();
+    }
+  }
+
+  close(): void {
+    if (this.closable()) {
+      this.open.set(false);
       this.closed.emit();
     }
   }
 
-  onBackdropClick(event: Event) {
-    if (this.closeOnBackdrop && event.target === event.currentTarget) {
+  onBackdropClick(event: Event): void {
+    if (this.closeOnBackdrop() && event.target === event.currentTarget) {
       this.close();
     }
   }
 
-  onKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && this.closeOnEsc) {
-      this.close();
-    }
-  }
-
-  onEscapeKey() {
-    if (this.open && this.closeOnEsc) {
-      this.close();
-    }
-  }
-
-  onConfirm() {
+  onConfirm(): void {
     this.confirmed.emit();
   }
 
-  onCancel() {
+  onCancel(): void {
     this.cancelled.emit();
     this.close();
   }
-}
-
-/**
- * Confirm dialog result
- */
-export interface ConfirmResult {
-  confirmed: boolean;
 }
 
 /**
@@ -317,43 +286,35 @@ export interface ConfirmResult {
  */
 @Injectable({ providedIn: 'root' })
 export class ModalService {
-  private modals = signal<Map<string, boolean>>(new Map());
+  private readonly _modals = signal<Map<string, boolean>>(new Map());
 
-  open(id: string) {
-    this.modals.update((m) => new Map(m).set(id, true));
+  open(id: string): void {
+    this._modals.update((m) => new Map(m).set(id, true));
   }
 
-  close(id: string) {
-    this.modals.update((m) => new Map(m).set(id, false));
+  close(id: string): void {
+    this._modals.update((m) => new Map(m).set(id, false));
   }
 
   isOpen(id: string): boolean {
-    return this.modals().get(id) ?? false;
+    return this._modals().get(id) ?? false;
   }
 
-  toggle(id: string) {
-    if (this.isOpen(id)) {
-      this.close(id);
-    } else {
-      this.open(id);
-    }
+  toggle(id: string): void {
+    this.isOpen(id) ? this.close(id) : this.open(id);
   }
 
-  closeAll() {
-    this.modals.set(new Map());
+  closeAll(): void {
+    this._modals.set(new Map());
   }
 
-  /** Simple confirm dialog */
   async confirm(message: string, title = 'Onay'): Promise<boolean> {
     return new Promise((resolve) => {
-      // In a real implementation, this would create a dynamic modal
-      // For simplicity, using native confirm
       const result = window.confirm(`${title}\n\n${message}`);
       resolve(result);
     });
   }
 
-  /** Simple alert dialog */
   async alert(message: string, title = 'Uyarı'): Promise<void> {
     return new Promise((resolve) => {
       window.alert(`${title}\n\n${message}`);

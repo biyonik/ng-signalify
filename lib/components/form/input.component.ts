@@ -1,40 +1,25 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
-  forwardRef,
   ChangeDetectionStrategy,
+  forwardRef,
   signal,
   computed,
+  input,
+  output,
+  model,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
-  FormsModule,
-} from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url';
 
 /**
- * SigInput - Text/Number input with signal support
- * 
- * Usage:
- * <sig-input
- *   type="email"
- *   [(value)]="email"
- *   placeholder="E-posta adresiniz"
- *   [disabled]="false"
- * />
- * 
- * Or with ngModel:
- * <sig-input type="text" [(ngModel)]="name" />
+ * SigInput - Signal-based text input
  */
 @Component({
   selector: 'sig-input',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -44,29 +29,29 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
     },
   ],
   template: `
-    <div class="sig-input" [class.sig-input--with-icon]="icon">
-      @if (icon && iconPosition === 'left') {
-        <span class="sig-input__icon sig-input__icon--left">{{ icon }}</span>
+    <div class="sig-input" [class.sig-input--with-icon]="icon()">
+      @if (icon() && iconPosition() === 'left') {
+        <span class="sig-input__icon sig-input__icon--left">{{ icon() }}</span>
       }
 
       <input
         [type]="actualType()"
-        [value]="value"
-        [placeholder]="placeholder"
-        [disabled]="disabled"
-        [readonly]="readonly"
-        [min]="min"
-        [max]="max"
-        [step]="step"
-        [maxlength]="maxLength"
-        [autocomplete]="autocomplete"
+        [value]="value()"
+        [placeholder]="placeholder()"
+        [disabled]="disabled()"
+        [readonly]="readonly()"
+        [min]="min()"
+        [max]="max()"
+        [step]="step()"
+        [maxlength]="maxLength()"
+        [autocomplete]="autocomplete()"
         (input)="onInput($event)"
         (blur)="onBlur()"
-        (focus)="onFocus()"
+        (focus)="onFocusEvent()"
         class="sig-input__field"
       />
 
-      @if (type === 'password') {
+      @if (type() === 'password') {
         <button
           type="button"
           class="sig-input__toggle"
@@ -77,7 +62,7 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
         </button>
       }
 
-      @if (clearable && value) {
+      @if (clearable() && value()) {
         <button
           type="button"
           class="sig-input__clear"
@@ -88,8 +73,8 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
         </button>
       }
 
-      @if (icon && iconPosition === 'right') {
-        <span class="sig-input__icon sig-input__icon--right">{{ icon }}</span>
+      @if (icon() && iconPosition() === 'right') {
+        <span class="sig-input__icon sig-input__icon--right">{{ icon() }}</span>
       }
     </div>
   `,
@@ -135,13 +120,8 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
       font-size: 1rem;
     }
 
-    .sig-input__icon--left {
-      left: 0.75rem;
-    }
-
-    .sig-input__icon--right {
-      right: 0.75rem;
-    }
+    .sig-input__icon--left { left: 0.75rem; }
+    .sig-input__icon--right { right: 0.75rem; }
 
     .sig-input__toggle,
     .sig-input__clear {
@@ -160,7 +140,6 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
       color: #374151;
     }
 
-    /* Number input arrows */
     .sig-input__field[type="number"]::-webkit-outer-spin-button,
     .sig-input__field[type="number"]::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -173,77 +152,71 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
   `],
 })
 export class SigInputComponent implements ControlValueAccessor {
-  @Input() type: InputType = 'text';
-  @Input() value: string | number = '';
-  @Input() placeholder = '';
-  @Input() disabled = false;
-  @Input() readonly = false;
-  @Input() clearable = false;
-  @Input() icon = '';
-  @Input() iconPosition: 'left' | 'right' = 'left';
-  @Input() min: number | null = null;
-  @Input() max: number | null = null;
-  @Input() step: number | null = null;
-  @Input() maxLength: number | null = null;
-  @Input() autocomplete = 'off';
+  readonly type = input<InputType>('text');
+  readonly value = model<string | number>('');
+  readonly placeholder = input<string>('');
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  readonly clearable = input<boolean>(false);
+  readonly icon = input<string>('');
+  readonly iconPosition = input<'left' | 'right'>('left');
+  readonly min = input<number | null>(null);
+  readonly max = input<number | null>(null);
+  readonly step = input<number | null>(null);
+  readonly maxLength = input<number | null>(null);
+  readonly autocomplete = input<string>('off');
 
-  @Output() valueChange = new EventEmitter<string | number>();
-  @Output() focus = new EventEmitter<void>();
-  @Output() blur = new EventEmitter<void>();
+  readonly focus = output<void>();
+  readonly blur = output<void>();
 
-  showPassword = signal(false);
+  readonly showPassword = signal(false);
 
-  actualType = computed(() => {
-    if (this.type === 'password' && this.showPassword()) {
+  readonly actualType = computed(() => {
+    if (this.type() === 'password' && this.showPassword()) {
       return 'text';
     }
-    return this.type;
+    return this.type();
   });
 
-  private onChange: (value: string | number) => void = () => {};
-  private onTouched: () => void = () => {};
+  private _onChange: (value: string | number) => void = () => {};
+  private _onTouched: () => void = () => {};
 
-  onInput(event: Event) {
+  onInput(event: Event): void {
     const target = event.target as HTMLInputElement;
-    const value = this.type === 'number' ? Number(target.value) : target.value;
-    this.value = value;
-    this.valueChange.emit(value);
-    this.onChange(value);
+    const val = this.type() === 'number' ? Number(target.value) : target.value;
+    this.value.set(val);
+    this._onChange(val);
   }
 
-  onBlur() {
-    this.onTouched();
+  onBlur(): void {
+    this._onTouched();
     this.blur.emit();
   }
 
-  onFocus() {
+  onFocusEvent(): void {
     this.focus.emit();
   }
 
-  onClear() {
-    this.value = '';
-    this.valueChange.emit('');
-    this.onChange('');
+  onClear(): void {
+    this.value.set('');
+    this._onChange('');
   }
 
-  togglePassword() {
+  togglePassword(): void {
     this.showPassword.update((v) => !v);
   }
 
-  // ControlValueAccessor
   writeValue(value: string | number): void {
-    this.value = value ?? '';
+    this.value.set(value ?? '');
   }
 
   registerOnChange(fn: (value: string | number) => void): void {
-    this.onChange = fn;
+    this._onChange = fn;
   }
 
   registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
+    this._onTouched = fn;
   }
 
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
+  setDisabledState(_isDisabled: boolean): void {}
 }
