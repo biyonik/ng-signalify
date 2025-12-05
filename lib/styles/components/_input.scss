@@ -1,0 +1,72 @@
+/* lib/styles/components/_input.scss */
+@import '../abstract/mixins';
+
+.sig-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  &__field {
+    width: 100%;
+    padding: var(--sig-spacing-2) var(--sig-spacing-3);
+    border: 1px solid var(--sig-border-color);
+    border-radius: var(--sig-radius-md);
+    background-color: var(--sig-bg-surface);
+    color: var(--sig-text-main);
+    transition: var(--sig-transition);
+    @include text-sm;
+
+    @include focus-ring;
+
+    &:disabled {
+      background-color: var(--sig-bg-disabled);
+      color: var(--sig-text-disabled);
+      cursor: not-allowed;
+    }
+
+    &::placeholder {
+      color: var(--sig-text-muted);
+    }
+    
+    /* Number input oklarını gizle */
+    &[type="number"] {
+      -moz-appearance: textfield;
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+  }
+
+  &--with-icon .sig-input__field {
+    padding-left: 2.25rem;
+  }
+
+  &__icon {
+    position: absolute;
+    color: var(--sig-text-muted);
+    font-size: 1rem;
+    pointer-events: none; /* İkona tıklanmasını engelle */
+
+    &--left { left: var(--sig-spacing-3); }
+    &--right { right: var(--sig-spacing-3); }
+  }
+
+  &__toggle,
+  &__clear {
+    position: absolute;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--sig-spacing-1);
+    color: var(--sig-text-muted);
+    @include flex-center;
+
+    &:hover {
+      color: var(--sig-text-main);
+    }
+  }
+}

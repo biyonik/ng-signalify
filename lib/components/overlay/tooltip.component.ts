@@ -1,15 +1,11 @@
 import {
-  Component,
   Directive,
-  ChangeDetectionStrategy,
   input,
-  signal,
   ElementRef,
   inject,
   OnDestroy,
   HostListener,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 /**
  * SigTooltip - Signal-based tooltip directive

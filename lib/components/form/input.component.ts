@@ -7,6 +7,7 @@ import {
   input,
   output,
   model,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -21,6 +22,7 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -78,79 +80,7 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
       }
     </div>
   `,
-  styles: [`
-    .sig-input {
-      position: relative;
-      display: flex;
-      align-items: center;
-      width: 100%;
-    }
-
-    .sig-input__field {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-
-    .sig-input--with-icon .sig-input__field {
-      padding-left: 2.25rem;
-    }
-
-    .sig-input__field:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .sig-input__field:disabled {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    .sig-input__field::placeholder {
-      color: #9ca3af;
-    }
-
-    .sig-input__icon {
-      position: absolute;
-      color: #9ca3af;
-      font-size: 1rem;
-    }
-
-    .sig-input__icon--left { left: 0.75rem; }
-    .sig-input__icon--right { right: 0.75rem; }
-
-    .sig-input__toggle,
-    .sig-input__clear {
-      position: absolute;
-      right: 0.5rem;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.25rem;
-      font-size: 0.875rem;
-      color: #6b7280;
-    }
-
-    .sig-input__toggle:hover,
-    .sig-input__clear:hover {
-      color: #374151;
-    }
-
-    .sig-input__field[type="number"]::-webkit-outer-spin-button,
-    .sig-input__field[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    .sig-input__field[type="number"] {
-      -moz-appearance: textfield;
-    }
-  `],
-})
+  })
 export class SigInputComponent implements ControlValueAccessor {
   readonly type = input<InputType>('text');
   readonly value = model<string | number>('');

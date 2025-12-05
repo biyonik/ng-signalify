@@ -8,6 +8,7 @@ import {
     signal,
     viewChild,
     ElementRef,
+    ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -35,6 +36,7 @@ interface ToolbarAction {
     standalone: true,
     imports: [CommonModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -229,152 +231,7 @@ interface ToolbarAction {
       }
     </div>
   `,
-    styles: [`
-    .sig-rte {
-      border: 1px solid #d1d5db;
-      border-radius: 0.5rem;
-      overflow: hidden;
-      background-color: white;
-    }
-
-    .sig-rte--focused {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .sig-rte--disabled {
-      opacity: 0.6;
-      pointer-events: none;
-    }
-
-    .sig-rte__toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.5rem;
-      border-bottom: 1px solid #e5e7eb;
-      background-color: #f9fafb;
-    }
-
-    .sig-rte__toolbar-group {
-      display: flex;
-      align-items: center;
-      gap: 0.125rem;
-    }
-
-    .sig-rte__toolbar-group--right {
-      margin-left: auto;
-    }
-
-    .sig-rte__toolbar-divider {
-  width: 1px;
-  height: 1.5rem;
-  margin: 0 0.25rem;
-  background-color: #e5e7eb;
-}
-
-.sig-rte__tool {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  border: none;
-  border-radius: 0.25rem;
-  background: none;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.1s;
-}
-
-.sig-rte__tool:hover {
-  background-color: #e5e7eb;
-}
-
-.sig-rte__tool--active {
-  background-color: #dbeafe;
-  color: #3b82f6;
-}
-
-.sig-rte__select {
-  padding: 0.25rem 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  background: white;
-}
-
-.sig-rte__editor {
-  padding: 1rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  outline: none;
-}
-
-.sig-rte__editor:empty::before {
-  content: attr(placeholder);
-  color: #9ca3af;
-  pointer-events: none;
-}
-
-.sig-rte__editor p {
-  margin: 0 0 0.5rem;
-}
-
-.sig-rte__editor h1,
-.sig-rte__editor h2,
-.sig-rte__editor h3 {
-  margin: 1rem 0 0.5rem;
-  line-height: 1.3;
-}
-
-.sig-rte__editor h1 { font-size: 1.5rem; }
-.sig-rte__editor h2 { font-size: 1.25rem; }
-.sig-rte__editor h3 { font-size: 1.125rem; }
-
-.sig-rte__editor ul,
-.sig-rte__editor ol {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
-}
-
-.sig-rte__editor a {
-  color: #3b82f6;
-  text-decoration: underline;
-}
-
-.sig-rte__editor img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.25rem;
-}
-
-.sig-rte__source {
-  width: 100%;
-  padding: 1rem;
-  border: none;
-  font-family: monospace;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  resize: vertical;
-  outline: none;
-}
-
-.sig-rte__footer {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.5rem;
-  border-top: 1px solid #e5e7eb;
-  background-color: #f9fafb;
-}
-
-.sig-rte__char-count {
-  font-size: 0.75rem;
-  color: #6b7280;
-}`],
-})
+    })
 
 export class SigRichTextEditorComponent implements ControlValueAccessor {
     readonly editorRef = viewChild<ElementRef>('editor');

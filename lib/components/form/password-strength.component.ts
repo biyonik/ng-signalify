@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   input,
   computed,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -34,6 +35,7 @@ const DEFAULT_RULES: PasswordStrengthRule[] = [
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="sig-password-strength">
       <!-- Strength Bar -->
@@ -81,86 +83,7 @@ const DEFAULT_RULES: PasswordStrengthRule[] = [
       }
     </div>
   `,
-  styles: [`
-    .sig-password-strength {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .sig-password-strength__bar-container {
-      height: 4px;
-      background-color: #e5e7eb;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .sig-password-strength__bar {
-      height: 100%;
-      border-radius: 2px;
-      transition: width 0.3s, background-color 0.3s;
-    }
-
-    .sig-password-strength__bar--weak {
-      background-color: #ef4444;
-    }
-
-    .sig-password-strength__bar--fair {
-      background-color: #f59e0b;
-    }
-
-    .sig-password-strength__bar--good {
-      background-color: #10b981;
-    }
-
-    .sig-password-strength__bar--strong {
-      background-color: #059669;
-    }
-
-    .sig-password-strength__label {
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .sig-password-strength__label--weak {
-      color: #ef4444;
-    }
-
-    .sig-password-strength__label--fair {
-      color: #f59e0b;
-    }
-
-    .sig-password-strength__label--good {
-      color: #10b981;
-    }
-
-    .sig-password-strength__label--strong {
-      color: #059669;
-    }
-
-    .sig-password-strength__rules {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .sig-password-strength__rule {
-      display: flex;
-      align-items: center;
-      gap: 0.375rem;
-      font-size: 0.75rem;
-      color: #6b7280;
-    }
-
-    .sig-password-strength__rule--passed {
-      color: #10b981;
-    }
-
-    .sig-password-strength__rule-icon {
-      font-size: 0.625rem;
-    }
-  `],
-})
+  })
 export class SigPasswordStrengthComponent {
   readonly password = input<string>('');
   readonly rules = input<PasswordStrengthRule[]>(DEFAULT_RULES);

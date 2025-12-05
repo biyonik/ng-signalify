@@ -5,6 +5,7 @@ import {
   output,
   signal,
   computed,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -34,6 +35,7 @@ export interface TreeNode {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="sig-tree">
       @if (searchable()) {
@@ -126,108 +128,7 @@ export interface TreeNode {
       </ng-template>
     </div>
   `,
-  styles: [`
-    .sig-tree {
-      font-size: 0.875rem;
-    }
-
-    .sig-tree__search {
-      margin-bottom: 0.75rem;
-    }
-
-    .sig-tree__search-input {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-    }
-
-    .sig-tree__node {
-      user-select: none;
-    }
-
-    .sig-tree__node-content {
-      display: flex;
-      align-items: center;
-      gap: 0.375rem;
-      padding: 0.375rem 0.5rem;
-      border-radius: 0.375rem;
-      cursor: pointer;
-      transition: background-color 0.1s;
-    }
-
-    .sig-tree__node-content:hover {
-      background-color: #f3f4f6;
-    }
-
-    .sig-tree__node-content--selected {
-      background-color: #eff6ff;
-    }
-
-    .sig-tree__node-content--disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .sig-tree__toggle {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 1rem;
-      height: 1rem;
-      padding: 0;
-      border: none;
-      background: none;
-      font-size: 0.625rem;
-      color: #6b7280;
-      cursor: pointer;
-    }
-
-    .sig-tree__toggle:hover {
-      color: #374151;
-    }
-
-    .sig-tree__toggle-placeholder {
-      width: 1rem;
-    }
-
-    .sig-tree__checkbox {
-      margin: 0;
-    }
-
-    .sig-tree__icon {
-      font-size: 1rem;
-    }
-
-    .sig-tree__label {
-      flex: 1;
-      color: #374151;
-    }
-
-    .sig-tree__label mark {
-      background-color: #fef08a;
-      padding: 0 0.125rem;
-      border-radius: 0.125rem;
-    }
-
-    .sig-tree__actions {
-      display: flex;
-      gap: 0.25rem;
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-
-    .sig-tree__node-content:hover .sig-tree__actions {
-      opacity: 1;
-    }
-
-    .sig-tree__children {
-      margin-left: 0.5rem;
-      border-left: 1px dashed #e5e7eb;
-    }
-  `],
-})
+  })
 export class SigTreeComponent {
   readonly nodes = input.required<TreeNode[]>();
   readonly selectable = input<boolean>(true);

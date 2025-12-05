@@ -1,0 +1,19 @@
+/* lib/styles/abstract/_mixins.scss */
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin focus-ring {
+  &:focus {
+    outline: none;
+    border-color: var(--sig-border-color-focus);
+    box-shadow: var(--sig-focus-ring);
+  }
+}
+
+@mixin text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}

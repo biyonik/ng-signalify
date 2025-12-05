@@ -4,6 +4,7 @@ import {
   computed,
   input,
   signal,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -23,6 +24,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div 
       class="sig-avatar"
@@ -70,133 +72,7 @@ import { CommonModule } from '@angular/common';
       }
     </div>
   `,
-  styles: [`
-    .sig-avatar {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background-color: var(--avatar-bg, #e5e7eb);
-      color: #374151;
-      font-weight: 600;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .sig-avatar--clickable {
-      cursor: pointer;
-    }
-
-    .sig-avatar--square {
-      border-radius: 0.25rem;
-    }
-
-    .sig-avatar--rounded {
-      border-radius: 0.5rem;
-    }
-
-    /* Sizes */
-    .sig-avatar--xs {
-      width: 1.5rem;
-      height: 1.5rem;
-      font-size: 0.625rem;
-    }
-
-    .sig-avatar--sm {
-      width: 2rem;
-      height: 2rem;
-      font-size: 0.75rem;
-    }
-
-    .sig-avatar--md {
-      width: 2.5rem;
-      height: 2.5rem;
-      font-size: 0.875rem;
-    }
-
-    .sig-avatar--lg {
-      width: 3rem;
-      height: 3rem;
-      font-size: 1rem;
-    }
-
-    .sig-avatar--xl {
-      width: 4rem;
-      height: 4rem;
-      font-size: 1.25rem;
-    }
-
-    .sig-avatar--2xl {
-      width: 5rem;
-      height: 5rem;
-      font-size: 1.5rem;
-    }
-
-    .sig-avatar__image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .sig-avatar__icon {
-      font-size: 1.25em;
-    }
-
-    .sig-avatar__initials {
-      text-transform: uppercase;
-      user-select: none;
-    }
-
-    /* Status */
-    .sig-avatar__status {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 25%;
-      height: 25%;
-      min-width: 8px;
-      min-height: 8px;
-      border-radius: 50%;
-      border: 2px solid white;
-    }
-
-    .sig-avatar__status--online {
-      background-color: #10b981;
-    }
-
-    .sig-avatar__status--offline {
-      background-color: #9ca3af;
-    }
-
-    .sig-avatar__status--busy {
-      background-color: #ef4444;
-    }
-
-    .sig-avatar__status--away {
-      background-color: #f59e0b;
-    }
-
-    /* Badge */
-    .sig-avatar__badge {
-      position: absolute;
-      top: -2px;
-      right: -2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 1.25rem;
-      height: 1.25rem;
-      padding: 0 0.25rem;
-      background-color: #ef4444;
-      color: white;
-      font-size: 0.625rem;
-      font-weight: 600;
-      border-radius: 9999px;
-      border: 2px solid white;
-    }
-  `],
-})
+  })
 export class SigAvatarComponent {
   readonly src = input<string>('');
   readonly name = input<string>('');
@@ -271,57 +147,7 @@ export class SigAvatarComponent {
       }
     </div>
   `,
-  styles: [`
-    .sig-avatar-group {
-      display: flex;
-      align-items: center;
-    }
-
-    .sig-avatar-group ::ng-deep .sig-avatar {
-      margin-left: -0.5rem;
-      border: 2px solid white;
-    }
-
-    .sig-avatar-group ::ng-deep .sig-avatar:first-child {
-      margin-left: 0;
-    }
-
-    .sig-avatar-group--sm ::ng-deep .sig-avatar {
-      margin-left: -0.375rem;
-    }
-
-    .sig-avatar-group--lg ::ng-deep .sig-avatar {
-      margin-left: -0.75rem;
-    }
-
-    .sig-avatar-group__remaining {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 2.5rem;
-      height: 2.5rem;
-      margin-left: -0.5rem;
-      border-radius: 50%;
-      background-color: #e5e7eb;
-      color: #374151;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border: 2px solid white;
-    }
-
-    .sig-avatar-group--sm .sig-avatar-group__remaining {
-      width: 2rem;
-      height: 2rem;
-      font-size: 0.625rem;
-    }
-
-    .sig-avatar-group--lg .sig-avatar-group__remaining {
-      width: 3rem;
-      height: 3rem;
-      font-size: 0.875rem;
-    }
-  `],
-})
+  })
 export class SigAvatarGroupComponent {
   readonly size = input<'sm' | 'md' | 'lg'>('md');
   readonly max = input<number>(5);

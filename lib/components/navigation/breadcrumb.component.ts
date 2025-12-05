@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   input,
   contentChildren,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -40,6 +41,7 @@ export class SigBreadcrumbItemDirective {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <nav 
       class="sig-breadcrumb"
@@ -52,67 +54,7 @@ export class SigBreadcrumbItemDirective {
       </ol>
     </nav>
   `,
-  styles: [`
-    .sig-breadcrumb {
-      font-size: 0.875rem;
-    }
-
-    .sig-breadcrumb--sm {
-      font-size: 0.75rem;
-    }
-
-    .sig-breadcrumb--lg {
-      font-size: 1rem;
-    }
-
-    .sig-breadcrumb__list {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    :host ::ng-deep .sig-breadcrumb__item {
-      display: inline-flex;
-      align-items: center;
-      color: #6b7280;
-      text-decoration: none;
-    }
-
-    :host ::ng-deep .sig-breadcrumb__item:not(.sig-breadcrumb__item--active):not(.sig-breadcrumb__item--disabled):hover {
-      color: #3b82f6;
-      text-decoration: underline;
-    }
-
-    :host ::ng-deep .sig-breadcrumb__item--active {
-      color: #374151;
-      font-weight: 500;
-      pointer-events: none;
-    }
-
-    :host ::ng-deep .sig-breadcrumb__item--disabled {
-      color: #9ca3af;
-      pointer-events: none;
-    }
-
-    :host ::ng-deep .sig-breadcrumb__item:not(:last-child)::after {
-      content: '/';
-      margin-left: 0.5rem;
-      color: #d1d5db;
-    }
-
-    :host(.sig-breadcrumb--arrow) ::ng-deep .sig-breadcrumb__item:not(:last-child)::after {
-      content: '›';
-    }
-
-    :host(.sig-breadcrumb--dot) ::ng-deep .sig-breadcrumb__item:not(:last-child)::after {
-      content: '•';
-    }
-  `],
-})
+  })
 export class SigBreadcrumbComponent {
   readonly items = contentChildren(SigBreadcrumbItemDirective);
   
@@ -156,47 +98,7 @@ export class SigBreadcrumbComponent {
       </ol>
     </nav>
   `,
-  styles: [`
-    .sig-breadcrumb__list {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      font-size: 0.875rem;
-    }
-
-    .sig-breadcrumb__item {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      color: #6b7280;
-      text-decoration: none;
-    }
-
-    .sig-breadcrumb__item:hover:not(.sig-breadcrumb__item--active) {
-      color: #3b82f6;
-      text-decoration: underline;
-    }
-
-    .sig-breadcrumb__item--active {
-      color: #374151;
-      font-weight: 500;
-    }
-
-    .sig-breadcrumb__icon {
-      font-size: 1em;
-    }
-
-    li:not(:last-child)::after {
-      content: '/';
-      margin-left: 0.5rem;
-      color: #d1d5db;
-    }
-  `],
-})
+  })
 export class SigBreadcrumbAutoComponent {
   readonly items = input<Array<{ label: string; path: string; icon?: string }>>([]);
 }

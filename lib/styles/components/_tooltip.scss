@@ -1,0 +1,26 @@
+@import '../abstract/mixins';
+
+.sig-tooltip {
+  position: absolute;
+  z-index: var(--sig-z-tooltip);
+  background-color: var(--sig-gray-800);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--sig-radius-sm);
+  font-size: var(--sig-font-size-xs);
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  &--visible { opacity: 1; }
+  
+  /* Ok işareti (Arrow) */
+  &::after {
+    content: '';
+    position: absolute;
+    border: 4px solid transparent;
+  }
+  
+  &--top { bottom: 100%; margin-bottom: 4px; &::after { top: 100%; border-top-color: var(--sig-gray-800); left: 50%; transform: translateX(-50%); } }
+}

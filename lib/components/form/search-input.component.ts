@@ -8,6 +8,7 @@ import {
   ElementRef,
   viewChild,
   OnDestroy,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -27,6 +28,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div 
       class="sig-search"
@@ -75,100 +77,7 @@ import { CommonModule } from '@angular/common';
       }
     </div>
   `,
-  styles: [`
-    .sig-search {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.5rem;
-      background: white;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-
-    .sig-search--focused {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .sig-search--disabled {
-      background-color: #f3f4f6;
-      opacity: 0.6;
-    }
-
-    .sig-search__icon {
-      flex-shrink: 0;
-      font-size: 1rem;
-      opacity: 0.5;
-    }
-
-    .sig-search__input {
-      flex: 1;
-      min-width: 0;
-      border: none;
-      outline: none;
-      font-size: 0.875rem;
-      background: transparent;
-    }
-
-    .sig-search__input::placeholder {
-      color: #9ca3af;
-    }
-
-    .sig-search__spinner {
-      flex-shrink: 0;
-      width: 1rem;
-      height: 1rem;
-      border: 2px solid #e5e7eb;
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .sig-search__clear {
-      flex-shrink: 0;
-      padding: 0.125rem;
-      border: none;
-      background: none;
-      color: #9ca3af;
-      cursor: pointer;
-      font-size: 0.75rem;
-      border-radius: 0.25rem;
-    }
-
-    .sig-search__clear:hover {
-      color: #374151;
-      background-color: #f3f4f6;
-    }
-
-    .sig-search__button {
-      flex-shrink: 0;
-      padding: 0.375rem 0.75rem;
-      border: none;
-      background-color: #3b82f6;
-      color: white;
-      font-size: 0.875rem;
-      font-weight: 500;
-      border-radius: 0.375rem;
-      cursor: pointer;
-      transition: background-color 0.15s;
-    }
-
-    .sig-search__button:hover:not(:disabled) {
-      background-color: #2563eb;
-    }
-
-    .sig-search__button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  `],
-})
+  })
 export class SigSearchInputComponent implements OnDestroy {
   readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('inputRef');
 

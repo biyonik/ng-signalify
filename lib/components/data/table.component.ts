@@ -8,6 +8,7 @@ import {
   contentChildren,
   TemplateRef,
   Directive,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -57,6 +58,7 @@ export class SigColumnDirective {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="sig-table-wrapper" [class.sig-table-wrapper--loading]="loading()">
       @if (loading()) {
@@ -153,123 +155,7 @@ export class SigColumnDirective {
       </table>
     </div>
   `,
-  styles: [`
-    .sig-table-wrapper {
-      position: relative;
-      overflow-x: auto;
-    }
-
-    .sig-table-wrapper--loading {
-      pointer-events: none;
-    }
-
-    .sig-table__loading {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.8);
-      z-index: 10;
-    }
-
-    .sig-table__spinner {
-      width: 2rem;
-      height: 2rem;
-      border: 3px solid #e5e7eb;
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .sig-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.875rem;
-    }
-
-    .sig-table--bordered {
-      border: 1px solid #e5e7eb;
-    }
-
-    .sig-table__head {
-      background-color: #f9fafb;
-    }
-
-    .sig-table__th {
-      padding: 0.75rem 1rem;
-      text-align: left;
-      font-weight: 600;
-      color: #374151;
-      border-bottom: 1px solid #e5e7eb;
-      white-space: nowrap;
-    }
-
-    .sig-table__th--sortable {
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .sig-table__th--sortable:hover {
-      background-color: #f3f4f6;
-    }
-
-    .sig-table__th-content {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .sig-table__sort-icon {
-      color: #9ca3af;
-      font-size: 0.75rem;
-    }
-
-    .sig-table__th--checkbox,
-    .sig-table__td--checkbox {
-      width: 40px;
-      text-align: center;
-    }
-
-    .sig-table__row {
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .sig-table--striped .sig-table__row:nth-child(even) {
-      background-color: #f9fafb;
-    }
-
-    .sig-table__row:hover {
-      background-color: #f3f4f6;
-    }
-
-    .sig-table__row--selected {
-      background-color: #eff6ff !important;
-    }
-
-    .sig-table__row--clickable {
-      cursor: pointer;
-    }
-
-    .sig-table__td {
-      padding: 0.75rem 1rem;
-      color: #4b5563;
-    }
-
-    .sig-table__row--empty .sig-table__td {
-      padding: 2rem;
-    }
-
-    .sig-table__empty {
-      text-align: center;
-      color: #9ca3af;
-    }
-  `],
-})
+  })
 export class SigTableComponent<T extends Record<string, unknown>> {
   // Content queries
   readonly columnTemplates = contentChildren(SigColumnDirective);

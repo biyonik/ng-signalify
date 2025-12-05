@@ -8,6 +8,7 @@ import {
   output,
   ElementRef,
   viewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -27,6 +28,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -100,126 +102,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       </div>
     }
   `,
-  styles: [`
-    .sig-tags-input {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      min-height: 2.5rem;
-      padding: 0.25rem 0.5rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      background: white;
-      cursor: text;
-      transition: border-color 0.15s;
-    }
-
-    .sig-tags-input--focused {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .sig-tags-input--disabled {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    .sig-tags-input__tags {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.25rem;
-      flex: 1;
-    }
-
-    .sig-tags-input__tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.125rem 0.5rem;
-      background-color: #eff6ff;
-      color: #1d4ed8;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .sig-tags-input__tag-remove {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 1rem;
-      height: 1rem;
-      padding: 0;
-      border: none;
-      background: none;
-      color: #3b82f6;
-      cursor: pointer;
-      border-radius: 50%;
-      font-size: 0.625rem;
-    }
-
-    .sig-tags-input__tag-remove:hover {
-      background-color: #dbeafe;
-      color: #1e40af;
-    }
-
-    .sig-tags-input__input {
-      flex: 1;
-      min-width: 80px;
-      padding: 0.25rem;
-      border: none;
-      outline: none;
-      font-size: 0.875rem;
-      background: transparent;
-    }
-
-    .sig-tags-input__input::placeholder {
-      color: #9ca3af;
-    }
-
-    .sig-tags-input__counter {
-      font-size: 0.75rem;
-      color: #9ca3af;
-      margin-left: 0.5rem;
-    }
-
-    .sig-tags-input__error {
-      margin-top: 0.25rem;
-      font-size: 0.75rem;
-      color: #ef4444;
-    }
-
-    .sig-tags-input__suggestions {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      margin-top: 0.25rem;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.375rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      max-height: 10rem;
-      overflow-y: auto;
-    }
-
-    .sig-tags-input__suggestion {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: none;
-      background: none;
-      text-align: left;
-      font-size: 0.875rem;
-      cursor: pointer;
-    }
-
-    .sig-tags-input__suggestion:hover {
-      background-color: #f3f4f6;
-    }
-  `],
-  host: {
+    host: {
     style: 'position: relative; display: block;',
   },
 })

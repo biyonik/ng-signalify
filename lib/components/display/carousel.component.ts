@@ -11,6 +11,7 @@ import {
   Directive,
   TemplateRef,
   inject,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -40,6 +41,7 @@ export class SigCarouselSlideDirective {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div 
       class="sig-carousel"
@@ -111,121 +113,7 @@ export class SigCarouselSlideDirective {
       }
     </div>
   `,
-  styles: [`
-    .sig-carousel {
-      position: relative;
-      overflow: hidden;
-      border-radius: 0.5rem;
-    }
-
-    .sig-carousel__track {
-      display: flex;
-      will-change: transform;
-    }
-
-    .sig-carousel__slide {
-      flex-shrink: 0;
-      width: 100%;
-    }
-
-    .sig-carousel__slide img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    .sig-carousel__arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 0.75rem;
-      border: none;
-      background-color: rgba(255, 255, 255, 0.9);
-      color: #374151;
-      font-size: 1rem;
-      cursor: pointer;
-      border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-      transition: all 0.15s;
-    }
-
-    .sig-carousel__arrow:hover:not(:disabled) {
-      background-color: white;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-    }
-
-    .sig-carousel__arrow:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .sig-carousel__arrow--prev {
-      left: 1rem;
-    }
-
-    .sig-carousel__arrow--next {
-      right: 1rem;
-    }
-
-    .sig-carousel__dots {
-      position: absolute;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 0.5rem;
-      z-index: 10;
-    }
-
-    .sig-carousel__dot {
-      width: 8px;
-      height: 8px;
-      padding: 0;
-      border: none;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.5);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .sig-carousel__dot:hover {
-      background-color: rgba(255, 255, 255, 0.8);
-    }
-
-    .sig-carousel__dot--active {
-      background-color: white;
-      transform: scale(1.25);
-    }
-
-    .sig-carousel__progress {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background-color: rgba(255, 255, 255, 0.3);
-    }
-
-    .sig-carousel__progress-bar {
-      height: 100%;
-      background-color: white;
-      transition: width 0.1s linear;
-    }
-
-    .sig-carousel__counter {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      padding: 0.25rem 0.5rem;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: white;
-      font-size: 0.75rem;
-      border-radius: 0.25rem;
-      z-index: 10;
-    }
-  `],
-})
+  })
 export class SigCarouselComponent implements OnDestroy {
   readonly slides = contentChildren(SigCarouselSlideDirective);
 

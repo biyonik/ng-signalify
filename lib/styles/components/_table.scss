@@ -1,0 +1,63 @@
+/* lib/styles/components/_table.scss */
+@import '../abstract/mixins';
+
+.sig-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--sig-border-color);
+  border-radius: var(--sig-radius-lg);
+  background-color: var(--sig-bg-surface);
+}
+
+.sig-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  @include text-sm;
+
+  &__head {
+    background-color: var(--sig-bg-background);
+    border-bottom: 1px solid var(--sig-border-color);
+
+    th {
+      padding: var(--sig-spacing-3) var(--sig-spacing-4);
+      font-weight: 600;
+      color: var(--sig-text-secondary);
+      white-space: nowrap;
+    }
+  }
+
+  &__body {
+    tr {
+      border-bottom: 1px solid var(--sig-border-color);
+      transition: background-color 0.1s;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background-color: var(--sig-bg-surface-hover);
+      }
+    }
+
+    td {
+      padding: var(--sig-spacing-3) var(--sig-spacing-4);
+      color: var(--sig-text-main);
+      vertical-align: middle;
+    }
+  }
+
+  /* Striped Variant */
+  &--striped {
+    tbody tr:nth-child(even) {
+      background-color: var(--sig-bg-background);
+    }
+  }
+
+  /* Loading State */
+  &--loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}

@@ -11,6 +11,7 @@ import {
   TemplateRef,
   contentChild,
   Directive,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -41,6 +42,7 @@ export class SigVirtualItemDirective {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div 
       class="sig-virtual-scroll"
@@ -82,61 +84,7 @@ export class SigVirtualItemDirective {
       }
     </div>
   `,
-  styles: [`
-    .sig-virtual-scroll {
-      position: relative;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    .sig-virtual-scroll__spacer {
-      position: relative;
-    }
-
-    .sig-virtual-scroll__content {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      will-change: transform;
-    }
-
-    .sig-virtual-scroll__item {
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-    }
-
-    .sig-virtual-scroll__loading {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 1rem;
-      background-color: white;
-      border-top: 1px solid #e5e7eb;
-      font-size: 0.875rem;
-      color: #6b7280;
-    }
-
-    .sig-virtual-scroll__spinner {
-      width: 1rem;
-      height: 1rem;
-      border: 2px solid #e5e7eb;
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `],
-})
+  })
 export class SigVirtualScrollComponent<T = any> {
   readonly viewport = viewChild<ElementRef>('viewport');
   readonly itemTemplate = contentChild(SigVirtualItemDirective);

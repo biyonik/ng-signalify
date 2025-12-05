@@ -7,6 +7,7 @@ import {
   input,
   model,
   HostListener,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -26,6 +27,7 @@ export interface SelectOption {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -105,130 +107,7 @@ export interface SelectOption {
       }
     </div>
   `,
-  styles: [`
-    .sig-select {
-      position: relative;
-      width: 100%;
-    }
-
-    .sig-select__trigger {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      background: white;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-
-    .sig-select__trigger:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .sig-select--disabled .sig-select__trigger {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    .sig-select--open .sig-select__trigger {
-      border-color: #3b82f6;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-
-    .sig-select__value {
-      flex: 1;
-      text-align: left;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .sig-select__placeholder { color: #9ca3af; }
-
-    .sig-select__arrow {
-      font-size: 0.625rem;
-      color: #6b7280;
-      transition: transform 0.15s;
-    }
-
-    .sig-select--open .sig-select__arrow {
-      transform: rotate(180deg);
-    }
-
-    .sig-select__dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      background: white;
-      border: 1px solid #3b82f6;
-      border-top: none;
-      border-radius: 0 0 0.375rem 0.375rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      max-height: 15rem;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sig-select__search {
-      padding: 0.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .sig-select__search-input {
-      width: 100%;
-      padding: 0.375rem 0.5rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.25rem;
-      font-size: 0.875rem;
-    }
-
-    .sig-select__search-input:focus {
-      outline: none;
-      border-color: #3b82f6;
-    }
-
-    .sig-select__options {
-      overflow-y: auto;
-      max-height: 12rem;
-    }
-
-    .sig-select__option {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 0.75rem;
-      border: none;
-      background: none;
-      font-size: 0.875rem;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .sig-select__option:hover { background-color: #f3f4f6; }
-    .sig-select__option--selected { background-color: #eff6ff; color: #1d4ed8; }
-    .sig-select__option--disabled { color: #9ca3af; cursor: not-allowed; }
-    .sig-select__option--clear { color: #6b7280; border-bottom: 1px solid #e5e7eb; }
-    .sig-select__check { color: #3b82f6; }
-
-    .sig-select__empty {
-      padding: 1rem;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 0.875rem;
-    }
-  `],
-})
+  })
 export class SigSelectComponent implements ControlValueAccessor {
   readonly options = input<SelectOption[]>([]);
   readonly value = model<string | number | null>(null);

@@ -7,6 +7,7 @@ import {
   input,
   model,
   output,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -33,6 +34,7 @@ export interface TimeValue {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -172,161 +174,7 @@ export interface TimeValue {
       }
     </div>
   `,
-  styles: [`
-    .sig-time-picker {
-      position: relative;
-      width: 100%;
-    }
-
-    .sig-time-picker__trigger {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      background: white;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
-
-    .sig-time-picker__trigger:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .sig-time-picker__trigger:disabled {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    .sig-time-picker__value {
-      flex: 1;
-      text-align: left;
-    }
-
-    .sig-time-picker__placeholder {
-      color: #9ca3af;
-    }
-
-    .sig-time-picker__icon {
-      font-size: 1rem;
-    }
-
-    .sig-time-picker__dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      z-index: 50;
-      margin-top: 0.25rem;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.5rem;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-
-    .sig-time-picker__columns {
-      display: flex;
-    }
-
-    .sig-time-picker__column {
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid #e5e7eb;
-    }
-
-    .sig-time-picker__column:last-child {
-      border-right: none;
-    }
-
-    .sig-time-picker__column--period {
-      min-width: 50px;
-    }
-
-    .sig-time-picker__column-header {
-      padding: 0.5rem;
-      font-size: 0.625rem;
-      font-weight: 600;
-      color: #9ca3af;
-      text-transform: uppercase;
-      text-align: center;
-      background-color: #f9fafb;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .sig-time-picker__scroll {
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 0.25rem;
-    }
-
-    .sig-time-picker__option {
-      width: 100%;
-      padding: 0.375rem 0.75rem;
-      border: none;
-      background: none;
-      font-size: 0.875rem;
-      color: #374151;
-      text-align: center;
-      cursor: pointer;
-      border-radius: 0.25rem;
-      transition: background-color 0.1s;
-    }
-
-    .sig-time-picker__option:hover {
-      background-color: #f3f4f6;
-    }
-
-    .sig-time-picker__option--selected {
-      background-color: #3b82f6;
-      color: white;
-    }
-
-    .sig-time-picker__option--selected:hover {
-      background-color: #2563eb;
-    }
-
-    .sig-time-picker__footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem;
-      border-top: 1px solid #e5e7eb;
-      background-color: #f9fafb;
-    }
-
-    .sig-time-picker__now,
-    .sig-time-picker__clear,
-    .sig-time-picker__confirm {
-      padding: 0.25rem 0.5rem;
-      border: none;
-      background: none;
-      font-size: 0.75rem;
-      color: #3b82f6;
-      cursor: pointer;
-      border-radius: 0.25rem;
-    }
-
-    .sig-time-picker__now:hover,
-    .sig-time-picker__clear:hover,
-    .sig-time-picker__confirm:hover {
-      background-color: #eff6ff;
-    }
-
-    .sig-time-picker__confirm {
-      background-color: #3b82f6;
-      color: white;
-    }
-
-    .sig-time-picker__confirm:hover {
-      background-color: #2563eb;
-    }
-  `],
-  host: {
+    host: {
     '(document:click)': 'onClickOutside($event)',
   },
 })

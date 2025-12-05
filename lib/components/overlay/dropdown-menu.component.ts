@@ -11,6 +11,7 @@ import {
   inject,
   HostListener,
   TemplateRef,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -45,14 +46,7 @@ export class SigDropdownItemDirective {
   selector: 'sig-dropdown-divider',
   standalone: true,
   template: `<div class="sig-dropdown__divider"></div>`,
-  styles: [`
-    .sig-dropdown__divider {
-      height: 1px;
-      margin: 0.25rem 0;
-      background-color: #e5e7eb;
-    }
-  `],
-})
+  })
 export class SigDropdownDividerComponent {}
 
 /**
@@ -66,17 +60,7 @@ export class SigDropdownDividerComponent {}
       <ng-content></ng-content>
     </div>
   `,
-  styles: [`
-    .sig-dropdown__header {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-  `],
-})
+  })
 export class SigDropdownHeaderComponent {}
 
 /**
@@ -102,6 +86,7 @@ export class SigDropdownHeaderComponent {}
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="sig-dropdown" [class.sig-dropdown--open]="isOpen()">
       <!-- Trigger -->
@@ -126,98 +111,7 @@ export class SigDropdownHeaderComponent {}
       }
     </div>
   `,
-  styles: [`
-    .sig-dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .sig-dropdown__trigger {
-      cursor: pointer;
-    }
-
-    .sig-dropdown__menu {
-      position: absolute;
-      z-index: 50;
-      min-width: 160px;
-      padding: 0.25rem 0;
-      background-color: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.5rem;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      animation: dropdown-fade 0.15s ease-out;
-    }
-
-    @keyframes dropdown-fade {
-      from {
-        opacity: 0;
-        transform: translateY(-4px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Position */
-    .sig-dropdown__menu--bottom {
-      top: 100%;
-      margin-top: 0.25rem;
-    }
-
-    .sig-dropdown__menu--top {
-      bottom: 100%;
-      margin-bottom: 0.25rem;
-    }
-
-    /* Alignment */
-    .sig-dropdown__menu--left {
-      left: 0;
-    }
-
-    .sig-dropdown__menu--right {
-      right: 0;
-    }
-
-    .sig-dropdown__menu--center {
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    /* Items */
-    :host ::ng-deep .sig-dropdown__item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: none;
-      background: none;
-      font-size: 0.875rem;
-      color: #374151;
-      text-align: left;
-      cursor: pointer;
-      transition: background-color 0.1s;
-    }
-
-    :host ::ng-deep .sig-dropdown__item:hover:not(.sig-dropdown__item--disabled) {
-      background-color: #f3f4f6;
-    }
-
-    :host ::ng-deep .sig-dropdown__item--disabled {
-      color: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    :host ::ng-deep .sig-dropdown__item.text-danger {
-      color: #ef4444;
-    }
-
-    :host ::ng-deep .sig-dropdown__item.text-danger:hover:not(.sig-dropdown__item--disabled) {
-      background-color: #fef2f2;
-    }
-  `],
-  host: {
+    host: {
     '(document:click)': 'onClickOutside($event)',
     '(document:keydown.escape)': 'close()',
   },

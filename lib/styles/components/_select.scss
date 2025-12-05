@@ -1,0 +1,78 @@
+/* lib/styles/components/_select.scss */
+@import '../abstract/mixins';
+
+.sig-select {
+  position: relative;
+  width: 100%;
+
+  &__trigger {
+    width: 100%;
+    padding: var(--sig-spacing-2) var(--sig-spacing-3);
+    padding-right: 2.5rem; /* Chevron için yer */
+    background-color: var(--sig-bg-surface);
+    border: 1px solid var(--sig-border-color);
+    border-radius: var(--sig-radius-md);
+    color: var(--sig-text-main);
+    text-align: left;
+    cursor: pointer;
+    transition: var(--sig-transition);
+    @include text-sm;
+    @include focus-ring;
+
+    &:disabled {
+      background-color: var(--sig-bg-disabled);
+      color: var(--sig-text-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    right: var(--sig-spacing-3);
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--sig-text-muted);
+    font-size: 0.75rem;
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: var(--sig-spacing-1);
+    background-color: var(--sig-bg-surface);
+    border: 1px solid var(--sig-border-color);
+    border-radius: var(--sig-radius-md);
+    box-shadow: var(--sig-shadow-lg);
+    z-index: var(--sig-z-dropdown);
+    max-height: 15rem;
+    overflow-y: auto;
+    animation: sig-fade-in 0.1s ease-out;
+  }
+
+  &__option {
+    padding: var(--sig-spacing-2) var(--sig-spacing-3);
+    color: var(--sig-text-main);
+    cursor: pointer;
+    transition: background-color 0.1s;
+    @include text-sm;
+
+    &:hover {
+      background-color: var(--sig-bg-background);
+    }
+
+    &--selected {
+      background-color: var(--sig-color-primary-subtle);
+      color: var(--sig-color-primary);
+      font-weight: 500;
+    }
+
+    &--disabled {
+      color: var(--sig-text-disabled);
+      cursor: not-allowed;
+      &:hover { background: none; }
+    }
+  }
+}

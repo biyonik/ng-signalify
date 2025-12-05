@@ -6,6 +6,7 @@ import {
   model,
   signal,
   effect,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -32,6 +33,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     @if (open()) {
       <!-- Backdrop -->
@@ -87,131 +89,7 @@ import { CommonModule } from '@angular/common';
       </div>
     }
   `,
-  styles: [`
-    .sig-drawer__backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 998;
-      background-color: rgba(0, 0, 0, 0.5);
-      animation: drawer-backdrop-fade 0.2s ease-out;
-    }
-
-    .sig-drawer__backdrop--transparent {
-      background-color: transparent;
-    }
-
-    @keyframes drawer-backdrop-fade {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .sig-drawer {
-      position: fixed;
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      background-color: white;
-      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Positions */
-    .sig-drawer--left {
-      top: 0;
-      left: 0;
-      bottom: 0;
-      animation: drawer-slide-left 0.3s ease-out;
-    }
-
-    .sig-drawer--right {
-      top: 0;
-      right: 0;
-      bottom: 0;
-      animation: drawer-slide-right 0.3s ease-out;
-    }
-
-    .sig-drawer--top {
-      top: 0;
-      left: 0;
-      right: 0;
-      animation: drawer-slide-top 0.3s ease-out;
-    }
-
-    .sig-drawer--bottom {
-      bottom: 0;
-      left: 0;
-      right: 0;
-      animation: drawer-slide-bottom 0.3s ease-out;
-    }
-
-    @keyframes drawer-slide-left {
-      from { transform: translateX(-100%); }
-      to { transform: translateX(0); }
-    }
-
-    @keyframes drawer-slide-right {
-      from { transform: translateX(100%); }
-      to { transform: translateX(0); }
-    }
-
-    @keyframes drawer-slide-top {
-      from { transform: translateY(-100%); }
-      to { transform: translateY(0); }
-    }
-
-    @keyframes drawer-slide-bottom {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .sig-drawer__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-      border-bottom: 1px solid #e5e7eb;
-      flex-shrink: 0;
-    }
-
-    .sig-drawer__title {
-      flex: 1;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .sig-drawer__close {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 2rem;
-      padding: 0;
-      border: none;
-      background: none;
-      color: #6b7280;
-      font-size: 1rem;
-      cursor: pointer;
-      border-radius: 0.375rem;
-      transition: all 0.15s;
-    }
-
-    .sig-drawer__close:hover {
-      background-color: #f3f4f6;
-      color: #374151;
-    }
-
-    .sig-drawer__content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-    }
-
-    .sig-drawer__footer {
-      padding: 1rem;
-      border-top: 1px solid #e5e7eb;
-      flex-shrink: 0;
-    }
-  `],
-  host: {
+    host: {
     '(document:keydown.escape)': 'onEscape()',
   },
 })

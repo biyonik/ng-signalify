@@ -10,6 +10,7 @@ import {
   viewChild,
   ElementRef,
   AfterViewInit,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -22,6 +23,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -59,60 +61,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       }
     </div>
   `,
-  styles: [`
-    .sig-textarea {
-      position: relative;
-      width: 100%;
-    }
-
-    .sig-textarea__field {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      font-family: inherit;
-      line-height: 1.5;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-
-    .sig-textarea__field:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .sig-textarea__field:disabled {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    .sig-textarea__field::placeholder {
-      color: #9ca3af;
-    }
-
-    .sig-textarea__field--resize-none { resize: none; }
-    .sig-textarea__field--resize-vertical { resize: vertical; }
-    .sig-textarea__field--resize-horizontal { resize: horizontal; }
-
-    .sig-textarea--disabled .sig-textarea__field {
-      background-color: #f3f4f6;
-    }
-
-    .sig-textarea__counter {
-      position: absolute;
-      bottom: 0.5rem;
-      right: 0.5rem;
-      font-size: 0.75rem;
-      color: #9ca3af;
-      background: white;
-      padding: 0 0.25rem;
-    }
-
-    .sig-textarea__counter--warning { color: #f59e0b; }
-    .sig-textarea__counter--error { color: #ef4444; }
-  `],
-})
+  })
 export class SigTextareaComponent implements ControlValueAccessor, AfterViewInit {
   readonly textareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('textareaRef');
 

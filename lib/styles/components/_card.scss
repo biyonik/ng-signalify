@@ -1,0 +1,34 @@
+/* lib/styles/components/_card.scss */
+.sig-card {
+  background-color: var(--sig-bg-surface);
+  border: 1px solid var(--sig-border-color);
+  border-radius: var(--sig-radius-lg);
+  box-shadow: var(--sig-shadow-sm);
+  overflow: hidden;
+
+  &__header {
+    padding: var(--sig-spacing-4);
+    border-bottom: 1px solid var(--sig-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h3 {
+      margin: 0;
+      font-size: var(--sig-font-size-lg);
+      font-weight: 600;
+      color: var(--sig-text-main);
+    }
+  }
+
+  &__body {
+    padding: var(--sig-spacing-4);
+    color: var(--sig-text-main);
+  }
+
+  &__footer {
+    padding: var(--sig-spacing-3) var(--sig-spacing-4);
+    background-color: var(--sig-bg-background);
+    border-top: 1px solid var(--sig-border-color);
+  }
+}

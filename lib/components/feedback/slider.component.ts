@@ -8,6 +8,7 @@ import {
   model,
   ElementRef,
   viewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -29,6 +30,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -107,150 +109,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       }
     </div>
   `,
-  styles: [`
-    .sig-slider {
-      width: 100%;
-      padding: 0.5rem 0;
-    }
-
-    .sig-slider--disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    .sig-slider__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .sig-slider__label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-    }
-
-    .sig-slider__value {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #3b82f6;
-    }
-
-    .sig-slider__track-container {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .sig-slider__min,
-    .sig-slider__max {
-      font-size: 0.75rem;
-      color: #9ca3af;
-      min-width: 2rem;
-    }
-
-    .sig-slider__max {
-      text-align: right;
-    }
-
-    .sig-slider__track {
-      flex: 1;
-      position: relative;
-      height: 6px;
-      background-color: #e5e7eb;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-
-    .sig-slider__fill {
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      background-color: #3b82f6;
-      border-radius: 3px;
-      pointer-events: none;
-    }
-
-    .sig-slider__thumb {
-      position: absolute;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 1.25rem;
-      height: 1.25rem;
-      background-color: white;
-      border: 2px solid #3b82f6;
-      border-radius: 50%;
-      cursor: grab;
-      transition: box-shadow 0.15s;
-    }
-
-    .sig-slider__thumb:hover {
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-    }
-
-    .sig-slider__thumb:focus {
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
-    }
-
-    .sig-slider__thumb:active {
-      cursor: grabbing;
-    }
-
-    .sig-slider__tooltip {
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-bottom: 0.5rem;
-      padding: 0.25rem 0.5rem;
-      background-color: #1f2937;
-      color: white;
-      font-size: 0.75rem;
-      border-radius: 0.25rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s;
-    }
-
-    .sig-slider__thumb:hover .sig-slider__tooltip,
-    .sig-slider__thumb:focus .sig-slider__tooltip {
-      opacity: 1;
-    }
-
-    .sig-slider__marks {
-      position: relative;
-      margin-top: 0.5rem;
-      height: 1.5rem;
-    }
-
-    .sig-slider__mark {
-      position: absolute;
-      transform: translateX(-50%);
-      cursor: pointer;
-    }
-
-    .sig-slider__mark-dot {
-      display: block;
-      width: 4px;
-      height: 4px;
-      background-color: #9ca3af;
-      border-radius: 50%;
-      margin: 0 auto;
-    }
-
-    .sig-slider__mark-label {
-      display: block;
-      margin-top: 0.25rem;
-      font-size: 0.625rem;
-      color: #6b7280;
-      text-align: center;
-    }
-  `],
-})
+  })
 export class SigSliderComponent implements ControlValueAccessor {
   readonly trackRef = viewChild<ElementRef<HTMLDivElement>>('trackRef');
 

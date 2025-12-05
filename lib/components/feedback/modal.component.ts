@@ -7,6 +7,7 @@ import {
   model,
   Injectable,
   HostListener,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -31,6 +32,7 @@ export interface ModalConfig {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     @if (open()) {
       <div 
@@ -98,137 +100,7 @@ export interface ModalConfig {
       </div>
     }
   `,
-  styles: [`
-    .sig-modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      background-color: rgba(0, 0, 0, 0.5);
-      animation: fadeIn 0.15s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .sig-modal {
-      width: 100%;
-      max-width: 32rem;
-      max-height: calc(100vh - 2rem);
-      display: flex;
-      flex-direction: column;
-      background: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-      animation: slideIn 0.15s ease-out;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: scale(0.95) translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    .sig-modal--sm { max-width: 24rem; }
-    .sig-modal--lg { max-width: 48rem; }
-    .sig-modal--xl { max-width: 64rem; }
-    .sig-modal--full { 
-      max-width: calc(100vw - 2rem);
-      max-height: calc(100vh - 2rem);
-    }
-
-    .sig-modal__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .sig-modal__title {
-      margin: 0;
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .sig-modal__close {
-      padding: 0.25rem;
-      background: none;
-      border: none;
-      font-size: 1.25rem;
-      color: #6b7280;
-      cursor: pointer;
-      border-radius: 0.25rem;
-    }
-
-    .sig-modal__close:hover {
-      color: #374151;
-      background-color: #f3f4f6;
-    }
-
-    .sig-modal__body {
-      flex: 1;
-      padding: 1.5rem;
-      overflow-y: auto;
-    }
-
-    .sig-modal__footer {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding: 1rem 1.5rem;
-      border-top: 1px solid #e5e7eb;
-      background-color: #f9fafb;
-      border-radius: 0 0 0.5rem 0.5rem;
-    }
-
-    .sig-modal__btn {
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      border-radius: 0.375rem;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .sig-modal__btn--cancel {
-      background: white;
-      border: 1px solid #d1d5db;
-      color: #374151;
-    }
-
-    .sig-modal__btn--cancel:hover {
-      background-color: #f3f4f6;
-    }
-
-    .sig-modal__btn--confirm {
-      background-color: #3b82f6;
-      border: 1px solid #3b82f6;
-      color: white;
-    }
-
-    .sig-modal__btn--confirm:hover:not(:disabled) {
-      background-color: #2563eb;
-    }
-
-    .sig-modal__btn--confirm:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  `],
-})
+  })
 export class SigModalComponent {
   // Two-way binding for open state
   readonly open = model<boolean>(false);

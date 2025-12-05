@@ -1,0 +1,94 @@
+/* lib/styles/components/_modal.scss */
+@import '../abstract/mixins';
+
+.sig-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1050; /* Bootstrap standardı */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sig-spacing-4);
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px); /* Modern dokunuş */
+  animation: sig-fade-in 0.15s ease-out;
+}
+
+.sig-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100vh - 2rem);
+  background: var(--sig-bg-surface);
+  border-radius: var(--sig-radius-lg);
+  box-shadow: var(--sig-shadow-lg);
+  animation: sig-slide-up 0.15s ease-out;
+  color: var(--sig-text-main);
+
+  /* Sizes */
+  &--sm { max-width: 24rem; }
+  &--md { max-width: 32rem; }
+  &--lg { max-width: 48rem; }
+  &--xl { max-width: 64rem; }
+  &--full { 
+    max-width: calc(100vw - 2rem);
+    height: calc(100vh - 2rem);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sig-spacing-4) var(--sig-spacing-6);
+    border-bottom: 1px solid var(--sig-border-color);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  &__close {
+    padding: var(--sig-spacing-1);
+    background: none;
+    border: none;
+    color: var(--sig-text-muted);
+    cursor: pointer;
+    border-radius: var(--sig-radius-md);
+    transition: var(--sig-transition);
+
+    &:hover {
+      background-color: var(--sig-bg-background);
+      color: var(--sig-text-main);
+    }
+  }
+
+  &__body {
+    flex: 1;
+    padding: var(--sig-spacing-6);
+    overflow-y: auto;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--sig-spacing-3);
+    padding: var(--sig-spacing-4) var(--sig-spacing-6);
+    border-top: 1px solid var(--sig-border-color);
+    background-color: var(--sig-bg-background);
+    border-radius: 0 0 var(--sig-radius-lg) var(--sig-radius-lg);
+  }
+}
+
+/* Animations */
+@keyframes sig-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sig-slide-up {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}

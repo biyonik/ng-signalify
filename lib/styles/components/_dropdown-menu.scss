@@ -1,0 +1,42 @@
+@import '../abstract/mixins';
+
+.sig-dropdown {
+  position: relative;
+  display: inline-block;
+
+  &__content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--sig-spacing-1);
+    background-color: var(--sig-bg-surface);
+    border: 1px solid var(--sig-border-color);
+    border-radius: var(--sig-radius-md);
+    box-shadow: var(--sig-shadow-lg);
+    z-index: var(--sig-z-dropdown);
+    min-width: 10rem;
+    overflow: hidden;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--sig-spacing-2) var(--sig-spacing-3);
+    border: none;
+    background: none;
+    text-align: left;
+    color: var(--sig-text-main);
+    cursor: pointer;
+    @include text-sm;
+
+    &:hover { background-color: var(--sig-bg-background); }
+    &--danger { color: var(--sig-color-danger); &:hover { background-color: var(--sig-color-danger-bg); } }
+  }
+
+  &__divider {
+    height: 1px;
+    background-color: var(--sig-border-color);
+    margin: var(--sig-spacing-1) 0;
+  }
+}

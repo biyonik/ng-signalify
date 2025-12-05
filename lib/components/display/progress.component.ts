@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   input,
   computed,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -18,6 +19,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="sig-progress">
       @if (label()) {
@@ -62,136 +64,7 @@ import { CommonModule } from '@angular/common';
       }
     </div>
   `,
-  styles: [`
-    .sig-progress {
-      width: 100%;
-    }
-
-    .sig-progress__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .sig-progress__label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-    }
-
-    .sig-progress__value {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #374151;
-    }
-
-    .sig-progress__track {
-      height: 0.75rem;
-      background-color: #e5e7eb;
-      border-radius: 0.25rem;
-      overflow: hidden;
-    }
-
-    .sig-progress__track--sm {
-      height: 0.375rem;
-    }
-
-    .sig-progress__track--lg {
-      height: 1.25rem;
-    }
-
-    .sig-progress__track--rounded {
-      border-radius: 9999px;
-    }
-
-    .sig-progress__bar {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: width 0.3s ease;
-      border-radius: inherit;
-    }
-
-    /* Variants */
-    .sig-progress__bar {
-      background-color: #3b82f6;
-    }
-
-    .sig-progress__bar--primary {
-      background-color: #3b82f6;
-    }
-
-    .sig-progress__bar--success {
-      background-color: #10b981;
-    }
-
-    .sig-progress__bar--warning {
-      background-color: #f59e0b;
-    }
-
-    .sig-progress__bar--danger {
-      background-color: #ef4444;
-    }
-
-    .sig-progress__bar--info {
-      background-color: #0ea5e9;
-    }
-
-    /* Striped */
-    .sig-progress__bar--striped {
-      background-image: linear-gradient(
-        45deg,
-        rgba(255, 255, 255, 0.15) 25%,
-        transparent 25%,
-        transparent 50%,
-        rgba(255, 255, 255, 0.15) 50%,
-        rgba(255, 255, 255, 0.15) 75%,
-        transparent 75%,
-        transparent
-      );
-      background-size: 1rem 1rem;
-    }
-
-    /* Animated */
-    .sig-progress__bar--animated {
-      animation: progress-stripes 1s linear infinite;
-    }
-
-    @keyframes progress-stripes {
-      from { background-position: 1rem 0; }
-      to { background-position: 0 0; }
-    }
-
-    /* Indeterminate */
-    .sig-progress__bar--indeterminate {
-      width: 30% !important;
-      animation: progress-indeterminate 1.5s ease-in-out infinite;
-    }
-
-    @keyframes progress-indeterminate {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(400%);
-      }
-    }
-
-    .sig-progress__bar-text {
-      font-size: 0.625rem;
-      font-weight: 600;
-      color: white;
-    }
-
-    .sig-progress__description {
-      margin-top: 0.25rem;
-      font-size: 0.75rem;
-      color: #6b7280;
-    }
-  `],
-})
+  })
 export class SigProgressComponent {
   readonly value = input<number>(0);
   readonly max = input<number>(100);
@@ -284,58 +157,7 @@ export class SigProgressComponent {
       </div>
     </div>
   `,
-  styles: [`
-    .sig-progress-circle {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .sig-progress-circle__svg {
-      transform: rotate(-90deg);
-    }
-
-    .sig-progress-circle__track {
-      stroke: #e5e7eb;
-    }
-
-    .sig-progress-circle__progress {
-      stroke: #3b82f6;
-      transition: stroke-dashoffset 0.3s ease;
-    }
-
-    .sig-progress-circle__progress--primary {
-      stroke: #3b82f6;
-    }
-
-    .sig-progress-circle__progress--success {
-      stroke: #10b981;
-    }
-
-    .sig-progress-circle__progress--warning {
-      stroke: #f59e0b;
-    }
-
-    .sig-progress-circle__progress--danger {
-      stroke: #ef4444;
-    }
-
-    .sig-progress-circle__content {
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .sig-progress-circle__value {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #374151;
-    }
-  `],
-})
+  })
 export class SigProgressCircleComponent {
   readonly value = input<number>(0);
   readonly max = input<number>(100);

@@ -1,0 +1,44 @@
+/* lib/styles/components/_tabs.scss */
+.sig-tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  &__header {
+    display: flex;
+    border-bottom: 1px solid var(--sig-border-color);
+    margin-bottom: var(--sig-spacing-4);
+    gap: var(--sig-spacing-4);
+    overflow-x: auto;
+  }
+
+  &__btn {
+    padding: var(--sig-spacing-3) var(--sig-spacing-1);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--sig-text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--sig-transition);
+
+    &:hover {
+      color: var(--sig-text-main);
+    }
+
+    &--active {
+      color: var(--sig-color-primary);
+      border-bottom-color: var(--sig-color-primary);
+    }
+
+    &:disabled {
+      color: var(--sig-text-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  &__content {
+    padding: var(--sig-spacing-2) 0;
+  }
+}

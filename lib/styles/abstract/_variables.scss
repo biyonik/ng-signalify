@@ -1,0 +1,76 @@
+/* lib/styles/abstract/_variables.scss */
+:root {
+  /* --- Renk Paleti (Primitives) --- */
+  --sig-blue-50: #eff6ff;
+  --sig-blue-100: #dbeafe;
+  --sig-blue-500: #3b82f6;
+  --sig-blue-600: #2563eb;
+  --sig-blue-700: #1d4ed8;
+
+  --sig-gray-50: #f9fafb;
+  --sig-gray-100: #f3f4f6;
+  --sig-gray-200: #e5e7eb;
+  --sig-gray-300: #d1d5db;
+  --sig-gray-400: #9ca3af;
+  --sig-gray-500: #6b7280;
+  --sig-gray-600: #4b5563;
+  --sig-gray-700: #374151;
+  --sig-gray-800: #1f2937;
+  --sig-gray-900: #111827;
+
+  --sig-red-100: #fee2e2;
+  --sig-red-500: #ef4444;
+  --sig-red-700: #b91c1c;
+
+  /* --- Semantic Tokens --- */
+  
+  /* Brand */
+  --sig-color-primary: var(--sig-blue-500);
+  --sig-color-primary-hover: var(--sig-blue-600);
+  --sig-color-primary-text: #ffffff;
+
+  /* Surface & Background */
+  --sig-bg-surface: #ffffff;
+  --sig-bg-background: var(--sig-gray-50);
+  --sig-bg-disabled: var(--sig-gray-100);
+
+  /* Borders */
+  --sig-border-color: var(--sig-gray-300);
+  --sig-border-color-focus: var(--sig-blue-500);
+
+  /* Text */
+  --sig-text-main: var(--sig-gray-900);
+  --sig-text-muted: var(--sig-gray-500);
+  --sig-text-disabled: var(--sig-gray-400);
+
+  /* Spacing */
+  --sig-spacing-1: 0.25rem;
+  --sig-spacing-2: 0.5rem;
+  --sig-spacing-3: 0.75rem;
+  --sig-spacing-4: 1rem;
+  --sig-spacing-6: 1.5rem;
+
+  /* Radius */
+  --sig-radius-md: 0.375rem;
+  --sig-radius-lg: 0.5rem;
+
+  /* Transitions */
+  --sig-transition: all 0.15s ease-in-out;
+
+  /* Shadows */
+  --sig-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Focus Ring */
+  --sig-focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sig-bg-surface: var(--sig-gray-800);
+    --sig-bg-background: var(--sig-gray-900);
+    --sig-text-main: var(--sig-gray-50);
+    --sig-text-muted: var(--sig-gray-400);
+    --sig-border-color: var(--sig-gray-600);
+    --sig-bg-disabled: var(--sig-gray-800);
+  }
+}

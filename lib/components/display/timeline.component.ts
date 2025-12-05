@@ -6,6 +6,7 @@ import {
   contentChildren,
   TemplateRef,
   inject,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -49,6 +50,7 @@ export class SigTimelineItemDirective {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div 
       class="sig-timeline"
@@ -99,170 +101,7 @@ export class SigTimelineItemDirective {
       }
     </div>
   `,
-  styles: [`
-    .sig-timeline {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sig-timeline--horizontal {
-      flex-direction: row;
-      overflow-x: auto;
-    }
-
-    .sig-timeline__item {
-      position: relative;
-      display: flex;
-      gap: 1rem;
-      padding-bottom: 1.5rem;
-    }
-
-    .sig-timeline--horizontal .sig-timeline__item {
-      flex-direction: column;
-      padding-bottom: 0;
-      padding-right: 2rem;
-    }
-
-    .sig-timeline--alternate .sig-timeline__item {
-      width: 50%;
-      margin-left: 50%;
-    }
-
-    .sig-timeline--alternate .sig-timeline__item--left {
-      margin-left: 0;
-      margin-right: 50%;
-      flex-direction: row-reverse;
-      text-align: right;
-    }
-
-    .sig-timeline--right .sig-timeline__item {
-      flex-direction: row-reverse;
-      text-align: right;
-    }
-
-    /* Dot */
-    .sig-timeline__dot {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 50%;
-      background-color: #e5e7eb;
-      color: #6b7280;
-      flex-shrink: 0;
-      z-index: 1;
-    }
-
-    .sig-timeline__dot--primary {
-      background-color: #dbeafe;
-      color: #3b82f6;
-    }
-
-    .sig-timeline__dot--success {
-      background-color: #d1fae5;
-      color: #10b981;
-    }
-
-    .sig-timeline__dot--warning {
-      background-color: #fef3c7;
-      color: #f59e0b;
-    }
-
-    .sig-timeline__dot--danger {
-      background-color: #fee2e2;
-      color: #ef4444;
-    }
-
-    .sig-timeline__icon {
-      font-size: 0.875rem;
-    }
-
-    /* Line */
-    .sig-timeline__line {
-      position: absolute;
-      left: calc(1rem - 1px);
-      top: 2rem;
-      bottom: 0;
-      width: 2px;
-      background-color: #e5e7eb;
-    }
-
-    .sig-timeline--alternate .sig-timeline__line {
-      left: auto;
-      right: calc(-50% + 1rem - 1px);
-    }
-
-    .sig-timeline--alternate .sig-timeline__item--left .sig-timeline__line {
-      left: auto;
-      right: calc(1rem - 1px);
-    }
-
-    .sig-timeline--right .sig-timeline__line {
-      left: auto;
-      right: calc(1rem - 1px);
-    }
-
-    .sig-timeline--horizontal .sig-timeline__line {
-      top: calc(1rem - 1px);
-      left: 2rem;
-      right: 0;
-      bottom: auto;
-      width: auto;
-      height: 2px;
-    }
-
-    .sig-timeline__line--dotted {
-      background: repeating-linear-gradient(
-        to bottom,
-        #e5e7eb,
-        #e5e7eb 4px,
-        transparent 4px,
-        transparent 8px
-      );
-    }
-
-    .sig-timeline--horizontal .sig-timeline__line--dotted {
-      background: repeating-linear-gradient(
-        to right,
-        #e5e7eb,
-        #e5e7eb 4px,
-        transparent 4px,
-        transparent 8px
-      );
-    }
-
-    /* Content */
-    .sig-timeline__content {
-      flex: 1;
-      padding-bottom: 0.5rem;
-    }
-
-    .sig-timeline__date {
-      font-size: 0.75rem;
-      color: #6b7280;
-      margin-bottom: 0.25rem;
-    }
-
-    .sig-timeline__title {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 0.25rem;
-    }
-
-    .sig-timeline__body {
-      font-size: 0.875rem;
-      color: #4b5563;
-    }
-
-    .sig-timeline__body p {
-      margin: 0;
-    }
-  `],
-})
+  })
 export class SigTimelineComponent {
   readonly items = contentChildren(SigTimelineItemDirective);
   
