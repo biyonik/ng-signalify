@@ -37,6 +37,40 @@ export interface ToastConfig {
   };
 }
 
+/**
+ * TR: Toast servis yapılandırması.
+ *
+ * EN: Toast service configuration.
+ */
+export interface ToastServiceConfig {
+  /**
+   * TR: Ekranda gösterilebilecek maksimum toast sayısı.
+   * Limit aşılırsa en eski toast otomatik silinir.
+   *
+   * EN: Maximum number of toasts that can be shown on screen.
+   * If limit is exceeded, oldest toast is automatically dismissed.
+   */
+  maxToasts?: number;
+
+  /**
+   * TR: Kuyruk modu aktif mi?
+   * Aktifse, limit aşıldığında yeni toast'lar kuyruğa alınır.
+   * Değilse, en eski toast silinir.
+   *
+   * EN: Is queue mode enabled?
+   * If enabled, new toasts are queued when limit is exceeded.
+   * Otherwise, oldest toast is dismissed.
+   */
+  queueMode?: boolean;
+
+  /**
+   * TR: Varsayılan toast süresi (ms).
+   *
+   * EN: Default toast duration (ms).
+   */
+  defaultDuration?: number;
+}
+
 /** Toast item */
 export interface Toast extends Required<Omit<ToastConfig, 'action'>> {
   action?: ToastConfig['action'];
@@ -52,6 +86,9 @@ export class ToastService {
   private counter = 0;
 
   readonly toasts = this._toasts.asReadonly();
+
+  private timers = new Map<string, ReturnType<typeof setTimeout>>();
+
 
   /** Show toast */
   show(config: ToastConfig): string {

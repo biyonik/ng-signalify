@@ -182,6 +182,7 @@ export interface EnhancedFormState<T extends Record<string, unknown>> {
   validateAll: () => Promise<boolean>;
   markDirty: (name: keyof T) => void;
   markPristine: () => void;
+  destroy: () => void;
 
   history?: FormHistory<T>;
   dependencies: DependencyResolver;
@@ -210,6 +211,9 @@ export function createEnhancedForm<T extends Record<string, unknown>>(
     history: enableHistory = false,
     historyOptions = {},
   } = options;
+
+  const effectRefs: Array<{ destroy: () => void }> = [];
+
 
   // TR: Zod şemasını inşa et
   // EN: Build Zod schema
@@ -269,12 +273,13 @@ export function createEnhancedForm<T extends Record<string, unknown>>(
 
       // TR: Değer değişince asenkron validasyonu tetikle (Effect)
       // EN: Trigger async validation on value change (Effect)
-      effect(() => {
+      const asyncEffect = effect(() => {
         const v = value();
         if (touched()) {
           asyncValidator.validate(v);
         }
       });
+      effectRefs.push(asyncEffect);
     }
 
     // TR: Dirty (Kirli) Kontrolü
@@ -348,7 +353,7 @@ export function createEnhancedForm<T extends Record<string, unknown>>(
 
   // TR: Bağımlılık sonuçlarını (görünürlük/aktiflik) alanlara yansıt
   // EN: Reflect dependency results (visibility/enabled) to fields
-  effect(() => {
+  const dependencyEffect = effect(() => {
     for (const field of fields) {
       const state = dependencies.getState(field.name);
       const fv = formFields[field.name as keyof T];
@@ -358,6 +363,7 @@ export function createEnhancedForm<T extends Record<string, unknown>>(
       }
     }
   });
+  effectRefs.push(dependencyEffect);
 
   // TR: Çapraz Validasyon Hataları
   // EN: Cross-Validation Errors
@@ -502,11 +508,29 @@ export function createEnhancedForm<T extends Record<string, unknown>>(
 
     // TR: Değişiklikleri tarihçeye kaydet
     // EN: Save changes to history
-    effect(() => {
+    const historyEffect = effect(() => {
       const currentValues = values();
       formHistory!.push(deepClone(currentValues));
     });
+    effectRefs.push(historyEffect);
   }
+
+  const destroy = () => {
+    // Effect'leri temizle
+    for (const effectRef of effectRefs) {
+      effectRef.destroy();
+    }
+
+    // Async validator'ları iptal et ve temizle
+    for (const [, validator] of asyncValidators) {
+      validator.cancel();
+      validator.reset();
+    }
+    asyncValidators.clear();
+
+    // Dependency resolver'ı temizle
+    dependencies.cleanup();
+  };
 
   return {
     fields: formFields,
@@ -531,5 +555,6 @@ export function createEnhancedForm<T extends Record<string, unknown>>(
     markPristine,
     history: formHistory,
     dependencies,
+    destroy
   };
 }

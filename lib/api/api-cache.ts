@@ -368,14 +368,152 @@ export class ApiCache {
     }
   }
 
+  /**
+   * TR: LocalStorage'dan süresi dolmuş kayıtları temizler.
+   *
+   * EN: Clears expired entries from LocalStorage.
+   */
+  private clearExpiredFromStorage(): number {
+    if (typeof localStorage === 'undefined') return 0;
+
+    const now = Date.now();
+    let cleared = 0;
+
+    try {
+      const keys = Object.keys(localStorage).filter((k) =>
+        k.startsWith(this.config.storagePrefix)
+      );
+
+      for (const storageKey of keys) {
+        try {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) {
+            const entry = JSON.parse(raw) as CacheEntry<unknown>;
+            if (now > entry.expiresAt) {
+              localStorage.removeItem(storageKey);
+              const key = storageKey.replace(this.config.storagePrefix, '');
+              this.cache.delete(key);
+              cleared++;
+            }
+          }
+        } catch {
+          localStorage.removeItem(storageKey);
+          cleared++;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to clear expired from storage:', e);
+    }
+
+    if (cleared > 0) {
+      this.updateStats({ entries: this.cache.size });
+    }
+
+    return cleared;
+  }
+
+  /**
+   * TR: LocalStorage'dan en eski kayıtları siler (LRU).
+   *
+   * EN: Evicts oldest entries from LocalStorage (LRU).
+   *
+   * @param fraction - TR: Silinecek oran (0-1 arası). / EN: Fraction to evict (0-1).
+   */
+  private evictOldestFromStorage(fraction: number): number {
+    if (typeof localStorage === 'undefined') return 0;
+
+    try {
+      const entries: Array<{ key: string; timestamp: number }> = [];
+      const keys = Object.keys(localStorage).filter((k) =>
+        k.startsWith(this.config.storagePrefix)
+      );
+
+      for (const storageKey of keys) {
+        try {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) {
+            const entry = JSON.parse(raw) as CacheEntry<unknown>;
+            entries.push({ key: storageKey, timestamp: entry.timestamp });
+          }
+        } catch {
+          entries.push({ key: storageKey, timestamp: 0 });
+        }
+      }
+
+      entries.sort((a, b) => a.timestamp - b.timestamp);
+
+      // Belirtilen oranı sil
+      const toEvict = Math.max(1, Math.floor(entries.length * fraction));
+      let evicted = 0;
+
+      for (let i = 0; i < toEvict && i < entries.length; i++) {
+        const storageKey = entries[i].key;
+        localStorage.removeItem(storageKey);
+        
+        // In-memory cache'den de sil
+        const key = storageKey.replace(this.config.storagePrefix, '');
+        this.cache.delete(key);
+        evicted++;
+      }
+
+      if (evicted > 0) {
+        this.updateStats({ entries: this.cache.size });
+      }
+
+      return evicted;
+    } catch (e) {
+      console.warn('Failed to evict from storage:', e);
+      return 0;
+    }
+  }
+
+  /**
+   * TR: Veriyi LocalStorage'a kaydeder.
+   * Kota aşımında (QuotaExceededError) eski kayıtları temizleyip tekrar dener.
+   *
+   * EN: Saves data to LocalStorage.
+   * On quota exceeded (QuotaExceededError), clears old entries and retries.
+   */
   private saveToStorage<T>(key: string, entry: CacheEntry<T>): void {
     if (typeof localStorage === 'undefined') return;
 
+    const storageKey = this.config.storagePrefix + key;
+    const data = JSON.stringify(entry);
+
     try {
-      const storageKey = this.config.storagePrefix + key;
-      localStorage.setItem(storageKey, JSON.stringify(entry));
+      localStorage.setItem(storageKey, data);
     } catch (e) {
-      console.warn('Failed to save cache to storage:', e);
+      if (e instanceof DOMException && (e.name === 'QuotaExceededError' || e.code === 22)) {
+        console.warn('Storage quota exceeded, attempting cleanup...');
+        
+        this.clearExpiredFromStorage();
+        
+        try {
+          localStorage.setItem(storageKey, data);
+          return; 
+        } catch {
+          // Hala yer yok, daha agresif temizlik yap
+        }
+
+        this.evictOldestFromStorage(0.25);
+        
+        try {
+          localStorage.setItem(storageKey, data);
+          return; // Başarılı
+        } catch {
+          // Son çare: bu namespace'deki tüm cache'i temizle
+          console.warn('Storage still full, clearing all cache entries');
+          this.clearStorage();
+          
+          try {
+            localStorage.setItem(storageKey, data);
+          } catch {
+            console.error('Storage quota exceeded, cache will not persist');
+          }
+        }
+      } else {
+        console.warn('Failed to save cache to storage:', e);
+      }
     }
   }
 
