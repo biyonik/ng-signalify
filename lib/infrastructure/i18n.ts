@@ -285,6 +285,8 @@ export function createI18n(config: I18nConfig): I18nState {
   const currentLocale = signal<Locale>(savedLocale ?? defaultLocale);
   const loadedLocales = signal<Set<Locale>>(new Set(Object.keys(initialTranslations)));
 
+  const loadingPromises = new Map<Locale, Promise<void>>();
+
   // Computed
   const availableLocales = computed(() => Object.keys(translations()));
   const isLoaded = computed(() => loadedLocales().has(currentLocale()));
@@ -375,13 +377,26 @@ export function createI18n(config: I18nConfig): I18nState {
     return value;
   };
 
+  /**
+   * TR: Dili değiştirir.
+   * Dil yüklü değilse ve loader sağlanmışsa otomatik yükler.
+   *
+   * EN: Sets the locale.
+   * Auto-loads if locale is not loaded and loader is provided.
+   */
   const setLocale = (locale: Locale) => {
-    // TR: Dil yüklüyse veya fallback ise değiştir
-    // EN: Change if locale is loaded or fallback
+    // TR: Dil zaten yüklüyse veya fallback ise hemen değiştir
+    // EN: Change immediately if locale is loaded or fallback
     if (translations()[locale] || locale === fallbackLocale) {
       currentLocale.set(locale);
+    } else if (loadingPromises.has(locale)) {
+      // TR: Yükleme devam ediyorsa, tamamlandığında değiştir
+      // EN: If loading in progress, change when completed
+      loadingPromises.get(locale)?.then(() => {
+        currentLocale.set(locale);
+      });
     } else {
-      console.warn(`Locale "${locale}" not available`);
+      console.warn(`Locale "${locale}" not available. Use loadTranslations() first.`);
     }
   };
 
@@ -402,14 +417,45 @@ export function createI18n(config: I18nConfig): I18nState {
     loadedLocales.update((s) => new Set([...s, locale]));
   };
 
+  /**
+   * TR: Çevirileri asenkron olarak yükler (Lazy Loading).
+   * Eşzamanlı çağrıları tek bir request'e birleştirir (Deduplication).
+   *
+   * EN: Loads translations asynchronously (Lazy Loading).
+   * Deduplicates concurrent calls into a single request.
+   */
   const loadTranslations = async (
     locale: Locale,
     loader: () => Promise<TranslationDictionary>
   ): Promise<void> => {
-    if (loadedLocales().has(locale)) return;
+    // TR: Zaten yüklüyse atla
+    // EN: Skip if already loaded
+    if (loadedLocales().has(locale)) {
+      return;
+    }
 
-    const newTranslations = await loader();
-    addTranslations(locale, newTranslations);
+    // TR: Zaten bir yükleme devam ediyorsa, ona bağlan (Race condition fix)
+    // EN: If loading is already in progress, join it (Race condition fix)
+    const existingPromise = loadingPromises.get(locale);
+    if (existingPromise) {
+      return existingPromise;
+    }
+
+    // TR: Yeni yükleme başlat ve Map'e kaydet
+    // EN: Start new loading and save to Map
+    const loadPromise = (async () => {
+      try {
+        const newTranslations = await loader();
+        addTranslations(locale, newTranslations);
+      } finally {
+        // TR: Tamamlandığında Map'ten sil
+        // EN: Remove from Map when completed
+        loadingPromises.delete(locale);
+      }
+    })();
+
+    loadingPromises.set(locale, loadPromise);
+    return loadPromise;
   };
 
   const getTranslations = (locale?: Locale): TranslationDictionary => {
