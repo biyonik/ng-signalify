@@ -7,8 +7,9 @@ import {
   ElementRef,
   OnDestroy,
   HostListener,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 
 /**
  * SigPopover - Signal-based popover component
@@ -42,6 +43,13 @@ export class SigPopoverDirective implements OnDestroy {
   private popoverElement: HTMLDivElement | null = null;
   private isOpen = false;
 
+  private document: Document = inject(DOCUMENT);
+  private platformId: Object = inject(PLATFORM_ID);
+
+  private get isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
+  }
+
   @HostListener('click')
   onClick(): void {
     if (this.trigger() === 'click' && !this.disabled()) {
@@ -51,7 +59,7 @@ export class SigPopoverDirective implements OnDestroy {
 
   @HostListener('mouseenter')
   onMouseEnter(): void {
-    if (this.trigger() === 'hover' && !this.disabled()) {
+    if (this.trigger() === 'hover' && !this.disabled() && this.isBrowser) {
       this.show();
     }
   }
@@ -65,6 +73,8 @@ export class SigPopoverDirective implements OnDestroy {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
+    if (!this.isBrowser) return;
+
     if (
       this.isOpen &&
       this.closeOnOutsideClick() &&
@@ -80,20 +90,22 @@ export class SigPopoverDirective implements OnDestroy {
   }
 
   show(): void {
-    if (this.isOpen) return;
+   if (this.isOpen || !this.isBrowser) return;
 
-    this.popoverElement = document.createElement('div');
+    this.popoverElement = this.document.createElement('div');
     this.popoverElement.className = `sig-popover sig-popover--${this.position()}`;
 
     const content = this.content();
     if (typeof content === 'string') {
       this.popoverElement.textContent = content;
     } else {
-      // Template rendering would require ViewContainerRef in real implementation
-      this.popoverElement.innerHTML = '<div class="sig-popover__content">[Template Content]</div>';
+      // Not: TemplateRef render işlemi için ViewContainerRef gerekir.
+      // Basitleştirmek adına şimdilik string desteği veya placeholder koyuyoruz.
+      // Gerçek implementasyonda Overlay CDK kullanımı önerilir.
+      this.popoverElement.innerHTML = '<div class="sig-popover__content">Template Content</div>';
     }
 
-    document.body.appendChild(this.popoverElement);
+    this.document.body.appendChild(this.popoverElement);
     this.updatePosition();
     this.isOpen = true;
     this.opened.emit();
@@ -111,12 +123,13 @@ export class SigPopoverDirective implements OnDestroy {
   }
 
   private updatePosition(): void {
-    if (!this.popoverElement) return;
+    if (!this.popoverElement || !this.isBrowser) return;
 
     const hostRect = this.elementRef.nativeElement.getBoundingClientRect();
     const popoverRect = this.popoverElement.getBoundingClientRect();
     const pos = this.position();
     const offset = this.offset();
+    const win = this.document.defaultView || window;
 
     let top = 0;
     let left = 0;
@@ -140,12 +153,11 @@ export class SigPopoverDirective implements OnDestroy {
         break;
     }
 
-    // Keep within viewport
-    top = Math.max(8, Math.min(top, window.innerHeight - popoverRect.height - 8));
-    left = Math.max(8, Math.min(left, window.innerWidth - popoverRect.width - 8));
+    top = Math.max(8, Math.min(top, win.innerHeight - popoverRect.height - 8));
+    left = Math.max(8, Math.min(left, win.innerWidth - popoverRect.width - 8));
 
-    this.popoverElement.style.top = `${top + window.scrollY}px`;
-    this.popoverElement.style.left = `${left + window.scrollX}px`;
+    this.popoverElement.style.top = `${top + win.scrollY}px`;
+    this.popoverElement.style.left = `${left + win.scrollX}px`;
   }
 
   ngOnDestroy(): void {

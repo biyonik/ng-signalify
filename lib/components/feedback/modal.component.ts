@@ -8,8 +8,10 @@ import {
   Injectable,
   HostListener,
   ViewEncapsulation,
+  inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 /** Modal configuration */
 export interface ModalConfig {
@@ -159,6 +161,7 @@ export class SigModalComponent {
 @Injectable({ providedIn: 'root' })
 export class ModalService {
   private readonly _modals = signal<Map<string, boolean>>(new Map());
+  private readonly platformId = inject(PLATFORM_ID);
 
   open(id: string): void {
     this._modals.update((m) => new Map(m).set(id, true));
@@ -181,6 +184,9 @@ export class ModalService {
   }
 
   async confirm(message: string, title = 'Onay'): Promise<boolean> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return false;
+    }
     return new Promise((resolve) => {
       const result = window.confirm(`${title}\n\n${message}`);
       resolve(result);
@@ -188,6 +194,9 @@ export class ModalService {
   }
 
   async alert(message: string, title = 'Uyarı'): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
     return new Promise((resolve) => {
       window.alert(`${title}\n\n${message}`);
       resolve();
