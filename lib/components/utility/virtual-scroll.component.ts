@@ -12,8 +12,10 @@ import {
   contentChild,
   Directive,
   ViewEncapsulation,
+  PLATFORM_ID,
+  inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Directive({
   selector: '[sigVirtualItem]',
@@ -42,7 +44,7 @@ export class SigVirtualItemDirective {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None, // CSS refactoring sonrası
   template: `
     <div 
       class="sig-virtual-scroll"
@@ -83,11 +85,12 @@ export class SigVirtualItemDirective {
         </div>
       }
     </div>
-  `,
-  })
+  `
+})
 export class SigVirtualScrollComponent<T = any> {
   readonly viewport = viewChild<ElementRef>('viewport');
   readonly itemTemplate = contentChild(SigVirtualItemDirective);
+  readonly platformId = inject(PLATFORM_ID);
 
   readonly items = input.required<T[]>();
   readonly itemHeight = input<number>(48);
@@ -143,19 +146,22 @@ export class SigVirtualScrollComponent<T = any> {
   }
 
   onScroll(): void {
+    // SSR Koruması
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const el = this.viewport()?.nativeElement;
     if (!el) return;
 
     this.scrollTop.set(el.scrollTop);
 
-    // Check if scrolled to bottom
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
       this.scrollEnd.emit();
     }
   }
 
-  // Public API
   scrollToIndex(index: number, behavior: ScrollBehavior = 'auto'): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const el = this.viewport()?.nativeElement;
     if (!el) return;
 

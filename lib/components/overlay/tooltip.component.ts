@@ -1,3 +1,4 @@
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import {
   Directive,
   input,
@@ -5,6 +6,7 @@ import {
   inject,
   OnDestroy,
   HostListener,
+  PLATFORM_ID,
 } from '@angular/core';
 
 /**
@@ -28,6 +30,13 @@ export class SigTooltipDirective implements OnDestroy {
   private readonly elementRef = inject(ElementRef);
   private tooltipElement: HTMLDivElement | null = null;
   private showTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  private document: Document = inject(DOCUMENT);
+  private platformId: Object = inject(PLATFORM_ID);
+
+  private get isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
+  }
 
   @HostListener('mouseenter')
   onMouseEnter(): void {
@@ -55,12 +64,11 @@ export class SigTooltipDirective implements OnDestroy {
   }
 
   private show(): void {
-    if (this.tooltipElement) return;
-
-    this.tooltipElement = document.createElement('div');
+    if (!this.isBrowser || this.tooltipElement) return;
+    this.tooltipElement = this.document.createElement('div');
     this.tooltipElement.className = `sig-tooltip sig-tooltip--${this.position()}`;
     this.tooltipElement.textContent = this.content();
-    document.body.appendChild(this.tooltipElement);
+    this.document.body.appendChild(this.tooltipElement);
 
     this.updatePosition();
   }
@@ -108,8 +116,9 @@ export class SigTooltipDirective implements OnDestroy {
     }
 
     // Keep within viewport
-    top = Math.max(8, Math.min(top, window.innerHeight - tooltipRect.height - 8));
-    left = Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8));
+    const win = this.document.defaultView || window;
+    top = Math.max(8, Math.min(top, win.innerHeight - tooltipRect.height - 8));
+    left = Math.max(8, Math.min(left, win.innerWidth - tooltipRect.width - 8));
 
     this.tooltipElement.style.top = `${top + window.scrollY}px`;
     this.tooltipElement.style.left = `${left + window.scrollX}px`;
