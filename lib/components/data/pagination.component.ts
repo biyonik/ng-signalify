@@ -1,26 +1,15 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
   ChangeDetectionStrategy,
   computed,
-  signal,
+  input,
+  output,
+  model,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
- * SigPagination - Pagination controls
- * 
- * Usage:
- * <sig-pagination
- *   [page]="currentPage"
- *   [pageSize]="pageSize"
- *   [total]="totalItems"
- *   [pageSizeOptions]="[10, 20, 50, 100]"
- *   (pageChange)="onPageChange($event)"
- *   (pageSizeChange)="onPageSizeChange($event)"
- * />
+ * SigPagination - Signal-based pagination controls
  */
 @Component({
   selector: 'sig-pagination',
@@ -28,25 +17,23 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="sig-pagination" [class.sig-pagination--compact]="compact">
-      <!-- Info -->
-      @if (showInfo) {
+    <div class="sig-pagination" [class.sig-pagination--compact]="compact()">
+      @if (showInfo()) {
         <div class="sig-pagination__info">
           {{ infoText() }}
         </div>
       }
 
-      <!-- Page size selector -->
-      @if (showPageSize && pageSizeOptions.length > 0) {
+      @if (showPageSize() && pageSizeOptions().length > 0) {
         <div class="sig-pagination__size">
           <label>
             <span class="sig-pagination__size-label">Sayfa başına:</span>
             <select
-              [value]="pageSize"
-              (change)="onPageSizeChange($event)"
+              [value]="pageSize()"
+              (change)="onPageSizeSelect($event)"
               class="sig-pagination__size-select"
             >
-              @for (size of pageSizeOptions; track size) {
+              @for (size of pageSizeOptions(); track size) {
                 <option [value]="size">{{ size }}</option>
               }
             </select>
@@ -54,42 +41,38 @@ import { CommonModule } from '@angular/common';
         </div>
       }
 
-      <!-- Navigation -->
       <div class="sig-pagination__nav">
-        <!-- First -->
-        @if (showFirstLast) {
+        @if (showFirstLast()) {
           <button
             type="button"
             class="sig-pagination__btn"
             [disabled]="!hasPrev()"
             (click)="goFirst()"
-            [title]="'İlk sayfa'"
+            title="İlk sayfa"
           >
             ««
           </button>
         }
 
-        <!-- Previous -->
         <button
           type="button"
           class="sig-pagination__btn"
           [disabled]="!hasPrev()"
           (click)="goPrev()"
-          [title]="'Önceki sayfa'"
+          title="Önceki sayfa"
         >
           ‹
         </button>
 
-        <!-- Page buttons -->
-        @if (!compact) {
-          @for (p of visiblePages(); track p) {
+        @if (!compact()) {
+          @for (p of visiblePages(); track $index) {
             @if (p === -1) {
               <span class="sig-pagination__ellipsis">...</span>
             } @else {
               <button
                 type="button"
                 class="sig-pagination__btn sig-pagination__btn--page"
-                [class.sig-pagination__btn--active]="p === page"
+                [class.sig-pagination__btn--active]="p === page()"
                 (click)="goTo(p)"
               >
                 {{ p }}
@@ -98,29 +81,27 @@ import { CommonModule } from '@angular/common';
           }
         } @else {
           <span class="sig-pagination__current">
-            {{ page }} / {{ totalPages() }}
+            {{ page() }} / {{ totalPages() }}
           </span>
         }
 
-        <!-- Next -->
         <button
           type="button"
           class="sig-pagination__btn"
           [disabled]="!hasNext()"
           (click)="goNext()"
-          [title]="'Sonraki sayfa'"
+          title="Sonraki sayfa"
         >
           ›
         </button>
 
-        <!-- Last -->
-        @if (showFirstLast) {
+        @if (showFirstLast()) {
           <button
             type="button"
             class="sig-pagination__btn"
             [disabled]="!hasNext()"
             (click)="goLast()"
-            [title]="'Son sayfa'"
+            title="Son sayfa"
           >
             »»
           </button>
@@ -221,43 +202,46 @@ import { CommonModule } from '@angular/common';
   `],
 })
 export class SigPaginationComponent {
-  @Input() page = 1;
-  @Input() pageSize = 10;
-  @Input() total = 0;
-  @Input() pageSizeOptions: number[] = [10, 20, 50, 100];
-  @Input() maxButtons = 5;
-  @Input() showInfo = true;
-  @Input() showPageSize = true;
-  @Input() showFirstLast = true;
-  @Input() compact = false;
+  // Inputs
+  readonly page = model<number>(1);
+  readonly pageSize = model<number>(10);
+  readonly total = input<number>(0);
+  readonly pageSizeOptions = input<number[]>([10, 20, 50, 100]);
+  readonly maxButtons = input<number>(5);
+  readonly showInfo = input<boolean>(true);
+  readonly showPageSize = input<boolean>(true);
+  readonly showFirstLast = input<boolean>(true);
+  readonly compact = input<boolean>(false);
 
-  @Output() pageChange = new EventEmitter<number>();
-  @Output() pageSizeChanged = new EventEmitter<number>();
+  // Outputs
+  readonly pageSizeChanged = output<number>();
 
-  totalPages = computed(() => {
-    return this.pageSize > 0 ? Math.ceil(this.total / this.pageSize) : 0;
+  // Computed
+  readonly totalPages = computed(() => {
+    const size = this.pageSize();
+    return size > 0 ? Math.ceil(this.total() / size) : 0;
   });
 
-  startIndex = computed(() => {
-    return (this.page - 1) * this.pageSize + 1;
+  readonly startIndex = computed(() => {
+    return (this.page() - 1) * this.pageSize() + 1;
   });
 
-  endIndex = computed(() => {
-    return Math.min(this.page * this.pageSize, this.total);
+  readonly endIndex = computed(() => {
+    return Math.min(this.page() * this.pageSize(), this.total());
   });
 
-  infoText = computed(() => {
-    if (this.total === 0) return 'Kayıt bulunamadı';
-    return `${this.startIndex()} - ${this.endIndex()} / ${this.total} kayıt`;
+  readonly infoText = computed(() => {
+    if (this.total() === 0) return 'Kayıt bulunamadı';
+    return `${this.startIndex()} - ${this.endIndex()} / ${this.total()} kayıt`;
   });
 
-  hasPrev = computed(() => this.page > 1);
-  hasNext = computed(() => this.page < this.totalPages());
+  readonly hasPrev = computed(() => this.page() > 1);
+  readonly hasNext = computed(() => this.page() < this.totalPages());
 
-  visiblePages = computed(() => {
+  readonly visiblePages = computed(() => {
     const total = this.totalPages();
-    const current = this.page;
-    const max = this.maxButtons;
+    const current = this.page();
+    const max = this.maxButtons();
 
     if (total <= max) {
       return Array.from({ length: total }, (_, i) => i + 1);
@@ -273,56 +257,49 @@ export class SigPaginationComponent {
       start = Math.max(1, end - max + 1);
     }
 
-    // Always show first page
     if (start > 1) {
       pages.push(1);
-      if (start > 2) {
-        pages.push(-1); // Ellipsis
-      }
+      if (start > 2) pages.push(-1);
     }
 
-    // Middle pages
     for (let i = start; i <= end; i++) {
-      if (!pages.includes(i)) {
-        pages.push(i);
-      }
+      if (!pages.includes(i)) pages.push(i);
     }
 
-    // Always show last page
     if (end < total) {
-      if (end < total - 1) {
-        pages.push(-1); // Ellipsis
-      }
+      if (end < total - 1) pages.push(-1);
       pages.push(total);
     }
 
     return pages;
   });
 
-  goTo(page: number) {
-    if (page >= 1 && page <= this.totalPages() && page !== this.page) {
-      this.pageChange.emit(page);
+  goTo(pageNum: number): void {
+    if (pageNum >= 1 && pageNum <= this.totalPages() && pageNum !== this.page()) {
+      this.page.set(pageNum);
     }
   }
 
-  goFirst() {
+  goFirst(): void {
     this.goTo(1);
   }
 
-  goLast() {
+  goLast(): void {
     this.goTo(this.totalPages());
   }
 
-  goPrev() {
-    this.goTo(this.page - 1);
+  goPrev(): void {
+    this.goTo(this.page() - 1);
   }
 
-  goNext() {
-    this.goTo(this.page + 1);
+  goNext(): void {
+    this.goTo(this.page() + 1);
   }
 
-  onPageSizeChange(event: Event) {
+  onPageSizeSelect(event: Event): void {
     const value = Number((event.target as HTMLSelectElement).value);
+    this.pageSize.set(value);
     this.pageSizeChanged.emit(value);
+    this.page.set(1); // Reset to first page
   }
 }

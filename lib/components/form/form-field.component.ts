@@ -1,25 +1,13 @@
 import {
   Component,
-  Input,
-  Signal,
-  computed,
   ChangeDetectionStrategy,
+  computed,
+  input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
- * FormField - Field wrapper with label, error, hint
- * 
- * Usage:
- * <sig-form-field 
- *   label="E-posta" 
- *   [error]="form.fields.email.combinedError()"
- *   [touched]="form.fields.email.touched()"
- *   [required]="true"
- *   hint="Geçerli bir e-posta adresi girin"
- * >
- *   <input type="email" ... />
- * </sig-form-field>
+ * FormField - Signal-based form field wrapper
  */
 @Component({
   selector: 'sig-form-field',
@@ -30,12 +18,12 @@ import { CommonModule } from '@angular/common';
     <div 
       class="sig-form-field"
       [class.sig-form-field--error]="showError()"
-      [class.sig-form-field--disabled]="disabled"
+      [class.sig-form-field--disabled]="disabled()"
     >
-      @if (label) {
+      @if (label()) {
         <label class="sig-form-field__label">
-          {{ label }}
-          @if (required) {
+          {{ label() }}
+          @if (required()) {
             <span class="sig-form-field__required">*</span>
           }
         </label>
@@ -44,26 +32,26 @@ import { CommonModule } from '@angular/common';
       <div class="sig-form-field__control">
         <ng-content></ng-content>
         
-        @if (loading) {
+        @if (loading()) {
           <span class="sig-form-field__loading">
             <span class="sig-form-field__spinner"></span>
           </span>
         }
       </div>
 
-      @if (showError() && error) {
+      @if (showError() && error()) {
         <div class="sig-form-field__error">
-          {{ error }}
+          {{ error() }}
         </div>
-      } @else if (hint) {
+      } @else if (hint()) {
         <div class="sig-form-field__hint">
-          {{ hint }}
+          {{ hint() }}
         </div>
       }
 
-      @if (charCount !== null && maxLength) {
+      @if (charCount() !== null && maxLength()) {
         <div class="sig-form-field__counter">
-          {{ charCount }} / {{ maxLength }}
+          {{ charCount() }} / {{ maxLength() }}
         </div>
       }
     </div>
@@ -168,15 +156,15 @@ import { CommonModule } from '@angular/common';
   `],
 })
 export class FormFieldComponent {
-  @Input() label = '';
-  @Input() error: string | null = null;
-  @Input() touched = false;
-  @Input() required = false;
-  @Input() disabled = false;
-  @Input() loading = false;
-  @Input() hint = '';
-  @Input() charCount: number | null = null;
-  @Input() maxLength: number | null = null;
+  readonly label = input<string>('');
+  readonly error = input<string | null>(null);
+  readonly touched = input<boolean>(false);
+  readonly required = input<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly loading = input<boolean>(false);
+  readonly hint = input<string>('');
+  readonly charCount = input<number | null>(null);
+  readonly maxLength = input<number | null>(null);
 
-  showError = computed(() => this.touched && this.error !== null);
+  readonly showError = computed(() => this.touched() && this.error() !== null);
 }

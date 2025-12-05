@@ -1,16 +1,13 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
   ChangeDetectionStrategy,
   signal,
   computed,
-  ContentChildren,
-  QueryList,
+  input,
+  output,
+  contentChildren,
   TemplateRef,
   Directive,
-  ContentChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -47,29 +44,13 @@ export interface TableSelectionEvent<T> {
   standalone: true,
 })
 export class SigColumnDirective {
-  @Input('sigColumn') name = '';
-  @Input() header?: TemplateRef<unknown>;
-  @Input() cell?: TemplateRef<unknown>;
+  readonly name = input.required<string>({ alias: 'sigColumn' });
+  readonly header = input<TemplateRef<unknown>>();
+  readonly cell = input<TemplateRef<unknown>>();
 }
 
 /**
- * SigTable - Data table with sorting, selection
- * 
- * Usage:
- * <sig-table
- *   [data]="users"
- *   [columns]="columns"
- *   [selectable]="true"
- *   [sortColumn]="sortColumn"
- *   [sortDirection]="sortDirection"
- *   (sort)="onSort($event)"
- *   (selectionChange)="onSelectionChange($event)"
- *   (rowClick)="onRowClick($event)"
- * >
- *   <ng-template sigColumn="actions" let-row>
- *     <button (click)="edit(row)">Düzenle</button>
- *   </ng-template>
- * </sig-table>
+ * SigTable - Signal-based data table
  */
 @Component({
   selector: 'sig-table',
@@ -77,17 +58,17 @@ export class SigColumnDirective {
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="sig-table-wrapper" [class.sig-table-wrapper--loading]="loading">
-      @if (loading) {
+    <div class="sig-table-wrapper" [class.sig-table-wrapper--loading]="loading()">
+      @if (loading()) {
         <div class="sig-table__loading">
           <div class="sig-table__spinner"></div>
         </div>
       }
 
-      <table class="sig-table" [class.sig-table--striped]="striped" [class.sig-table--bordered]="bordered">
+      <table class="sig-table" [class.sig-table--striped]="striped()" [class.sig-table--bordered]="bordered()">
         <thead class="sig-table__head">
           <tr>
-            @if (selectable) {
+            @if (selectable()) {
               <th class="sig-table__th sig-table__th--checkbox" style="width: 40px">
                 <input
                   type="checkbox"
@@ -98,21 +79,21 @@ export class SigColumnDirective {
               </th>
             }
 
-            @for (col of columns; track col.key) {
+            @for (col of columns(); track col.key) {
               <th 
                 class="sig-table__th"
                 [class.sig-table__th--sortable]="col.sortable"
                 [class]="col.headerClass"
                 [style.width]="col.width"
                 [style.text-align]="col.align || 'left'"
-                (click)="col.sortable && onSort(col.key)"
+                (click)="col.sortable && onSortColumn(col.key)"
               >
                 <div class="sig-table__th-content">
                   <span>{{ col.label }}</span>
                   @if (col.sortable) {
                     <span class="sig-table__sort-icon">
-                      @if (sortColumn === col.key) {
-                        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                      @if (sortColumn() === col.key) {
+                        {{ sortDirection() === 'asc' ? '↑' : '↓' }}
                       } @else {
                         ↕
                       }
@@ -125,14 +106,14 @@ export class SigColumnDirective {
         </thead>
 
         <tbody class="sig-table__body">
-          @for (row of data; track trackByFn(row); let i = $index) {
+          @for (row of data(); track trackByFn(row); let i = $index) {
             <tr 
               class="sig-table__row"
               [class.sig-table__row--selected]="isSelected(row)"
-              [class.sig-table__row--clickable]="rowClickable"
-              (click)="onRowClick(row, $event)"
+              [class.sig-table__row--clickable]="rowClickable()"
+              (click)="onRowClicked(row, $event)"
             >
-              @if (selectable) {
+              @if (selectable()) {
                 <td class="sig-table__td sig-table__td--checkbox">
                   <input
                     type="checkbox"
@@ -143,7 +124,7 @@ export class SigColumnDirective {
                 </td>
               }
 
-              @for (col of columns; track col.key) {
+              @for (col of columns(); track col.key) {
                 <td 
                   class="sig-table__td"
                   [class]="col.cellClass"
@@ -161,9 +142,9 @@ export class SigColumnDirective {
             </tr>
           } @empty {
             <tr class="sig-table__row--empty">
-              <td [attr.colspan]="columns.length + (selectable ? 1 : 0)" class="sig-table__td">
+              <td [attr.colspan]="columns().length + (selectable() ? 1 : 0)" class="sig-table__td">
                 <div class="sig-table__empty">
-                  {{ emptyText }}
+                  {{ emptyText() }}
                 </div>
               </td>
             </tr>
@@ -290,55 +271,60 @@ export class SigColumnDirective {
   `],
 })
 export class SigTableComponent<T extends Record<string, unknown>> {
-  @ContentChildren(SigColumnDirective) columnTemplates!: QueryList<SigColumnDirective>;
+  // Content queries
+  readonly columnTemplates = contentChildren(SigColumnDirective);
 
-  @Input() data: T[] = [];
-  @Input() columns: TableColumn<T>[] = [];
-  @Input() selectable = false;
-  @Input() selected: T[] = [];
-  @Input() sortColumn: string | null = null;
-  @Input() sortDirection: 'asc' | 'desc' | null = null;
-  @Input() loading = false;
-  @Input() striped = false;
-  @Input() bordered = false;
-  @Input() rowClickable = false;
-  @Input() emptyText = 'Veri bulunamadı';
-  @Input() trackBy: keyof T | ((row: T) => unknown) = 'id' as keyof T;
+  // Inputs
+  readonly data = input<T[]>([]);
+  readonly columns = input<TableColumn<T>[]>([]);
+  readonly selectable = input<boolean>(false);
+  readonly sortColumn = input<string | null>(null);
+  readonly sortDirection = input<'asc' | 'desc' | null>(null);
+  readonly loading = input<boolean>(false);
+  readonly striped = input<boolean>(false);
+  readonly bordered = input<boolean>(false);
+  readonly rowClickable = input<boolean>(false);
+  readonly emptyText = input<string>('Veri bulunamadı');
+  readonly trackBy = input<keyof T | ((row: T) => unknown)>('id' as keyof T);
 
-  @Output() sortChange = new EventEmitter<TableSortEvent>();
-  @Output() selectionChange = new EventEmitter<TableSelectionEvent<T>>();
-  @Output() rowClicked = new EventEmitter<T>();
+  // Outputs
+  readonly sortChange = output<TableSortEvent>();
+  readonly selectionChange = output<TableSelectionEvent<T>>();
+  readonly rowClicked = output<T>();
 
-  private selectedSet = signal(new Set<unknown>());
+  // Internal state
+  private readonly _selectedKeys = signal(new Set<unknown>());
+
+  // Computed
+  readonly isAllSelected = computed(() => {
+    const data = this.data();
+    return data.length > 0 && this._selectedKeys().size === data.length;
+  });
+
+  readonly isIndeterminate = computed(() => {
+    const size = this._selectedKeys().size;
+    return size > 0 && size < this.data().length;
+  });
 
   trackByFn = (row: T): unknown => {
-    if (typeof this.trackBy === 'function') {
-      return this.trackBy(row);
+    const trackBy = this.trackBy();
+    if (typeof trackBy === 'function') {
+      return trackBy(row);
     }
-    return row[this.trackBy];
+    return row[trackBy];
   };
 
   isSelected(row: T): boolean {
-    const key = this.trackByFn(row);
-    return this.selectedSet().has(key);
+    return this._selectedKeys().has(this.trackByFn(row));
   }
 
-  isAllSelected(): boolean {
-    return this.data.length > 0 && this.selectedSet().size === this.data.length;
-  }
-
-  isIndeterminate(): boolean {
-    const size = this.selectedSet().size;
-    return size > 0 && size < this.data.length;
-  }
-
-  onSort(column: string) {
+  onSortColumn(column: string): void {
     let direction: 'asc' | 'desc' | null = 'asc';
 
-    if (this.sortColumn === column) {
-      if (this.sortDirection === 'asc') {
+    if (this.sortColumn() === column) {
+      if (this.sortDirection() === 'asc') {
         direction = 'desc';
-      } else if (this.sortDirection === 'desc') {
+      } else if (this.sortDirection() === 'desc') {
         direction = null;
       }
     }
@@ -346,37 +332,37 @@ export class SigTableComponent<T extends Record<string, unknown>> {
     this.sortChange.emit({ column, direction });
   }
 
-  onSelectRow(row: T, event: Event) {
+  onSelectRow(row: T, event: Event): void {
     event.stopPropagation();
     const key = this.trackByFn(row);
-    const newSet = new Set(this.selectedSet());
+    const newSet = new Set(this._selectedKeys());
 
     if (newSet.has(key)) {
       newSet.delete(key);
-      this.selectedSet.set(newSet);
+      this._selectedKeys.set(newSet);
       this.emitSelection('deselect', row);
     } else {
       newSet.add(key);
-      this.selectedSet.set(newSet);
+      this._selectedKeys.set(newSet);
       this.emitSelection('select', row);
     }
   }
 
-  onSelectAll(event: Event) {
+  onSelectAll(event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      const allKeys = new Set(this.data.map((row) => this.trackByFn(row)));
-      this.selectedSet.set(allKeys);
+      const allKeys = new Set(this.data().map((row) => this.trackByFn(row)));
+      this._selectedKeys.set(allKeys);
       this.emitSelection('selectAll');
     } else {
-      this.selectedSet.set(new Set());
+      this._selectedKeys.set(new Set());
       this.emitSelection('deselectAll');
     }
   }
 
-  onRowClick(row: T, event: Event) {
-    if (this.rowClickable) {
+  onRowClicked(row: T, event: Event): void {
+    if (this.rowClickable()) {
       this.rowClicked.emit(row);
     }
   }
@@ -390,16 +376,16 @@ export class SigTableComponent<T extends Record<string, unknown>> {
   }
 
   getColumnTemplate(key: string): TemplateRef<unknown> | null {
-    const directive = this.columnTemplates?.find((d) => d.name === key);
-    return directive?.cell ?? null;
+    const directive = this.columnTemplates().find((d) => d.name() === key);
+    return directive?.cell() ?? null;
   }
 
   getSelectedRows(): T[] {
-    const selectedKeys = this.selectedSet();
-    return this.data.filter((row) => selectedKeys.has(this.trackByFn(row)));
+    const selectedKeys = this._selectedKeys();
+    return this.data().filter((row) => selectedKeys.has(this.trackByFn(row)));
   }
 
-  private emitSelection(type: TableSelectionEvent<T>['type'], row?: T) {
+  private emitSelection(type: TableSelectionEvent<T>['type'], row?: T): void {
     this.selectionChange.emit({
       selected: this.getSelectedRows(),
       row,
@@ -407,13 +393,13 @@ export class SigTableComponent<T extends Record<string, unknown>> {
     });
   }
 
-  // Public methods
-  clearSelection() {
-    this.selectedSet.set(new Set());
+  // Public API
+  clearSelection(): void {
+    this._selectedKeys.set(new Set());
   }
 
-  selectRows(rows: T[]) {
+  selectRows(rows: T[]): void {
     const keys = new Set(rows.map((row) => this.trackByFn(row)));
-    this.selectedSet.set(keys);
+    this._selectedKeys.set(keys);
   }
 }

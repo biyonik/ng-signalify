@@ -1,30 +1,21 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
-  forwardRef,
   ChangeDetectionStrategy,
+  forwardRef,
   signal,
   computed,
+  input,
+  output,
+  model,
+  viewChild,
   ElementRef,
-  ViewChild,
   AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 /**
- * SigTextarea - Multiline text input
- * 
- * Usage:
- * <sig-textarea
- *   [(value)]="description"
- *   placeholder="Açıklama giriniz..."
- *   [rows]="4"
- *   [maxLength]="500"
- *   [autoResize]="true"
- * />
+ * SigTextarea - Signal-based multiline text input
  */
 @Component({
   selector: 'sig-textarea',
@@ -39,31 +30,31 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     },
   ],
   template: `
-    <div class="sig-textarea" [class.sig-textarea--disabled]="disabled">
+    <div class="sig-textarea" [class.sig-textarea--disabled]="disabled()">
       <textarea
         #textareaRef
-        [value]="value"
-        [placeholder]="placeholder"
-        [disabled]="disabled"
-        [readonly]="readonly"
-        [rows]="rows"
-        [maxlength]="maxLength"
+        [value]="value()"
+        [placeholder]="placeholder()"
+        [disabled]="disabled()"
+        [readonly]="readonly()"
+        [rows]="rows()"
+        [maxlength]="maxLength()"
         (input)="onInput($event)"
         (blur)="onBlur()"
-        (focus)="onFocus()"
+        (focus)="onFocusEvent()"
         class="sig-textarea__field"
-        [class.sig-textarea__field--resize-none]="!resize"
-        [class.sig-textarea__field--resize-vertical]="resize === 'vertical'"
-        [class.sig-textarea__field--resize-horizontal]="resize === 'horizontal'"
+        [class.sig-textarea__field--resize-none]="!resize()"
+        [class.sig-textarea__field--resize-vertical]="resize() === 'vertical'"
+        [class.sig-textarea__field--resize-horizontal]="resize() === 'horizontal'"
       ></textarea>
 
-      @if (showCounter && maxLength) {
+      @if (showCounter() && maxLength()) {
         <div 
           class="sig-textarea__counter"
           [class.sig-textarea__counter--warning]="isNearLimit()"
           [class.sig-textarea__counter--error]="isAtLimit()"
         >
-          {{ charCount() }} / {{ maxLength }}
+          {{ charCount() }} / {{ maxLength() }}
         </div>
       }
     </div>
@@ -100,17 +91,9 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       color: #9ca3af;
     }
 
-    .sig-textarea__field--resize-none {
-      resize: none;
-    }
-
-    .sig-textarea__field--resize-vertical {
-      resize: vertical;
-    }
-
-    .sig-textarea__field--resize-horizontal {
-      resize: horizontal;
-    }
+    .sig-textarea__field--resize-none { resize: none; }
+    .sig-textarea__field--resize-vertical { resize: vertical; }
+    .sig-textarea__field--resize-horizontal { resize: horizontal; }
 
     .sig-textarea--disabled .sig-textarea__field {
       background-color: #f3f4f6;
@@ -126,102 +109,94 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       padding: 0 0.25rem;
     }
 
-    .sig-textarea__counter--warning {
-      color: #f59e0b;
-    }
-
-    .sig-textarea__counter--error {
-      color: #ef4444;
-    }
+    .sig-textarea__counter--warning { color: #f59e0b; }
+    .sig-textarea__counter--error { color: #ef4444; }
   `],
 })
 export class SigTextareaComponent implements ControlValueAccessor, AfterViewInit {
-  @ViewChild('textareaRef') textareaRef!: ElementRef<HTMLTextAreaElement>;
+  readonly textareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('textareaRef');
 
-  @Input() value = '';
-  @Input() placeholder = '';
-  @Input() disabled = false;
-  @Input() readonly = false;
-  @Input() rows = 3;
-  @Input() maxLength: number | null = null;
-  @Input() resize: 'none' | 'vertical' | 'horizontal' | 'both' = 'vertical';
-  @Input() autoResize = false;
-  @Input() showCounter = true;
+  readonly value = model<string>('');
+  readonly placeholder = input<string>('');
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  readonly rows = input<number>(3);
+  readonly maxLength = input<number | null>(null);
+  readonly resize = input<'none' | 'vertical' | 'horizontal' | 'both'>('vertical');
+  readonly autoResize = input<boolean>(false);
+  readonly showCounter = input<boolean>(true);
 
-  @Output() valueChange = new EventEmitter<string>();
-  @Output() focus = new EventEmitter<void>();
-  @Output() blur = new EventEmitter<void>();
+  readonly focus = output<void>();
+  readonly blur = output<void>();
 
-  charCount = signal(0);
+  readonly charCount = signal(0);
 
-  private onChange: (value: string) => void = () => {};
-  private onTouched: () => void = () => {};
+  readonly isNearLimit = computed(() => {
+    const max = this.maxLength();
+    if (!max) return false;
+    return this.charCount() > max * 0.9;
+  });
 
-  ngAfterViewInit() {
-    if (this.autoResize) {
+  readonly isAtLimit = computed(() => {
+    const max = this.maxLength();
+    if (!max) return false;
+    return this.charCount() >= max;
+  });
+
+  private _onChange: (value: string) => void = () => {};
+  private _onTouched: () => void = () => {};
+
+  ngAfterViewInit(): void {
+    if (this.autoResize()) {
       this.adjustHeight();
     }
-    this.charCount.set(this.value.length);
+    this.charCount.set(this.value().length);
   }
 
-  isNearLimit = computed(() => {
-    if (!this.maxLength) return false;
-    return this.charCount() > this.maxLength * 0.9;
-  });
-
-  isAtLimit = computed(() => {
-    if (!this.maxLength) return false;
-    return this.charCount() >= this.maxLength;
-  });
-
-  onInput(event: Event) {
+  onInput(event: Event): void {
     const target = event.target as HTMLTextAreaElement;
-    this.value = target.value;
+    this.value.set(target.value);
     this.charCount.set(target.value.length);
-    this.valueChange.emit(this.value);
-    this.onChange(this.value);
+    this._onChange(target.value);
 
-    if (this.autoResize) {
+    if (this.autoResize()) {
       this.adjustHeight();
     }
   }
 
-  onBlur() {
-    this.onTouched();
+  onBlur(): void {
+    this._onTouched();
     this.blur.emit();
   }
 
-  onFocus() {
+  onFocusEvent(): void {
     this.focus.emit();
   }
 
-  private adjustHeight() {
-    const textarea = this.textareaRef?.nativeElement;
+  private adjustHeight(): void {
+    const textarea = this.textareaRef()?.nativeElement;
     if (!textarea) return;
 
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
   }
 
-  // ControlValueAccessor
   writeValue(value: string): void {
-    this.value = value ?? '';
-    this.charCount.set(this.value.length);
-    
-    if (this.autoResize && this.textareaRef) {
+    this.value.set(value ?? '');
+    this.charCount.set(this.value().length);
+
+    if (this.autoResize() && this.textareaRef()) {
       setTimeout(() => this.adjustHeight());
     }
   }
 
   registerOnChange(fn: (value: string) => void): void {
-    this.onChange = fn;
+    this._onChange = fn;
   }
 
   registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
+    this._onTouched = fn;
   }
 
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
+  setDisabledState(_isDisabled: boolean): void {}
 }
