@@ -1,0 +1,54 @@
+/* lib/styles/components/_pagination.scss */
+@import '../abstract/mixins';
+
+.sig-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sig-spacing-3) 0;
+  color: var(--sig-text-secondary);
+  @include text-sm;
+
+  &__pages {
+    display: flex;
+    gap: var(--sig-spacing-1);
+  }
+
+  &__btn {
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 var(--sig-spacing-2);
+    border-radius: var(--sig-radius-md);
+    border: 1px solid var(--sig-border-color);
+    background-color: var(--sig-bg-surface);
+    color: var(--sig-text-main);
+    cursor: pointer;
+    transition: var(--sig-transition);
+    @include flex-center;
+    
+    &:hover:not(:disabled) {
+      background-color: var(--sig-bg-background);
+      border-color: var(--sig-text-muted);
+    }
+
+    &--active {
+      background-color: var(--sig-color-primary);
+      color: var(--sig-color-primary-text);
+      border-color: var(--sig-color-primary);
+
+      &:hover {
+        background-color: var(--sig-color-primary-hover);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: var(--sig-bg-disabled);
+    }
+  }
+
+  &__info {
+    color: var(--sig-text-muted);
+  }
+}

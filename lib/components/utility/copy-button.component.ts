@@ -4,6 +4,7 @@ import {
   input,
   output,
   signal,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -20,6 +21,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <button
       type="button"
@@ -46,65 +48,7 @@ import { CommonModule } from '@angular/common';
       }
     </button>
   `,
-  styles: [`
-    .sig-copy-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.375rem;
-      padding: 0.375rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      background: white;
-      font-size: 0.875rem;
-      color: #374151;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .sig-copy-button:hover:not(:disabled) {
-      background-color: #f9fafb;
-      border-color: #9ca3af;
-    }
-
-    .sig-copy-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .sig-copy-button--success {
-      background-color: #d1fae5;
-      border-color: #10b981;
-      color: #047857;
-    }
-
-    .sig-copy-button--icon {
-      padding: 0.375rem;
-    }
-
-    .sig-copy-button--sm {
-      padding: 0.25rem 0.5rem;
-      font-size: 0.75rem;
-    }
-
-    .sig-copy-button--sm.sig-copy-button--icon {
-      padding: 0.25rem;
-    }
-
-    .sig-copy-button--lg {
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-    }
-
-    .sig-copy-button--lg.sig-copy-button--icon {
-      padding: 0.5rem;
-    }
-
-    .sig-copy-button__icon {
-      font-size: 1em;
-    }
-  `],
-})
+  })
 export class SigCopyButtonComponent {
   readonly content = input.required<string>();
   readonly variant = input<'button' | 'icon'>('button');
@@ -169,28 +113,7 @@ export class SigCopyButtonComponent {
       </div>
     </div>
   `,
-  styles: [`
-    .sig-copyable {
-      position: relative;
-    }
-
-    .sig-copyable__content {
-      /* Content styling */
-    }
-
-    .sig-copyable__button {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-
-    .sig-copyable:hover .sig-copyable__button {
-      opacity: 1;
-    }
-  `],
-})
+  })
 export class SigCopyableComponent {
   readonly content = input.required<string>();
 }

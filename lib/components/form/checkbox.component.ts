@@ -5,6 +5,7 @@ import {
   signal,
   input,
   model,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -17,6 +18,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -50,61 +52,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       }
     </label>
   `,
-  styles: [`
-    .sig-checkbox {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .sig-checkbox--disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .sig-checkbox__input {
-      position: absolute;
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .sig-checkbox__box {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 1.25rem;
-      height: 1.25rem;
-      border: 2px solid #d1d5db;
-      border-radius: 0.25rem;
-      background: white;
-      transition: all 0.15s;
-    }
-
-    .sig-checkbox--checked .sig-checkbox__box {
-      background-color: #3b82f6;
-      border-color: #3b82f6;
-    }
-
-    .sig-checkbox__input:focus + .sig-checkbox__box {
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-
-    .sig-checkbox__check,
-    .sig-checkbox__indeterminate {
-      color: white;
-      font-size: 0.75rem;
-      font-weight: bold;
-    }
-
-    .sig-checkbox__label {
-      font-size: 0.875rem;
-      color: #374151;
-    }
-  `],
-})
+  })
 export class SigCheckboxComponent implements ControlValueAccessor {
   readonly checked = model<boolean>(false);
   readonly label = input<string>('');
@@ -176,74 +124,7 @@ export class SigCheckboxComponent implements ControlValueAccessor {
       }
     </label>
   `,
-  styles: [`
-    .sig-switch {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .sig-switch--disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .sig-switch__input {
-      position: absolute;
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .sig-switch__track {
-      position: relative;
-      width: 2.5rem;
-      height: 1.5rem;
-      background-color: #d1d5db;
-      border-radius: 9999px;
-      transition: background-color 0.2s;
-    }
-
-    .sig-switch--checked .sig-switch__track {
-      background-color: #3b82f6;
-    }
-
-    .sig-switch__thumb {
-      position: absolute;
-      top: 0.125rem;
-      left: 0.125rem;
-      width: 1.25rem;
-      height: 1.25rem;
-      background-color: white;
-      border-radius: 9999px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
-    }
-
-    .sig-switch--checked .sig-switch__thumb {
-      transform: translateX(1rem);
-    }
-
-    .sig-switch__input:focus + .sig-switch__track {
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-
-    .sig-switch__label {
-      font-size: 0.875rem;
-      color: #374151;
-    }
-
-    .sig-switch--small .sig-switch__track { width: 2rem; height: 1.25rem; }
-    .sig-switch--small .sig-switch__thumb { width: 1rem; height: 1rem; }
-    .sig-switch--small.sig-switch--checked .sig-switch__thumb { transform: translateX(0.75rem); }
-
-    .sig-switch--large .sig-switch__track { width: 3rem; height: 1.75rem; }
-    .sig-switch--large .sig-switch__thumb { width: 1.5rem; height: 1.5rem; }
-    .sig-switch--large.sig-switch--checked .sig-switch__thumb { transform: translateX(1.25rem); }
-  `],
-})
+  })
 export class SigSwitchComponent implements ControlValueAccessor {
   readonly checked = model<boolean>(false);
   readonly label = input<string>('');

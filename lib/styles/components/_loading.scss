@@ -1,0 +1,45 @@
+/* lib/styles/components/_loading.scss */
+@import '../abstract/mixins';
+
+.sig-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: var(--sig-z-modal);
+  @include flex-center;
+  flex-direction: column;
+  gap: var(--sig-spacing-3);
+  backdrop-filter: blur(1px);
+
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  &--fullscreen {
+    position: fixed;
+    z-index: 9999;
+  }
+}
+
+.sig-spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid var(--sig-color-primary-subtle);
+  border-top-color: var(--sig-color-primary);
+  border-radius: 50%;
+  animation: sig-spin 0.8s linear infinite;
+
+  &--sm { width: 1.5rem; height: 1.5rem; border-width: 2px; }
+  &--lg { width: 4rem; height: 4rem; border-width: 4px; }
+}
+
+.sig-loading-text {
+  color: var(--sig-text-secondary);
+  font-weight: 500;
+  @include text-sm;
+}
+
+@keyframes sig-spin {
+  to { transform: rotate(360deg); }
+}

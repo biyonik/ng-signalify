@@ -1,0 +1,43 @@
+/* lib/styles/components/_button.scss */
+@import '../abstract/mixins';
+
+.sig-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sig-spacing-2) var(--sig-spacing-4);
+  font-weight: 500;
+  border-radius: var(--sig-radius-md);
+  transition: var(--sig-transition);
+  cursor: pointer;
+  @include text-sm;
+  @include focus-ring;
+
+  /* Primary Button */
+  &--primary {
+    background-color: var(--sig-color-primary);
+    color: var(--sig-color-primary-text);
+    border: 1px solid transparent;
+
+    &:hover:not(:disabled) {
+      background-color: var(--sig-color-primary-hover);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  /* Secondary / Cancel Button */
+  &--secondary {
+    background-color: var(--sig-bg-surface);
+    color: var(--sig-text-main);
+    border: 1px solid var(--sig-border-color);
+
+    &:hover {
+      background-color: var(--sig-bg-background);
+      border-color: var(--sig-text-muted);
+    }
+  }
+}

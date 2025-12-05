@@ -10,6 +10,7 @@ import {
   Directive,
   TemplateRef,
   inject,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -48,6 +49,7 @@ export class SigTabPanelDirective {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div 
       class="sig-tabs"
@@ -110,188 +112,7 @@ export class SigTabPanelDirective {
       </div>
     </div>
   `,
-  styles: [`
-    .sig-tabs {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sig-tabs--vertical {
-      flex-direction: row;
-    }
-
-    .sig-tabs__list {
-      position: relative;
-      display: flex;
-      gap: 0.25rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .sig-tabs--vertical .sig-tabs__list {
-      flex-direction: column;
-      border-bottom: none;
-      border-right: 1px solid #e5e7eb;
-      padding-right: 0.5rem;
-      min-width: 150px;
-    }
-
-    .sig-tabs--pills .sig-tabs__list {
-      border-bottom: none;
-      background-color: #f3f4f6;
-      padding: 0.25rem;
-      border-radius: 0.5rem;
-      gap: 0.25rem;
-    }
-
-    .sig-tabs--bordered .sig-tabs__list {
-      border: 1px solid #e5e7eb;
-      border-bottom: none;
-      border-radius: 0.5rem 0.5rem 0 0;
-      background-color: #f9fafb;
-      padding: 0.25rem 0.25rem 0;
-    }
-
-    .sig-tabs--full-width .sig-tabs__list {
-      width: 100%;
-    }
-
-    .sig-tabs--full-width .sig-tabs__tab {
-      flex: 1;
-    }
-
-    .sig-tabs__tab {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      border: none;
-      background: none;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #6b7280;
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-      position: relative;
-    }
-
-    .sig-tabs__tab:hover:not(:disabled) {
-      color: #374151;
-    }
-
-    .sig-tabs__tab--active {
-      color: #3b82f6;
-    }
-
-    .sig-tabs__tab--disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Underline variant */
-    .sig-tabs__tab--active::after {
-      content: '';
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background-color: #3b82f6;
-    }
-
-    .sig-tabs--vertical .sig-tabs__tab--active::after {
-      bottom: auto;
-      top: 0;
-      left: auto;
-      right: -1px;
-      width: 2px;
-      height: 100%;
-    }
-
-    /* Pills variant */
-    .sig-tabs--pills .sig-tabs__tab {
-      border-radius: 0.375rem;
-      padding: 0.5rem 1rem;
-    }
-
-    .sig-tabs--pills .sig-tabs__tab--active {
-      background-color: white;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      color: #374151;
-    }
-
-    .sig-tabs--pills .sig-tabs__tab--active::after {
-      display: none;
-    }
-
-    /* Bordered variant */
-    .sig-tabs--bordered .sig-tabs__tab {
-      border: 1px solid transparent;
-      border-bottom: none;
-      margin-bottom: -1px;
-      border-radius: 0.375rem 0.375rem 0 0;
-    }
-
-    .sig-tabs--bordered .sig-tabs__tab--active {
-      background-color: white;
-      border-color: #e5e7eb;
-      color: #374151;
-    }
-
-    .sig-tabs--bordered .sig-tabs__tab--active::after {
-      display: none;
-    }
-
-    .sig-tabs__icon {
-      font-size: 1rem;
-    }
-
-    .sig-tabs__badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 1.25rem;
-      height: 1.25rem;
-      padding: 0 0.375rem;
-      font-size: 0.625rem;
-      font-weight: 600;
-      background-color: #ef4444;
-      color: white;
-      border-radius: 9999px;
-    }
-
-    .sig-tabs__indicator {
-      position: absolute;
-      bottom: 0;
-      height: 2px;
-      background-color: #3b82f6;
-      transition: left 0.2s, width 0.2s;
-    }
-
-    .sig-tabs__panels {
-      flex: 1;
-    }
-
-    .sig-tabs--bordered .sig-tabs__panels {
-      border: 1px solid #e5e7eb;
-      border-top: none;
-      border-radius: 0 0 0.5rem 0.5rem;
-    }
-
-    .sig-tabs__panel {
-      padding: 1rem;
-    }
-
-    .sig-tabs__panel[hidden] {
-      display: none;
-    }
-
-    .sig-tabs--vertical .sig-tabs__panels {
-      padding-left: 1rem;
-    }
-  `],
-})
+  })
 export class SigTabsComponent {
   readonly tabs = contentChildren(SigTabPanelDirective);
 

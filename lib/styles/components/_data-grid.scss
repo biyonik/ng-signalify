@@ -1,0 +1,32 @@
+@import '../abstract/mixins';
+
+.sig-data-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sig-spacing-4);
+
+  &__toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sig-spacing-3);
+    flex-wrap: wrap;
+  }
+
+  &__filters {
+    display: flex;
+    gap: var(--sig-spacing-2);
+  }
+
+  &__content {
+    /* Table style'ını inherit eder ama wrapper ekler */
+    border: 1px solid var(--sig-border-color);
+    border-radius: var(--sig-radius-lg);
+    overflow: hidden;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

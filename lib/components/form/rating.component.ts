@@ -6,6 +6,7 @@ import {
   computed,
   input,
   model,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -26,6 +27,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -84,96 +86,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       }
     </div>
   `,
-  styles: [`
-    .sig-rating {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .sig-rating--disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    .sig-rating__label {
-      font-size: 0.875rem;
-      color: #374151;
-      margin-right: 0.25rem;
-    }
-
-    .sig-rating__stars {
-      display: flex;
-      gap: 0.125rem;
-    }
-
-    .sig-rating__star {
-      position: relative;
-      padding: 0;
-      border: none;
-      background: none;
-      cursor: pointer;
-      font-size: 1.5rem;
-      line-height: 1;
-      transition: transform 0.15s;
-    }
-
-    .sig-rating--sm .sig-rating__star {
-      font-size: 1rem;
-    }
-
-    .sig-rating--lg .sig-rating__star {
-      font-size: 2rem;
-    }
-
-    .sig-rating__star:hover:not(:disabled) {
-      transform: scale(1.1);
-    }
-
-    .sig-rating--readonly .sig-rating__star {
-      cursor: default;
-    }
-
-    .sig-rating__star-empty,
-    .sig-rating__star-fill,
-    .sig-rating__star-half {
-      display: block;
-    }
-
-    .sig-rating__star-empty {
-      color: #d1d5db;
-    }
-
-    .sig-rating__star-fill,
-    .sig-rating__star-half {
-      position: absolute;
-      top: 0;
-      left: 0;
-      color: #fbbf24;
-      overflow: hidden;
-      width: 0;
-    }
-
-    .sig-rating__star--filled .sig-rating__star-fill {
-      width: 100%;
-    }
-
-    .sig-rating__star--half .sig-rating__star-half {
-      width: 50%;
-    }
-
-    .sig-rating__value {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #374151;
-    }
-
-    .sig-rating__count {
-      font-size: 0.75rem;
-      color: #9ca3af;
-    }
-  `],
-})
+  })
 export class SigRatingComponent implements ControlValueAccessor {
   readonly value = model<number>(0);
   readonly max = input<number>(5);

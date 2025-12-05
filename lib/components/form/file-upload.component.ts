@@ -7,6 +7,7 @@ import {
   output,
   ElementRef,
   viewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -38,6 +39,7 @@ export interface UploadedFile {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="sig-file-upload">
       <!-- Drop Zone -->
@@ -147,214 +149,7 @@ export interface UploadedFile {
       }
     </div>
   `,
-  styles: [`
-    .sig-file-upload {
-      width: 100%;
-    }
-
-    .sig-file-upload__dropzone {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      border: 2px dashed #d1d5db;
-      border-radius: 0.5rem;
-      background-color: #f9fafb;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .sig-file-upload__dropzone:hover {
-      border-color: #3b82f6;
-      background-color: #eff6ff;
-    }
-
-    .sig-file-upload__dropzone--dragover {
-      border-color: #3b82f6;
-      background-color: #dbeafe;
-    }
-
-    .sig-file-upload__dropzone--disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .sig-file-upload__input {
-      position: absolute;
-      width: 0;
-      height: 0;
-      opacity: 0;
-    }
-
-    .sig-file-upload__content {
-      text-align: center;
-    }
-
-    .sig-file-upload__icon {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-      display: block;
-    }
-
-    .sig-file-upload__text {
-      margin: 0;
-      font-size: 0.875rem;
-      color: #4b5563;
-    }
-
-    .sig-file-upload__link {
-      color: #3b82f6;
-      font-weight: 500;
-    }
-
-    .sig-file-upload__hint {
-      margin: 0.5rem 0 0;
-      font-size: 0.75rem;
-      color: #9ca3af;
-    }
-
-    .sig-file-upload__error {
-      margin-top: 0.5rem;
-      padding: 0.5rem;
-      background-color: #fef2f2;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
-      color: #ef4444;
-    }
-
-    .sig-file-upload__list {
-      margin-top: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .sig-file-upload__item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem;
-      background-color: #f9fafb;
-      border-radius: 0.375rem;
-      border: 1px solid #e5e7eb;
-    }
-
-    .sig-file-upload__item--error {
-      background-color: #fef2f2;
-      border-color: #fecaca;
-    }
-
-    .sig-file-upload__item--success {
-      background-color: #f0fdf4;
-      border-color: #bbf7d0;
-    }
-
-    .sig-file-upload__preview {
-      width: 2.5rem;
-      height: 2.5rem;
-      object-fit: cover;
-      border-radius: 0.25rem;
-    }
-
-    .sig-file-upload__file-icon {
-      font-size: 1.5rem;
-    }
-
-    .sig-file-upload__info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .sig-file-upload__name {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .sig-file-upload__size {
-      font-size: 0.75rem;
-      color: #9ca3af;
-    }
-
-    .sig-file-upload__progress {
-      height: 4px;
-      background-color: #e5e7eb;
-      border-radius: 2px;
-      margin-top: 0.25rem;
-      overflow: hidden;
-    }
-
-    .sig-file-upload__progress-bar {
-      height: 100%;
-      background-color: #3b82f6;
-      transition: width 0.3s;
-    }
-
-    .sig-file-upload__item-error {
-      display: block;
-      font-size: 0.75rem;
-      color: #ef4444;
-    }
-
-    .sig-file-upload__status {
-      flex-shrink: 0;
-    }
-
-    .sig-file-upload__spinner {
-      display: block;
-      width: 1.25rem;
-      height: 1.25rem;
-      border: 2px solid #e5e7eb;
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .sig-file-upload__success {
-      color: #10b981;
-      font-weight: bold;
-    }
-
-    .sig-file-upload__error-icon {
-      color: #ef4444;
-      font-weight: bold;
-    }
-
-    .sig-file-upload__remove {
-      flex-shrink: 0;
-      width: 1.5rem;
-      height: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      background: none;
-      color: #9ca3af;
-      cursor: pointer;
-      border-radius: 0.25rem;
-    }
-
-    .sig-file-upload__remove:hover:not(:disabled) {
-      background-color: #fee2e2;
-      color: #ef4444;
-    }
-
-    .sig-file-upload__remove:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  `],
-})
+  })
 export class SigFileUploadComponent {
   readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 

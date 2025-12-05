@@ -1,0 +1,26 @@
+/* lib/styles/components/_textarea.scss */
+@import '../abstract/mixins';
+
+.sig-textarea {
+  width: 100%;
+  padding: var(--sig-spacing-2) var(--sig-spacing-3);
+  border: 1px solid var(--sig-border-color);
+  border-radius: var(--sig-radius-md);
+  background-color: var(--sig-bg-surface);
+  color: var(--sig-text-main);
+  transition: var(--sig-transition);
+  min-height: 5rem;
+  resize: vertical; /* Sadece dikey resize */
+  @include text-sm;
+  @include focus-ring;
+
+  &:disabled {
+    background-color: var(--sig-bg-disabled);
+    color: var(--sig-text-disabled);
+    cursor: not-allowed;
+  }
+
+  &::placeholder {
+    color: var(--sig-text-muted);
+  }
+}

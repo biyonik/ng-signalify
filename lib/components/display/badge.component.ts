@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   input,
   computed,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -20,6 +21,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <span 
       class="sig-badge"
@@ -59,140 +61,7 @@ import { CommonModule } from '@angular/common';
       }
     </span>
   `,
-  styles: [`
-    .sig-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.125rem 0.5rem;
-      font-size: 0.75rem;
-      font-weight: 500;
-      line-height: 1.5;
-      border-radius: 0.25rem;
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
-
-    /* Sizes */
-    .sig-badge--sm {
-      padding: 0 0.375rem;
-      font-size: 0.625rem;
-    }
-
-    .sig-badge--lg {
-      padding: 0.25rem 0.625rem;
-      font-size: 0.875rem;
-    }
-
-    .sig-badge--rounded {
-      border-radius: 9999px;
-    }
-
-    .sig-badge--clickable {
-      cursor: pointer;
-    }
-
-    /* Variants - Filled */
-    .sig-badge {
-      background-color: #e5e7eb;
-      color: #374151;
-    }
-
-    .sig-badge--primary {
-      background-color: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    .sig-badge--secondary {
-      background-color: #f3f4f6;
-      color: #4b5563;
-    }
-
-    .sig-badge--success {
-      background-color: #d1fae5;
-      color: #047857;
-    }
-
-    .sig-badge--danger {
-      background-color: #fee2e2;
-      color: #b91c1c;
-    }
-
-    .sig-badge--warning {
-      background-color: #fef3c7;
-      color: #b45309;
-    }
-
-    .sig-badge--info {
-      background-color: #e0f2fe;
-      color: #0369a1;
-    }
-
-    /* Variants - Outline */
-    .sig-badge--outline {
-      background-color: transparent;
-      border: 1px solid currentColor;
-    }
-
-    .sig-badge--outline.sig-badge--primary {
-      color: #3b82f6;
-    }
-
-    .sig-badge--outline.sig-badge--success {
-      color: #10b981;
-    }
-
-    .sig-badge--outline.sig-badge--danger {
-      color: #ef4444;
-    }
-
-    .sig-badge--outline.sig-badge--warning {
-      color: #f59e0b;
-    }
-
-    .sig-badge--outline.sig-badge--info {
-      color: #0ea5e9;
-    }
-
-    /* Dot */
-    .sig-badge__dot {
-      width: 0.5rem;
-      height: 0.5rem;
-      border-radius: 50%;
-      background-color: currentColor;
-    }
-
-    /* Icon */
-    .sig-badge__icon {
-      font-size: 0.875em;
-    }
-
-    /* Remove button */
-    .sig-badge__remove {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 1rem;
-      height: 1rem;
-      margin-left: 0.125rem;
-      margin-right: -0.25rem;
-      padding: 0;
-      border: none;
-      background: none;
-      color: currentColor;
-      opacity: 0.7;
-      cursor: pointer;
-      border-radius: 50%;
-      font-size: 0.625rem;
-      transition: all 0.15s;
-    }
-
-    .sig-badge__remove:hover {
-      opacity: 1;
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-  `],
-})
+  })
 export class SigBadgeComponent {
   readonly variant = input<'default' | 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info'>('default');
   readonly size = input<'sm' | 'md' | 'lg'>('md');
@@ -241,64 +110,7 @@ export class SigBadgeComponent {
       }
     </div>
   `,
-  styles: [`
-    .sig-badge-count {
-      position: relative;
-      display: inline-flex;
-    }
-
-    .sig-badge-count__badge {
-      position: absolute;
-      top: 0;
-      right: 0;
-      transform: translate(50%, -50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 1.25rem;
-      height: 1.25rem;
-      padding: 0 0.375rem;
-      background-color: #ef4444;
-      color: white;
-      font-size: 0.625rem;
-      font-weight: 600;
-      border-radius: 9999px;
-      border: 2px solid white;
-    }
-
-    .sig-badge-count__badge--sm {
-      min-width: 1rem;
-      height: 1rem;
-      font-size: 0.5rem;
-      padding: 0 0.25rem;
-    }
-
-    .sig-badge-count__badge--lg {
-      min-width: 1.5rem;
-      height: 1.5rem;
-      font-size: 0.75rem;
-    }
-
-    .sig-badge-count__badge--dot {
-      min-width: 0.5rem;
-      width: 0.5rem;
-      height: 0.5rem;
-      padding: 0;
-    }
-
-    .sig-badge-count__badge--dot.sig-badge-count__badge--sm {
-      min-width: 0.375rem;
-      width: 0.375rem;
-      height: 0.375rem;
-    }
-
-    .sig-badge-count__badge--dot.sig-badge-count__badge--lg {
-      min-width: 0.75rem;
-      width: 0.75rem;
-      height: 0.75rem;
-    }
-  `],
-})
+  })
 export class SigBadgeCountComponent {
   readonly count = input<number>(0);
   readonly max = input<number>(99);

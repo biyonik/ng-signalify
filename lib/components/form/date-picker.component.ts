@@ -7,6 +7,7 @@ import {
   input,
   model,
   output,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -36,6 +37,7 @@ interface CalendarDay {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -134,178 +136,7 @@ interface CalendarDay {
       }
     </div>
   `,
-  styles: [`
-    .sig-date-picker {
-      position: relative;
-      width: 100%;
-    }
-
-    .sig-date-picker__trigger {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      background: white;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
-
-    .sig-date-picker__trigger:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .sig-date-picker__trigger:disabled {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    .sig-date-picker__value {
-      flex: 1;
-      text-align: left;
-    }
-
-    .sig-date-picker__placeholder {
-      color: #9ca3af;
-    }
-
-    .sig-date-picker__icon {
-      font-size: 1rem;
-    }
-
-    .sig-date-picker__dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      z-index: 50;
-      width: 280px;
-      margin-top: 0.25rem;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.5rem;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      padding: 0.75rem;
-    }
-
-    .sig-date-picker__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-    }
-
-    .sig-date-picker__nav {
-      width: 2rem;
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      background: none;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-size: 1.25rem;
-      color: #6b7280;
-    }
-
-    .sig-date-picker__nav:hover {
-      background-color: #f3f4f6;
-    }
-
-    .sig-date-picker__month-year {
-      font-weight: 600;
-      color: #374151;
-    }
-
-    .sig-date-picker__weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.125rem;
-      margin-bottom: 0.25rem;
-    }
-
-    .sig-date-picker__weekday {
-      text-align: center;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #9ca3af;
-      padding: 0.25rem;
-    }
-
-    .sig-date-picker__days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.125rem;
-    }
-
-    .sig-date-picker__day {
-      width: 2rem;
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      background: none;
-      border-radius: 0.25rem;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .sig-date-picker__day:hover:not(:disabled) {
-      background-color: #f3f4f6;
-    }
-
-    .sig-date-picker__day--other-month {
-      color: #d1d5db;
-    }
-
-    .sig-date-picker__day--today {
-      font-weight: 600;
-      color: #3b82f6;
-    }
-
-    .sig-date-picker__day--selected {
-      background-color: #3b82f6 !important;
-      color: white !important;
-      font-weight: 600;
-    }
-
-    .sig-date-picker__day--disabled {
-      color: #d1d5db;
-      cursor: not-allowed;
-    }
-
-    .sig-date-picker__footer {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    .sig-date-picker__today,
-    .sig-date-picker__clear {
-      padding: 0.25rem 0.5rem;
-      border: none;
-      background: none;
-      font-size: 0.75rem;
-      color: #3b82f6;
-      cursor: pointer;
-      border-radius: 0.25rem;
-    }
-
-    .sig-date-picker__today:hover,
-    .sig-date-picker__clear:hover {
-      background-color: #eff6ff;
-    }
-  `],
-  host: {
+    host: {
     '(document:click)': 'onClickOutside($event)',
   },
 })

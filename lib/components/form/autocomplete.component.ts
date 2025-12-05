@@ -10,6 +10,7 @@ import {
   effect,
   ElementRef,
   viewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -38,6 +39,7 @@ export interface AutocompleteOption {
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -121,133 +123,7 @@ export interface AutocompleteOption {
       }
     </div>
   `,
-  styles: [`
-    .sig-autocomplete {
-      position: relative;
-      width: 100%;
-    }
-
-    .sig-autocomplete__input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .sig-autocomplete__input {
-      width: 100%;
-      padding: 0.5rem 2rem 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      transition: border-color 0.15s;
-    }
-
-    .sig-autocomplete__input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .sig-autocomplete__input:disabled {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    .sig-autocomplete__icon,
-    .sig-autocomplete__clear {
-      position: absolute;
-      right: 0.75rem;
-      color: #9ca3af;
-    }
-
-    .sig-autocomplete__icon {
-      font-size: 0.625rem;
-      pointer-events: none;
-    }
-
-    .sig-autocomplete__clear {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.25rem;
-      font-size: 0.75rem;
-    }
-
-    .sig-autocomplete__clear:hover {
-      color: #374151;
-    }
-
-    .sig-autocomplete__spinner {
-      position: absolute;
-      right: 0.75rem;
-      width: 1rem;
-      height: 1rem;
-      border: 2px solid #e5e7eb;
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .sig-autocomplete__dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      margin-top: 0.25rem;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.375rem;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      max-height: 15rem;
-      overflow-y: auto;
-    }
-
-    .sig-autocomplete__option {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: none;
-      background: none;
-      text-align: left;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: background-color 0.1s;
-    }
-
-    .sig-autocomplete__option:hover,
-    .sig-autocomplete__option--highlighted {
-      background-color: #f3f4f6;
-    }
-
-    .sig-autocomplete__option--selected {
-      background-color: #eff6ff;
-      color: #1d4ed8;
-    }
-
-    .sig-autocomplete__option--disabled {
-      color: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    .sig-autocomplete__loading,
-    .sig-autocomplete__empty {
-      padding: 0.75rem;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 0.875rem;
-    }
-
-    .sig-autocomplete mark {
-      background-color: #fef08a;
-      color: inherit;
-      padding: 0;
-    }
-  `],
-  host: {
+    host: {
     '(document:click)': 'onClickOutside($event)',
   },
 })

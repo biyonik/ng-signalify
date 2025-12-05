@@ -8,6 +8,7 @@ import {
   ElementRef,
   viewChildren,
   computed,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -26,6 +27,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -73,79 +75,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       }
     </div>
   `,
-  styles: [`
-    .sig-otp {
-      display: inline-flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .sig-otp__label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-    }
-
-    .sig-otp__inputs {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .sig-otp__input {
-      width: 3rem;
-      height: 3.5rem;
-      padding: 0;
-      border: 2px solid #d1d5db;
-      border-radius: 0.5rem;
-      background: white;
-      font-size: 1.5rem;
-      font-weight: 600;
-      text-align: center;
-      transition: all 0.15s;
-      caret-color: #3b82f6;
-    }
-
-    .sig-otp__input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-
-    .sig-otp__input--filled {
-      border-color: #3b82f6;
-      background-color: #eff6ff;
-    }
-
-    .sig-otp__input--masked {
-      -webkit-text-security: disc;
-    }
-
-    .sig-otp--error .sig-otp__input {
-      border-color: #ef4444;
-    }
-
-    .sig-otp--error .sig-otp__input:focus {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-    }
-
-    .sig-otp--disabled .sig-otp__input {
-      background-color: #f3f4f6;
-      cursor: not-allowed;
-    }
-
-    .sig-otp__separator {
-      font-size: 1.5rem;
-      color: #9ca3af;
-      padding: 0 0.25rem;
-    }
-
-    .sig-otp__error {
-      font-size: 0.75rem;
-      color: #ef4444;
-    }
-  `],
-})
+  })
 export class SigOtpInputComponent implements ControlValueAccessor {
   readonly digitInputs = viewChildren<ElementRef<HTMLInputElement>>('digitInput');
 

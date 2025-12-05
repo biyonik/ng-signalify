@@ -6,6 +6,7 @@ import {
   computed,
   input,
   model,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -26,6 +27,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -95,138 +97,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       </button>
     </div>
   `,
-  styles: [`
-    .sig-stepper {
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      background: white;
-      overflow: hidden;
-    }
-
-    .sig-stepper--disabled {
-      opacity: 0.5;
-    }
-
-    .sig-stepper--vertical {
-      flex-direction: column-reverse;
-    }
-
-    .sig-stepper__btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 2.5rem;
-      height: 2.5rem;
-      padding: 0;
-      border: none;
-      background-color: #f3f4f6;
-      color: #374151;
-      font-size: 1.25rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.15s;
-      user-select: none;
-    }
-
-    .sig-stepper--sm .sig-stepper__btn {
-      width: 2rem;
-      height: 2rem;
-      font-size: 1rem;
-    }
-
-    .sig-stepper--lg .sig-stepper__btn {
-      width: 3rem;
-      height: 3rem;
-      font-size: 1.5rem;
-    }
-
-    .sig-stepper__btn:hover:not(:disabled) {
-      background-color: #e5e7eb;
-    }
-
-    .sig-stepper__btn:active:not(:disabled) {
-      background-color: #d1d5db;
-    }
-
-    .sig-stepper__btn:disabled {
-      color: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    .sig-stepper--vertical .sig-stepper__btn {
-      width: 100%;
-      height: 1.5rem;
-    }
-
-    .sig-stepper__value-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 3rem;
-      padding: 0 0.5rem;
-      gap: 0.25rem;
-    }
-
-    .sig-stepper--sm .sig-stepper__value-container {
-      min-width: 2.5rem;
-      padding: 0 0.25rem;
-    }
-
-    .sig-stepper--lg .sig-stepper__value-container {
-      min-width: 4rem;
-      padding: 0 0.75rem;
-    }
-
-    .sig-stepper__value {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #374151;
-      text-align: center;
-    }
-
-    .sig-stepper--sm .sig-stepper__value {
-      font-size: 0.75rem;
-    }
-
-    .sig-stepper--lg .sig-stepper__value {
-      font-size: 1rem;
-    }
-
-    .sig-stepper__input {
-      width: 3rem;
-      padding: 0;
-      border: none;
-      background: transparent;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #374151;
-      text-align: center;
-      -moz-appearance: textfield;
-    }
-
-    .sig-stepper__input::-webkit-outer-spin-button,
-    .sig-stepper__input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    .sig-stepper__input:focus {
-      outline: none;
-    }
-
-    .sig-stepper__suffix {
-      font-size: 0.75rem;
-      color: #6b7280;
-    }
-
-    .sig-stepper--vertical .sig-stepper__value-container {
-      width: 100%;
-      padding: 0.5rem;
-    }
-  `],
-})
+  })
 export class SigNumberStepperComponent implements ControlValueAccessor {
   readonly value = model<number>(0);
   readonly min = input<number>(-Infinity);

@@ -1,10 +1,7 @@
 import {
-  Component,
   Directive,
-  ChangeDetectionStrategy,
   input,
   output,
-  signal,
   TemplateRef,
   inject,
   ElementRef,

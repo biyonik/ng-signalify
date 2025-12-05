@@ -5,6 +5,7 @@ import {
   input,
   output,
   model,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -16,6 +17,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="sig-pagination" [class.sig-pagination--compact]="compact()">
       @if (showInfo()) {
@@ -109,98 +111,7 @@ import { CommonModule } from '@angular/common';
       </div>
     </div>
   `,
-  styles: [`
-    .sig-pagination {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.75rem 0;
-      flex-wrap: wrap;
-    }
-
-    .sig-pagination--compact {
-      justify-content: center;
-    }
-
-    .sig-pagination__info {
-      font-size: 0.875rem;
-      color: #6b7280;
-    }
-
-    .sig-pagination__size {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .sig-pagination__size-label {
-      font-size: 0.875rem;
-      color: #6b7280;
-    }
-
-    .sig-pagination__size-select {
-      padding: 0.25rem 0.5rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.25rem;
-      font-size: 0.875rem;
-      background: white;
-    }
-
-    .sig-pagination__nav {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-    .sig-pagination__btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 2rem;
-      height: 2rem;
-      padding: 0 0.5rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.25rem;
-      background: white;
-      font-size: 0.875rem;
-      color: #374151;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .sig-pagination__btn:hover:not(:disabled) {
-      background-color: #f3f4f6;
-      border-color: #9ca3af;
-    }
-
-    .sig-pagination__btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .sig-pagination__btn--active {
-      background-color: #3b82f6;
-      border-color: #3b82f6;
-      color: white;
-    }
-
-    .sig-pagination__btn--active:hover:not(:disabled) {
-      background-color: #2563eb;
-    }
-
-    .sig-pagination__ellipsis {
-      padding: 0 0.5rem;
-      color: #9ca3af;
-    }
-
-    .sig-pagination__current {
-      padding: 0 0.75rem;
-      font-size: 0.875rem;
-      color: #374151;
-    }
-  `],
-})
+  })
 export class SigPaginationComponent {
   // Inputs
   readonly page = model<number>(1);

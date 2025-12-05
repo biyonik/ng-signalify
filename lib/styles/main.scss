@@ -1,0 +1,47 @@
+/* lib/styles/main.scss */
+
+/* 1. Core */
+@import 'abstract/variables';
+@import 'abstract/mixins';
+@import 'base/reset';
+
+/* 2. Form Components */
+@import 'components/button'; /* Base button */
+@import 'components/input';
+@import 'components/textarea';
+@import 'components/select';
+@import 'components/checkbox';
+@import 'components/radio';
+@import 'components/form-field'; /* Label, Error wrapper */
+@import 'components/file-upload';
+@import 'components/date-picker';
+@import 'components/rating';
+@import 'components/otp-input';
+
+/* 3. Display Components */
+@import 'components/badge';
+@import 'components/avatar';
+@import 'components/alert';
+@import 'components/progress';
+@import 'components/card';
+
+/* 4. Feedback */
+@import 'components/modal';
+@import 'components/toast';
+@import 'components/loading';
+
+/* 5. Navigation & Layout */
+@import 'components/tabs';
+@import 'components/accordion';
+@import 'components/stepper';
+@import 'components/drawer';
+@import 'components/breadcrumb';
+
+/* 6. Data & Composite */
+@import 'components/table';
+@import 'components/pagination';
+@import 'components/data-grid';
+
+/* 7. Overlays */
+@import 'components/tooltip';
+@import 'components/dropdown-menu';

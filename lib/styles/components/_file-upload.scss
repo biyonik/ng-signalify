@@ -1,0 +1,60 @@
+@import '../abstract/mixins';
+
+.sig-file-upload {
+  width: 100%;
+
+  &__dropzone {
+    border: 2px dashed var(--sig-border-color);
+    border-radius: var(--sig-radius-lg);
+    padding: var(--sig-spacing-6);
+    text-align: center;
+    transition: var(--sig-transition);
+    cursor: pointer;
+    background-color: var(--sig-bg-surface);
+
+    &:hover, &--dragover {
+      border-color: var(--sig-color-primary);
+      background-color: var(--sig-color-primary-subtle);
+    }
+
+    &--disabled {
+      background-color: var(--sig-bg-disabled);
+      cursor: not-allowed;
+      &:hover { border-color: var(--sig-border-color); background-color: var(--sig-bg-disabled); }
+    }
+  }
+
+  &__icon {
+    font-size: 2rem;
+    color: var(--sig-text-muted);
+    margin-bottom: var(--sig-spacing-2);
+  }
+
+  &__text {
+    color: var(--sig-text-main);
+    font-weight: 500;
+  }
+
+  &__hint {
+    color: var(--sig-text-muted);
+    @include text-sm;
+    margin-top: var(--sig-spacing-1);
+  }
+
+  &__list {
+    margin-top: var(--sig-spacing-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sig-spacing-2);
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sig-spacing-2);
+    border: 1px solid var(--sig-border-color);
+    border-radius: var(--sig-radius-md);
+    background-color: var(--sig-bg-surface);
+  }
+}
