@@ -123,7 +123,7 @@ export class TimeField extends BaseField<Time> {
       // TR: Minimum saat kontrolü
       // EN: Minimum time check
       .refine(
-        (data) => {
+        (data: Time) => {
           if (this.config.min) {
             const minTime = this.parseTimeString(this.config.min);
             return this.compareTime(data, minTime) >= 0;
@@ -135,7 +135,7 @@ export class TimeField extends BaseField<Time> {
       // TR: Maksimum saat kontrolü
       // EN: Maximum time check
       .refine(
-        (data) => {
+        (data: Time) => {
           if (this.config.max) {
             const maxTime = this.parseTimeString(this.config.max);
             return this.compareTime(data, maxTime) <= 0;

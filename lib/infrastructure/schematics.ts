@@ -9,7 +9,7 @@
  */
 
 /** Field type definition */
-export type FieldType =
+export type SchematicsFieldType =
   | 'string'
   | 'text'
   | 'integer'
@@ -38,7 +38,7 @@ export type FieldType =
  */
 export interface FieldDefinition {
   name: string;
-  type: FieldType;
+  type: SchematicsFieldType;
   label: string;
   required?: boolean;
   placeholder?: string;
@@ -75,8 +75,8 @@ export interface EntityDefinition {
  * EN: Generates necessary import statements based on field types.
  * Prevents duplicate imports.
  */
-export function generateFieldImport(types: FieldType[]): string {
-  const fieldMap: Record<FieldType, string> = {
+export function generateFieldImport(types: SchematicsFieldType[]): string {
+  const fieldMap: Record<SchematicsFieldType, string> = {
     string: 'StringField',
     text: 'TextAreaField',
     integer: 'IntegerField',
@@ -109,7 +109,7 @@ export function generateFieldImport(types: FieldType[]): string {
  * Includes validation rules (min, max, required, etc.) in the code.
  */
 export function generateFieldCode(field: FieldDefinition): string {
-  const fieldFactories: Record<FieldType, () => string> = {
+  const fieldFactories: Record<SchematicsFieldType, () => string> = {
     string: () => {
       const opts: string[] = [];
       if (field.required) opts.push('required: true');
@@ -187,7 +187,7 @@ export function generateFieldCode(field: FieldDefinition): string {
  * EN: Generates TypeScript Interface code based on entity definition.
  */
 export function generateInterface(entity: EntityDefinition): string {
-  const typeMap: Record<FieldType, string> = {
+  const typeMap: Record<SchematicsFieldType, string> = {
     string: 'string',
     text: 'string',
     integer: 'number',

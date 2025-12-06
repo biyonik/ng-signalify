@@ -46,7 +46,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       }
 
       <div class="sig-otp__inputs">
-        @for (digit of digits(); track $index; let i = $index) {
+        @for (digit of digits(); track i; let i = $index) {
           <input
             #digitInput
             type="text"

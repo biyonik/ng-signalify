@@ -12,14 +12,14 @@ import {
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-export interface DateRange {
+export interface DateRangeInterface {
   start: Date | null;
   end: Date | null;
 }
 
 export interface DateRangePreset {
   label: string;
-  range: DateRange;
+  range: DateRangeInterface;
 }
 
 /**
@@ -192,7 +192,7 @@ export interface DateRangePreset {
   },
 })
 export class SigDateRangePickerComponent implements ControlValueAccessor {
-  readonly value = model<DateRange | null>(null);
+  readonly value = model<DateRangeInterface | null>(null);
   readonly placeholder = input<string>('Tarih aralığı seçin');
   readonly disabled = input<boolean>(false);
   readonly clearable = input<boolean>(true);
@@ -200,7 +200,7 @@ export class SigDateRangePickerComponent implements ControlValueAccessor {
   readonly maxDate = input<Date | null>(null);
   readonly presets = input<DateRangePreset[]>([]);
 
-  readonly rangeSelected = output<DateRange>();
+  readonly rangeSelected = output<DateRangeInterface>();
 
   readonly isOpen = signal(false);
   readonly tempStart = signal<Date | null>(null);
@@ -218,7 +218,7 @@ export class SigDateRangePickerComponent implements ControlValueAccessor {
     'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
   ];
 
-  private _onChange: (value: DateRange | null) => void = () => {};
+  private _onChange: (value: DateRangeInterface | null) => void = () => {};
   private _onTouched: () => void = () => {};
 
   readonly startCalendarDays = computed(() => {
@@ -372,7 +372,7 @@ export class SigDateRangePickerComponent implements ControlValueAccessor {
   }
 
   apply(): void {
-    const range: DateRange = {
+    const range: DateRangeInterface = {
       start: this.tempStart(),
       end: this.tempEnd(),
     };
@@ -407,11 +407,11 @@ export class SigDateRangePickerComponent implements ControlValueAccessor {
     }
   }
 
-  writeValue(value: DateRange | null): void {
+  writeValue(value: DateRangeInterface | null): void {
     this.value.set(value);
   }
 
-  registerOnChange(fn: (value: DateRange | null) => void): void {
+  registerOnChange(fn: (value: DateRangeInterface | null) => void): void {
     this._onChange = fn;
   }
 
