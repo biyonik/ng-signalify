@@ -273,12 +273,12 @@ export function createEnhancedForm<T extends Record<string, unknown>>(
 
       // TR: Değer değişince asenkron validasyonu tetikle (Effect)
       // EN: Trigger async validation on value change (Effect)
-      const asyncEffect = effect(() => {
+      const asyncEffect = effect(async () => {
         const v = value();
         if (touched()) {
-          asyncValidator.validate(v);
+          await asyncValidator.validate(v);
         }
-      });
+      }, {allowSignalWrites: true});
       effectRefs.push(asyncEffect);
     }
 

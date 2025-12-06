@@ -177,7 +177,7 @@ export class SigAutocompleteComponent implements ControlValueAccessor {
       if (selected && !this.isOpen()) {
         this.searchText.set(selected.label);
       }
-    });
+    }, {allowSignalWrites: true});
   }
 
   onInput(event: Event): void {
