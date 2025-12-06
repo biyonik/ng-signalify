@@ -176,7 +176,7 @@ export class DependencyResolver {
           };
           dep.onDependencyChange(currentValues, context);
         }
-      });
+      }, {allowSignalWrites: true});
 
       this.effectCleanups.push(cleanup.destroy.bind(cleanup));
     }

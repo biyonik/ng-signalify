@@ -59,31 +59,36 @@ export abstract class BaseField<T> implements IField<T> {
    * @param initial - TR: Başlangıç değeri (varsayılan: null). / EN: Initial value (default: null).
    * @returns TR: Değer, hata ve durum sinyallerini içeren nesne. / EN: Object containing value, error, and status signals.
    */
-  createValue(initial: T | null = null): FieldValue<T> {
-    // TR: Değeri tutan ana sinyal
-    // EN: Main signal holding the value
-    const value = signal<T | null>(initial);
+    createValue(initial: T | null = null): FieldValue<T> {
+        const value = signal<T | null>(initial);
+        const touched = signal(false);
 
-    // TR: Kullanıcı etkileşimini izleyen sinyal
-    // EN: Signal tracking user interaction
-    const touched = signal(false);
+        // 1. Validasyon sonucunu hesaplayan saf (pure) sinyal
+        // Touched durumundan bağımsız olarak verinin geçerliliğini kontrol eder.
+        const validationResult = computed(() => {
+            return this.schema().safeParse(value());
+        });
 
-    // TR: Hata durumu: Sadece alan 'touched' ise ve şema doğrulaması başarısızsa hata döner.
-    // EN: Error state: Returns an error only if the field is 'touched' and schema validation fails.
-    const error = computed(() => {
-      if (!touched()) return null;
-      const result = this.schema().safeParse(value());
-      // TR: Hata varsa ilk hata mesajını, yoksa genel bir mesaj döndür.
-      // EN: Return the first error message if exists, otherwise a generic message.
-      return result.success ? null : result.error.errors[0]?.message ?? 'Geçersiz';
-    });
+        // 2. Geçerlilik Durumu (Valid)
+        // Sadece veriye bakar, touched olup olmaması umurunda değildir.
+        const valid = computed(() => validationResult().success);
 
-    // TR: Geçerlilik durumu: Hata yoksa alan geçerlidir.
-    // EN: Validity state: The field is valid if there are no errors.
-    const valid = computed(() => error() === null);
+        // 3. Hata Mesajı (Error)
+        // UI'da gösterilecek mesajdır. Sadece 'touched' true ise görünür.
+        const error = computed(() => {
+            // Dokunulmadıysa hata gösterme (Kullanıcıyı darlama)
+            if (!touched()) return null;
 
-    return { value, error, touched, valid };
-  }
+            const result = validationResult();
+            // Veri geçerliyse hata yok
+            if (result.success) return null;
+
+            // Hata varsa mesajı dön
+            return result.error.errors[0]?.message ?? 'Geçersiz';
+        });
+
+        return { value, error, touched, valid };
+    }
 
   /**
    * TR: Değerin kullanıcı arayüzünde nasıl görüneceğini belirleyen varsayılan sunum metodu.

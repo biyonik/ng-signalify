@@ -64,10 +64,10 @@ export const phoneNumber = z
  * Must start with TR and contain a total of 26 characters (TR + 24 digits).
  * Automatically transforms to uppercase.
  */
-export const iban = z
-  .string()
-  .regex(/^TR\d{24}$/, 'Geçerli bir IBAN girin')
-  .transform((val: string) => val.toUpperCase());
+export const iban = z.preprocess(
+    (val) => String(val).toUpperCase(),
+    z.string().regex(/^TR\d{24}$/, 'Geçerli bir IBAN girin')
+);
 
 /**
  * TR: Vergi Kimlik Numarası doğrulama şeması.
@@ -85,10 +85,10 @@ export const vergiNo = z.string().length(10).regex(/^\d+$/, 'Vergi No 10 haneli 
  * EN: Turkish vehicle license plate validation schema.
  * Validates province code (01-81), letter group (1-3 chars), and number group (2-4 digits) format.
  */
-export const plaka = z
-  .string()
-  .regex(/^(0[1-9]|[1-7][0-9]|8[01])[A-Z]{1,3}\d{2,4}$/, 'Geçerli bir plaka girin')
-  .transform((val: string) => val.toUpperCase());
+export const plaka = z.preprocess(
+    (val) => String(val).toUpperCase(),
+    z.string().regex(/^(0[1-9]|[1-7][0-9]|8[01])[A-Z]{1,3}\d{2,4}$/, 'Geçerli bir plaka girin')
+);
 
 /**
  * TR: Para birimi doğrulama şeması.

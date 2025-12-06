@@ -267,29 +267,40 @@ export class FileField extends BaseField<FileRef | FileRef[]> {
    * @returns TR: Hata mesajı veya null. / EN: Error message or null.
    */
   validateFile(file: File): string | null {
-    // Size check
-    if (this.config.maxSize && file.size > this.config.maxSize) {
-      return `Dosya boyutu en fazla ${this.formatSize(this.config.maxSize)} olabilir`;
-    }
-
-    // Type check
-    if (this.config.accept && this.config.accept.length > 0) {
-      const isValidType = this.config.accept.some((type) => {
-        // TR: Wildcard kontrolü (image/*)
-        // EN: Wildcard check (image/*)
-        if (type.endsWith('/*')) {
-          const prefix = type.replace('/*', '');
-          return file.type.startsWith(prefix);
-        }
-        return file.type === type;
-      });
-
-      if (!isValidType) {
-        return `İzin verilen dosya tipleri: ${this.config.accept.join(', ')}`;
+      // Size check
+      if (this.config.maxSize && file.size > this.config.maxSize) {
+          return `Dosya boyutu en fazla ${this.formatSize(this.config.maxSize)} olabilir`;
       }
-    }
 
-    return null;
+      // Type check
+      if (this.config.accept && this.config.accept.length > 0) {
+          const fileName = file.name.toLowerCase();
+          const fileType = file.type.toLowerCase();
+
+          const isValidType = this.config.accept.some((accept) => {
+              const type = accept.toLowerCase();
+
+              // 1. Wildcard (image/*)
+              if (type.endsWith('/*')) {
+                  const prefix = type.replace('/*', '');
+                  return fileType.startsWith(prefix);
+              }
+
+              // 2. Extension (.pdf)
+              if (type.startsWith('.')) {
+                  return fileName.endsWith(type);
+              }
+
+              // 3. Exact MIME (application/pdf)
+              return fileType === type;
+          });
+
+          if (!isValidType) {
+              return `İzin verilen dosya tipleri: ${this.config.accept.join(', ')}`;
+          }
+      }
+
+      return null;
   }
 
   /**
