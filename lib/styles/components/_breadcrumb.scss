@@ -1,31 +1,138 @@
-@import '../abstract/mixins';
+// ==========================================================================
+// Breadcrumb Component
+// ==========================================================================
+
+@use '../abstract/mixins' as *;
 
 .sig-breadcrumb {
   display: flex;
   align-items: center;
-  gap: var(--sig-spacing-2);
-  @include text-sm;
-  color: var(--sig-text-muted);
+  flex-wrap: wrap;
+  gap: var(--sig-spacing-1);
+  font-size: var(--sig-font-size-sm);
+  line-height: var(--sig-line-height-normal);
+
+  &__list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--sig-spacing-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
 
   &__item {
     display: flex;
     align-items: center;
+    gap: var(--sig-spacing-1);
+  }
+
+  &__link {
+    display: inline-flex;
+    align-items: center;
     gap: var(--sig-spacing-2);
-    
-    a {
-      color: var(--sig-text-secondary);
-      text-decoration: none;
-      &:hover { color: var(--sig-color-primary); }
+    color: var(--sig-text-secondary);
+    text-decoration: none;
+    padding: var(--sig-spacing-1) var(--sig-spacing-2);
+    border-radius: var(--sig-radius-sm);
+    transition: color var(--sig-transition-fast),
+    background-color var(--sig-transition-fast);
+
+    &:hover {
+      color: var(--sig-primary);
+      background: var(--sig-primary-light);
     }
 
-    &--active {
-      color: var(--sig-text-main);
-      font-weight: 500;
+    &:focus-visible {
+      outline: 2px solid var(--sig-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+
+    svg {
+      width: 100%;
+      height: 100%;
     }
   }
 
   &__separator {
-    font-size: 0.75rem;
-    color: var(--sig-text-disabled);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sig-text-muted);
+    padding: 0 var(--sig-spacing-1);
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  &__current {
+    color: var(--sig-text-primary);
+    font-weight: var(--sig-font-weight-medium);
+    padding: var(--sig-spacing-1) var(--sig-spacing-2);
+  }
+
+  // Sizes
+  &--sm {
+    font-size: var(--sig-font-size-xs);
+
+    .sig-breadcrumb__icon {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &--lg {
+    font-size: var(--sig-font-size-base);
+
+    .sig-breadcrumb__icon {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  // Collapsed variant
+  &__ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--sig-text-secondary);
+    background: var(--sig-gray-100);
+    border-radius: var(--sig-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--sig-transition-fast);
+
+    &:hover {
+      background: var(--sig-gray-200);
+    }
+  }
+}
+
+// Dark Mode
+[data-theme="dark"] {
+  .sig-breadcrumb {
+    &__link:hover {
+      background: rgba(26, 109, 220, 0.15);
+    }
+
+    &__ellipsis {
+      background: var(--sig-gray-700);
+
+      &:hover {
+        background: var(--sig-gray-600);
+      }
+    }
   }
 }

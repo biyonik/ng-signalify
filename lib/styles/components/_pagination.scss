@@ -1,54 +1,200 @@
-/* lib/styles/components/_pagination.scss */
-@import '../abstract/mixins';
+// ==========================================================================
+// Pagination Component
+// ==========================================================================
+
+@use '../abstract/mixins' as *;
 
 .sig-pagination {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--sig-spacing-3) 0;
-  color: var(--sig-text-secondary);
-  @include text-sm;
+  gap: var(--sig-spacing-1);
+  font-size: var(--sig-font-size-sm);
 
-  &__pages {
+  &__item {
     display: flex;
-    gap: var(--sig-spacing-1);
-  }
-
-  &__btn {
-    min-width: 2rem;
-    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
     padding: 0 var(--sig-spacing-2);
+    color: var(--sig-text-primary);
+    background: transparent;
+    border: 1px solid transparent;
     border-radius: var(--sig-radius-md);
-    border: 1px solid var(--sig-border-color);
-    background-color: var(--sig-bg-surface);
-    color: var(--sig-text-main);
+    font-weight: var(--sig-font-weight-medium);
     cursor: pointer;
-    transition: var(--sig-transition);
-    @include flex-center;
-    
+    transition: background-color var(--sig-transition-fast),
+    border-color var(--sig-transition-fast),
+    color var(--sig-transition-fast);
+
     &:hover:not(:disabled) {
-      background-color: var(--sig-bg-background);
-      border-color: var(--sig-text-muted);
+      background: var(--sig-gray-100);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--sig-primary);
+      outline-offset: 2px;
     }
 
     &--active {
-      background-color: var(--sig-color-primary);
-      color: var(--sig-color-primary-text);
-      border-color: var(--sig-color-primary);
+      background: var(--sig-primary);
+      color: white;
 
       &:hover {
-        background-color: var(--sig-color-primary-hover);
+        background: var(--sig-primary-hover);
       }
     }
 
-    &:disabled {
-      opacity: 0.5;
+    &--disabled {
+      opacity: 0.4;
       cursor: not-allowed;
-      background-color: var(--sig-bg-disabled);
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
     }
   }
 
-  &__info {
+  &__ellipsis {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
     color: var(--sig-text-muted);
+    cursor: default;
+  }
+
+  // Prev/Next buttons
+  &__prev,
+  &__next {
+    gap: var(--sig-spacing-1);
+    color: var(--sig-text-secondary);
+
+    &:hover:not(:disabled) {
+      color: var(--sig-text-primary);
+    }
+  }
+
+  // Sizes
+  &--sm {
+    .sig-pagination__item {
+      min-width: 28px;
+      height: 28px;
+      font-size: var(--sig-font-size-xs);
+    }
+
+    .sig-pagination__ellipsis {
+      min-width: 28px;
+      height: 28px;
+    }
+  }
+
+  &--lg {
+    .sig-pagination__item {
+      min-width: 44px;
+      height: 44px;
+      font-size: var(--sig-font-size-base);
+    }
+
+    .sig-pagination__ellipsis {
+      min-width: 44px;
+      height: 44px;
+    }
+  }
+
+  // Variants
+  &--outlined {
+    .sig-pagination__item {
+      border-color: var(--sig-border-color);
+
+      &:hover:not(:disabled):not(.sig-pagination__item--active) {
+        border-color: var(--sig-border-color-hover);
+      }
+
+      &--active {
+        border-color: var(--sig-primary);
+      }
+    }
+  }
+
+  &--rounded {
+    .sig-pagination__item {
+      border-radius: 50%;
+    }
+  }
+
+  // Simple variant (just prev/next)
+  &--simple {
+    .sig-pagination__info {
+      padding: 0 var(--sig-spacing-4);
+      font-size: var(--sig-font-size-sm);
+      color: var(--sig-text-secondary);
+    }
+  }
+
+  // Compact variant
+  &--compact {
+    gap: 0;
+
+    .sig-pagination__item {
+      border-radius: 0;
+      border-right-width: 0;
+
+      &:first-child {
+        border-radius: var(--sig-radius-md) 0 0 var(--sig-radius-md);
+      }
+
+      &:last-child {
+        border-radius: 0 var(--sig-radius-md) var(--sig-radius-md) 0;
+        border-right-width: 1px;
+      }
+    }
+  }
+}
+
+// Pagination with page size selector
+.sig-pagination-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sig-spacing-4);
+  flex-wrap: wrap;
+
+  &__info {
+    font-size: var(--sig-font-size-sm);
+    color: var(--sig-text-secondary);
+  }
+
+  &__page-size {
+    display: flex;
+    align-items: center;
+    gap: var(--sig-spacing-2);
+    font-size: var(--sig-font-size-sm);
+    color: var(--sig-text-secondary);
+
+    select {
+      padding: var(--sig-spacing-1) var(--sig-spacing-2);
+      border: 1px solid var(--sig-border-color);
+      border-radius: var(--sig-radius-md);
+      font-size: var(--sig-font-size-sm);
+      background: var(--sig-surface);
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+        border-color: var(--sig-primary);
+      }
+    }
+  }
+}
+
+// Dark Mode
+[data-theme="dark"] {
+  .sig-pagination {
+    &__item:hover:not(:disabled) {
+      background: var(--sig-gray-700);
+    }
   }
 }

@@ -1,21 +1,230 @@
-@import '../abstract/mixins';
+// ==========================================================================
+// Rating Component
+// ==========================================================================
+
+@use '../abstract/mixins' as *;
 
 .sig-rating {
   display: inline-flex;
-  gap: 2px;
-  
-  &__star {
-    background: none;
-    border: none;
-    padding: 0;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--sig-border-color); /* Pasif yıldız rengi */
-    transition: color 0.1s;
+  align-items: center;
+  gap: var(--sig-spacing-1);
 
-    &--filled { color: var(--sig-color-warning); }
-    &--hover { color: var(--sig-color-warning-text); }
-    
-    &:disabled { cursor: default; opacity: 0.6; }
+  &__items {
+    display: flex;
+    gap: var(--sig-spacing-1);
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sig-gray-300);
+    cursor: pointer;
+    transition: color var(--sig-transition-fast),
+    transform var(--sig-transition-fast);
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &--active {
+      color: #fbbf24;
+    }
+
+    &--half {
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+      }
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+  }
+
+  // Read-only
+  &--readonly {
+    .sig-rating__item {
+      cursor: default;
+
+      &:hover {
+        transform: none;
+      }
+    }
+  }
+
+  // Disabled
+  &--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  // Sizes
+  &--xs {
+    .sig-rating__item svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &--sm {
+    .sig-rating__item svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &--md {
+    .sig-rating__item svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &--lg {
+    .sig-rating__item svg {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  &--xl {
+    .sig-rating__item svg {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  // Color variants
+  &--primary {
+    .sig-rating__item--active {
+      color: var(--sig-primary);
+    }
+  }
+
+  &--success {
+    .sig-rating__item--active {
+      color: var(--sig-success);
+    }
+  }
+
+  &--error {
+    .sig-rating__item--active {
+      color: var(--sig-error);
+    }
+  }
+
+  // Value label
+  &__value {
+    margin-left: var(--sig-spacing-2);
+    font-size: var(--sig-font-size-sm);
+    font-weight: var(--sig-font-weight-medium);
+    color: var(--sig-text-primary);
+  }
+
+  &__count {
+    margin-left: var(--sig-spacing-1);
+    font-size: var(--sig-font-size-sm);
+    color: var(--sig-text-secondary);
+  }
+
+  // With labels
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: var(--sig-spacing-2);
+    font-size: var(--sig-font-size-sm);
+    color: var(--sig-text-secondary);
+  }
+}
+
+// Rating with hover preview
+.sig-rating--hover-preview {
+  .sig-rating__item {
+    &:hover ~ .sig-rating__item {
+      color: var(--sig-gray-300);
+    }
+  }
+
+  &:hover .sig-rating__item {
+    color: #fbbf24;
+  }
+}
+
+// Rating breakdown (for showing distribution)
+.sig-rating-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sig-spacing-2);
+  width: 100%;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: var(--sig-spacing-3);
+  }
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: var(--sig-spacing-1);
+    min-width: 60px;
+    font-size: var(--sig-font-size-sm);
+    color: var(--sig-text-secondary);
+
+    svg {
+      width: 14px;
+      height: 14px;
+      color: #fbbf24;
+      fill: currentColor;
+    }
+  }
+
+  &__bar {
+    flex: 1;
+    height: 8px;
+    background: var(--sig-gray-200);
+    border-radius: var(--sig-radius-full);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: #fbbf24;
+    border-radius: inherit;
+    transition: width var(--sig-transition-base);
+  }
+
+  &__count {
+    min-width: 40px;
+    text-align: right;
+    font-size: var(--sig-font-size-sm);
+    color: var(--sig-text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// Dark Mode
+[data-theme="dark"] {
+  .sig-rating {
+    &__item {
+      color: var(--sig-gray-600);
+    }
+  }
+
+  .sig-rating-breakdown {
+    &__bar {
+      background: var(--sig-gray-700);
+    }
   }
 }

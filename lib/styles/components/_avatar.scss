@@ -1,28 +1,206 @@
-@import '../abstract/mixins';
+// ==========================================================================
+// Avatar Component
+// ==========================================================================
+
+@use '../abstract/mixins' as *;
 
 .sig-avatar {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   border-radius: 50%;
-  overflow: hidden;
-  background-color: var(--sig-gray-200);
+  background: var(--sig-gray-200);
   color: var(--sig-text-secondary);
-  font-weight: 600;
-  text-transform: uppercase;
-  border: 1px solid var(--sig-bg-surface); /* Border for group overlapping */
+  font-weight: var(--sig-font-weight-medium);
+  overflow: hidden;
+  user-select: none;
 
-  &--sm { width: 2rem; height: 2rem; font-size: 0.75rem; }
-  &--md { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
-  &--lg { width: 3rem; height: 3rem; font-size: 1.125rem; }
-  &--xl { width: 4rem; height: 4rem; font-size: 1.5rem; }
+  // Sizes
+  &--xs {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
 
-  &__img { width: 100%; height: 100%; object-fit: cover; }
-  
-  /* Avatar Group */
-  &-group {
+  &--sm {
+    width: 32px;
+    height: 32px;
+    font-size: var(--sig-font-size-xs);
+  }
+
+  &--md {
+    width: 40px;
+    height: 40px;
+    font-size: var(--sig-font-size-sm);
+  }
+
+  &--lg {
+    width: 48px;
+    height: 48px;
+    font-size: var(--sig-font-size-base);
+  }
+
+  &--xl {
+    width: 64px;
+    height: 64px;
+    font-size: var(--sig-font-size-lg);
+  }
+
+  &--2xl {
+    width: 96px;
+    height: 96px;
+    font-size: var(--sig-font-size-2xl);
+  }
+
+  // Image
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  // Initials
+  &__initials {
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+
+  // Icon placeholder
+  &__icon {
     display: flex;
-    .sig-avatar:not(:first-child) { margin-left: -0.75rem; }
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 50%;
+      height: 50%;
+    }
+  }
+
+  // Status indicator
+  &__status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 25%;
+    height: 25%;
+    min-width: 8px;
+    min-height: 8px;
+    border-radius: 50%;
+    border: 2px solid var(--sig-surface);
+    background: var(--sig-gray-400);
+
+    &--online {
+      background: var(--sig-success);
+    }
+
+    &--offline {
+      background: var(--sig-gray-400);
+    }
+
+    &--busy {
+      background: var(--sig-error);
+    }
+
+    &--away {
+      background: var(--sig-warning);
+    }
+  }
+
+  // Variants
+  &--square {
+    border-radius: var(--sig-radius-md);
+  }
+
+  &--bordered {
+    border: 2px solid var(--sig-surface);
+    box-shadow: 0 0 0 1px var(--sig-border-color);
+  }
+
+  // Color variants
+  &--primary {
+    background: var(--sig-primary-light);
+    color: var(--sig-primary);
+  }
+
+  &--success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--sig-success);
+  }
+
+  &--warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--sig-warning);
+  }
+
+  &--error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--sig-error);
+  }
+}
+
+// Avatar Group
+.sig-avatar-group {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+
+  .sig-avatar {
+    border: 2px solid var(--sig-surface);
+    margin-left: -8px;
+    transition: transform var(--sig-transition-fast),
+    z-index var(--sig-transition-fast);
+
+    &:last-child {
+      margin-left: 0;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      z-index: 10;
+    }
+  }
+
+  &--sm .sig-avatar {
+    margin-left: -6px;
+  }
+
+  &--lg .sig-avatar {
+    margin-left: -12px;
+  }
+
+  // Counter for remaining avatars
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--sig-gray-100);
+    color: var(--sig-text-secondary);
+    font-size: var(--sig-font-size-xs);
+    font-weight: var(--sig-font-weight-medium);
+    border: 2px solid var(--sig-surface);
+    margin-left: -8px;
+  }
+}
+
+// Dark Mode
+[data-theme="dark"] {
+  .sig-avatar {
+    background: var(--sig-gray-700);
+
+    &--primary {
+      background: rgba(26, 109, 220, 0.2);
+    }
+
+    &__status {
+      border-color: var(--sig-gray-900);
+    }
+  }
+
+  .sig-avatar-group__count {
+    background: var(--sig-gray-700);
   }
 }

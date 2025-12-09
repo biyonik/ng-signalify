@@ -1,20 +1,179 @@
-@import '../abstract/mixins';
+// ==========================================================================
+// OTP Input Component
+// ==========================================================================
+
+@use '../abstract/mixins' as *;
 
 .sig-otp-input {
   display: flex;
+  flex-direction: column;
   gap: var(--sig-spacing-2);
-  justify-content: center;
+
+  &__container {
+    display: flex;
+    gap: var(--sig-spacing-2);
+    justify-content: center;
+  }
 
   &__field {
-    width: 3rem;
-    height: 3rem;
+    width: 48px;
+    height: 56px;
     text-align: center;
-    font-size: 1.25rem;
-    border: 1px solid var(--sig-border-color);
+    font-size: var(--sig-font-size-xl);
+    font-weight: var(--sig-font-weight-semibold);
+    font-family: var(--sig-font-mono);
+    color: var(--sig-text-primary);
+    background: var(--sig-surface);
+    border: 2px solid var(--sig-border-color);
     border-radius: var(--sig-radius-md);
-    background: var(--sig-bg-surface);
-    @include focus-ring;
-    
-    &::-webkit-inner-spin-button { appearance: none; }
+    outline: none;
+    transition: border-color var(--sig-transition-fast),
+    box-shadow var(--sig-transition-fast),
+    background-color var(--sig-transition-fast);
+
+    &:focus {
+      border-color: var(--sig-primary);
+      box-shadow: 0 0 0 3px var(--sig-primary-light);
+    }
+
+    &:hover:not(:focus):not(:disabled) {
+      border-color: var(--sig-border-color-hover);
+    }
+
+    &::placeholder {
+      color: var(--sig-text-muted);
+    }
+
+    &--filled {
+      background: var(--sig-gray-50);
+      border-color: var(--sig-gray-300);
+    }
+
+    &--error {
+      border-color: var(--sig-error);
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+      }
+    }
+
+    &--success {
+      border-color: var(--sig-success);
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+      }
+    }
+
+    &:disabled {
+      background: var(--sig-gray-100);
+      color: var(--sig-text-muted);
+      cursor: not-allowed;
+    }
+  }
+
+  // With separator
+  &--separated {
+    .sig-otp-input__container {
+      gap: var(--sig-spacing-3);
+    }
+  }
+
+  &__separator {
+    display: flex;
+    align-items: center;
+    font-size: var(--sig-font-size-lg);
+    color: var(--sig-text-muted);
+  }
+
+  // Sizes
+  &--sm {
+    .sig-otp-input__field {
+      width: 40px;
+      height: 44px;
+      font-size: var(--sig-font-size-lg);
+    }
+  }
+
+  &--lg {
+    .sig-otp-input__field {
+      width: 56px;
+      height: 64px;
+      font-size: var(--sig-font-size-2xl);
+    }
+  }
+
+  // Masked variant
+  &--masked {
+    .sig-otp-input__field {
+      -webkit-text-security: disc;
+      text-security: disc;
+      font-size: var(--sig-font-size-3xl);
+    }
+  }
+
+  // Helper text
+  &__helper {
+    text-align: center;
+    font-size: var(--sig-font-size-sm);
+    color: var(--sig-text-secondary);
+  }
+
+  &__error {
+    text-align: center;
+    font-size: var(--sig-font-size-sm);
+    color: var(--sig-error);
+  }
+
+  // Resend section
+  &__resend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sig-spacing-2);
+    margin-top: var(--sig-spacing-4);
+    font-size: var(--sig-font-size-sm);
+    color: var(--sig-text-secondary);
+  }
+
+  &__resend-btn {
+    color: var(--sig-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: var(--sig-font-weight-medium);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--sig-transition-fast);
+
+    &:hover {
+      color: var(--sig-primary-hover);
+    }
+
+    &:disabled {
+      color: var(--sig-text-muted);
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+  }
+
+  &__countdown {
+    color: var(--sig-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// Dark Mode
+[data-theme="dark"] {
+  .sig-otp-input {
+    &__field {
+      &--filled {
+        background: var(--sig-gray-800);
+      }
+
+      &:disabled {
+        background: var(--sig-gray-800);
+      }
+    }
   }
 }

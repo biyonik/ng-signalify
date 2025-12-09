@@ -1,37 +1,161 @@
-@import '../abstract/mixins';
+// ==========================================================================
+// Accordion Component
+// ==========================================================================
+
+@use '../abstract/mixins' as *;
 
 .sig-accordion {
-  border: 1px solid var(--sig-border-color);
-  border-radius: var(--sig-radius-md);
-  background: var(--sig-bg-surface);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sig-spacing-2);
+  width: 100%;
 
+  // Accordion Item
   &__item {
-    border-bottom: 1px solid var(--sig-border-color);
-    &:last-child { border-bottom: none; }
+    border: 1px solid var(--sig-border-color);
+    border-radius: var(--sig-radius-md);
+    background: var(--sig-surface);
+    overflow: hidden;
+    transition: border-color var(--sig-transition-fast),
+    box-shadow var(--sig-transition-fast);
+
+    &:hover {
+      border-color: var(--sig-border-color-hover);
+    }
+
+    &--expanded {
+      border-color: var(--sig-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    &--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   }
 
+  // Header / Trigger
   &__header {
-    width: 100%;
-    padding: var(--sig-spacing-3) var(--sig-spacing-4);
-    background: none;
-    border: none;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--sig-spacing-4);
+    background: transparent;
+    border: none;
     cursor: pointer;
-    font-weight: 500;
-    color: var(--sig-text-main);
-    transition: background-color 0.1s;
+    font-family: inherit;
+    font-size: var(--sig-font-size-base);
+    font-weight: var(--sig-font-weight-medium);
+    color: var(--sig-text-primary);
+    text-align: left;
+    transition: background-color var(--sig-transition-fast);
 
-    &:hover { background-color: var(--sig-bg-background); }
+    &:hover {
+      background: var(--sig-gray-50);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--sig-primary);
+      outline-offset: -2px;
+    }
+
+    .sig-accordion__item--expanded & {
+      background: var(--sig-gray-50);
+    }
   }
 
-  &__content {
-    padding: var(--sig-spacing-4);
-    border-top: 1px solid var(--sig-border-color);
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: var(--sig-spacing-3);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
     color: var(--sig-text-secondary);
-    @include text-sm;
-    animation: sig-slide-down 0.2s;
+    transition: transform var(--sig-transition-base);
+
+    .sig-accordion__item--expanded & {
+      transform: rotate(180deg);
+      color: var(--sig-primary);
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  // Content Panel
+  &__content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--sig-transition-base);
+
+    .sig-accordion__item--expanded & {
+      grid-template-rows: 1fr;
+    }
+  }
+
+  &__body {
+    overflow: hidden;
+  }
+
+  &__inner {
+    padding: 0 var(--sig-spacing-4) var(--sig-spacing-4);
+    color: var(--sig-text-secondary);
+    font-size: var(--sig-font-size-sm);
+    line-height: var(--sig-line-height-relaxed);
+  }
+
+  // Variants
+  &--bordered {
+    .sig-accordion__item {
+      border-radius: 0;
+
+      &:first-child {
+        border-radius: var(--sig-radius-md) var(--sig-radius-md) 0 0;
+      }
+
+      &:last-child {
+        border-radius: 0 0 var(--sig-radius-md) var(--sig-radius-md);
+      }
+
+      &:not(:last-child) {
+        border-bottom: none;
+      }
+    }
+  }
+
+  &--flush {
+    gap: 0;
+
+    .sig-accordion__item {
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+
+      &:first-child {
+        border-top: none;
+      }
+    }
+  }
+}
+
+// Dark Mode
+[data-theme="dark"] {
+  .sig-accordion {
+    &__header:hover {
+      background: var(--sig-gray-800);
+    }
+
+    &__item--expanded .sig-accordion__header {
+      background: var(--sig-gray-800);
+    }
   }
 }

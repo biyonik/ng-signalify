@@ -1,28 +1,255 @@
-@import '../abstract/mixins';
+// ==========================================================================
+// Progress Component
+// ==========================================================================
+
+@use '../abstract/mixins' as *;
 
 .sig-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sig-spacing-2);
   width: 100%;
-  
-  &__bar-bg {
+
+  // Track
+  &__track {
+    position: relative;
     width: 100%;
-    height: 0.5rem;
-    background-color: var(--sig-bg-disabled);
+    height: 8px;
+    background: var(--sig-gray-200);
     border-radius: var(--sig-radius-full);
     overflow: hidden;
   }
 
-  &__bar-fill {
+  // Bar
+  &__bar {
     height: 100%;
-    background-color: var(--sig-color-primary);
-    border-radius: var(--sig-radius-full);
-    transition: width 0.3s ease;
+    background: var(--sig-primary);
+    border-radius: inherit;
+    transition: width var(--sig-transition-base);
   }
 
+  // Label
   &__label {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: var(--sig-font-size-sm);
     color: var(--sig-text-secondary);
-    margin-bottom: var(--sig-spacing-1);
+  }
+
+  &__text {
+    font-weight: var(--sig-font-weight-medium);
+    color: var(--sig-text-primary);
+  }
+
+  &__value {
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Sizes
+  &--xs .sig-progress__track {
+    height: 4px;
+  }
+
+  &--sm .sig-progress__track {
+    height: 6px;
+  }
+
+  &--md .sig-progress__track {
+    height: 8px;
+  }
+
+  &--lg .sig-progress__track {
+    height: 12px;
+  }
+
+  &--xl .sig-progress__track {
+    height: 16px;
+  }
+
+  // Color variants
+  &--success .sig-progress__bar {
+    background: var(--sig-success);
+  }
+
+  &--warning .sig-progress__bar {
+    background: var(--sig-warning);
+  }
+
+  &--error .sig-progress__bar {
+    background: var(--sig-error);
+  }
+
+  // Indeterminate state
+  &--indeterminate {
+    .sig-progress__bar {
+      width: 30% !important;
+      animation: sig-progress-indeterminate 1.5s ease-in-out infinite;
+    }
+  }
+
+  // Striped variant
+  &--striped .sig-progress__bar {
+    background-image: linear-gradient(
+                    45deg,
+                    rgba(255, 255, 255, 0.15) 25%,
+                    transparent 25%,
+                    transparent 50%,
+                    rgba(255, 255, 255, 0.15) 50%,
+                    rgba(255, 255, 255, 0.15) 75%,
+                    transparent 75%,
+                    transparent
+    );
+    background-size: 1rem 1rem;
+  }
+
+  // Animated striped
+  &--animated .sig-progress__bar {
+    animation: sig-progress-stripes 1s linear infinite;
+  }
+
+  // With value inside bar
+  &--value-inside {
+    .sig-progress__track {
+      height: 20px;
+    }
+
+    .sig-progress__bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+    }
+
+    .sig-progress__bar-value {
+      font-size: var(--sig-font-size-xs);
+      font-weight: var(--sig-font-weight-semibold);
+      color: white;
+    }
+  }
+}
+
+// Circular Progress
+.sig-progress-circular {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &__svg {
+    transform: rotate(-90deg);
+  }
+
+  &__track {
+    fill: none;
+    stroke: var(--sig-gray-200);
+    stroke-width: 4;
+  }
+
+  &__bar {
+    fill: none;
+    stroke: var(--sig-primary);
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset var(--sig-transition-base);
+  }
+
+  &__value {
+    position: absolute;
+    font-size: var(--sig-font-size-sm);
+    font-weight: var(--sig-font-weight-semibold);
+    color: var(--sig-text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Sizes
+  &--sm {
+    width: 32px;
+    height: 32px;
+
+    .sig-progress-circular__value {
+      font-size: var(--sig-font-size-xs);
+    }
+  }
+
+  &--md {
+    width: 48px;
+    height: 48px;
+  }
+
+  &--lg {
+    width: 64px;
+    height: 64px;
+
+    .sig-progress-circular__value {
+      font-size: var(--sig-font-size-base);
+    }
+  }
+
+  &--xl {
+    width: 96px;
+    height: 96px;
+
+    .sig-progress-circular__value {
+      font-size: var(--sig-font-size-lg);
+    }
+  }
+
+  // Color variants
+  &--success .sig-progress-circular__bar {
+    stroke: var(--sig-success);
+  }
+
+  &--warning .sig-progress-circular__bar {
+    stroke: var(--sig-warning);
+  }
+
+  &--error .sig-progress-circular__bar {
+    stroke: var(--sig-error);
+  }
+
+  // Indeterminate
+  &--indeterminate {
+    .sig-progress-circular__svg {
+      animation: sig-spin 1.5s linear infinite;
+    }
+
+    .sig-progress-circular__bar {
+      stroke-dasharray: 60, 200;
+    }
+  }
+}
+
+// Animations
+@keyframes sig-progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@keyframes sig-progress-stripes {
+  from {
+    background-position: 1rem 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+// Dark Mode
+[data-theme="dark"] {
+  .sig-progress {
+    &__track {
+      background: var(--sig-gray-700);
+    }
+  }
+
+  .sig-progress-circular {
+    &__track {
+      stroke: var(--sig-gray-700);
+    }
   }
 }
