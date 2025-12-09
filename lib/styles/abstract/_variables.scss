@@ -9,6 +9,7 @@
      ========================================================================== */
 
   /* Primary - Professional Blue */
+  --sig-primary: #1a6ddc;
   --sig-primary-50: #f0f7ff;
   --sig-primary-100: #e0efff;
   --sig-primary-200: #b8dbff;
@@ -19,6 +20,8 @@
   --sig-primary-700: #0a4494;
   --sig-primary-800: #083670;
   --sig-primary-900: #062750;
+  --sig-primary-light: var(--sig-primary-50);
+  --sig-primary-hover: var(--sig-primary-600);
 
   /* Neutral - Slate Gray (Kurumsal gri tonları) */
   --sig-neutral-0: #ffffff;
@@ -36,28 +39,44 @@
   --sig-neutral-950: #0a0d12;
 
   /* Semantic Colors */
+  --sig-success: #22c55e;
   --sig-success-50: #f0fdf4;
   --sig-success-100: #dcfce7;
   --sig-success-500: #22c55e;
   --sig-success-600: #16a34a;
   --sig-success-700: #15803d;
 
+  --sig-warning: #f59e0b;
   --sig-warning-50: #fffbeb;
   --sig-warning-100: #fef3c7;
   --sig-warning-500: #f59e0b;
   --sig-warning-600: #d97706;
   --sig-warning-700: #b45309;
 
+  --sig-error: #ef4444;
   --sig-error-50: #fef2f2;
   --sig-error-100: #fee2e2;
   --sig-error-500: #ef4444;
   --sig-error-600: #dc2626;
   --sig-error-700: #b91c1c;
 
+  --sig-info: #3b82f6;
   --sig-info-50: #eff6ff;
   --sig-info-100: #dbeafe;
   --sig-info-500: #3b82f6;
   --sig-info-600: #2563eb;
+
+  /* Gray Scale (alias for neutral) */
+  --sig-gray-50: var(--sig-neutral-50);
+  --sig-gray-100: var(--sig-neutral-100);
+  --sig-gray-200: var(--sig-neutral-200);
+  --sig-gray-300: var(--sig-neutral-300);
+  --sig-gray-400: var(--sig-neutral-400);
+  --sig-gray-500: var(--sig-neutral-500);
+  --sig-gray-600: var(--sig-neutral-600);
+  --sig-gray-700: var(--sig-neutral-700);
+  --sig-gray-800: var(--sig-neutral-800);
+  --sig-gray-900: var(--sig-neutral-900);
 
   /* ==========================================================================
      SEMANTIC TOKENS
@@ -79,8 +98,12 @@
   --sig-bg-hover: var(--sig-neutral-50);
   --sig-bg-active: var(--sig-neutral-100);
 
+  /* Backgrounds - Short aliases */
+  --sig-surface: var(--sig-bg-surface);
+
   /* Borders */
   --sig-border-color: var(--sig-neutral-200);
+  --sig-border-color-hover: var(--sig-neutral-300);
   --sig-border-color-strong: var(--sig-neutral-300);
   --sig-border-color-focus: var(--sig-primary-500);
   --sig-border-color-error: var(--sig-error-500);
@@ -121,6 +144,17 @@
   --sig-text-lg: 1.125rem;     /* 18px */
   --sig-text-xl: 1.25rem;      /* 20px */
   --sig-text-2xl: 1.5rem;      /* 24px */
+  --sig-text-3xl: 1.875rem;    /* 30px */
+
+  /* Font Size Aliases (for component compatibility) */
+  --sig-font-size-xs: var(--sig-text-xs);
+  --sig-font-size-sm: var(--sig-text-sm);
+  --sig-font-size-base: var(--sig-text-base);
+  --sig-font-size-md: var(--sig-text-md);
+  --sig-font-size-lg: var(--sig-text-lg);
+  --sig-font-size-xl: var(--sig-text-xl);
+  --sig-font-size-2xl: var(--sig-text-2xl);
+  --sig-font-size-3xl: var(--sig-text-3xl);
 
   /* Line Heights */
   --sig-leading-none: 1;
@@ -129,11 +163,27 @@
   --sig-leading-normal: 1.5;
   --sig-leading-relaxed: 1.625;
 
+  /* Line Height Aliases */
+  --sig-line-height-none: var(--sig-leading-none);
+  --sig-line-height-tight: var(--sig-leading-tight);
+  --sig-line-height-snug: var(--sig-leading-snug);
+  --sig-line-height-normal: var(--sig-leading-normal);
+  --sig-line-height-relaxed: var(--sig-leading-relaxed);
+
   /* Font Weights */
   --sig-font-normal: 400;
   --sig-font-medium: 500;
   --sig-font-semibold: 600;
   --sig-font-bold: 700;
+
+  /* Font Weight Aliases */
+  --sig-font-weight-normal: var(--sig-font-normal);
+  --sig-font-weight-medium: var(--sig-font-medium);
+  --sig-font-weight-semibold: var(--sig-font-semibold);
+  --sig-font-weight-bold: var(--sig-font-bold);
+
+  /* Font Family Alias */
+  --sig-font-mono: var(--sig-font-family-mono);
 
   /* ==========================================================================
      SPACING SCALE
@@ -156,12 +206,18 @@
   --sig-space-12: 3rem;        /* 48px */
   --sig-space-16: 4rem;        /* 64px */
 
-  /* Legacy spacing aliases */
+  /* Spacing Aliases (for component compatibility) */
+  --sig-spacing-0: var(--sig-space-0);
   --sig-spacing-1: var(--sig-space-1);
   --sig-spacing-2: var(--sig-space-2);
   --sig-spacing-3: var(--sig-space-3);
   --sig-spacing-4: var(--sig-space-4);
+  --sig-spacing-5: var(--sig-space-5);
   --sig-spacing-6: var(--sig-space-6);
+  --sig-spacing-8: var(--sig-space-8);
+  --sig-spacing-10: var(--sig-space-10);
+  --sig-spacing-12: var(--sig-space-12);
+  --sig-spacing-16: var(--sig-space-16);
 
   /* ==========================================================================
      BORDER RADIUS
@@ -217,7 +273,8 @@
   --sig-transition-normal: var(--sig-duration-normal) var(--sig-ease-default);
   --sig-transition-slow: var(--sig-duration-slow) var(--sig-ease-default);
 
-  /* Legacy transition alias */
+  /* Transition Aliases */
+  --sig-transition-base: var(--sig-transition-normal);
   --sig-transition: all var(--sig-transition-normal);
 
   /* ==========================================================================
@@ -262,7 +319,11 @@
   --sig-bg-hover: var(--sig-neutral-800);
   --sig-bg-active: var(--sig-neutral-700);
 
+  /* Surface alias */
+  --sig-surface: var(--sig-bg-surface);
+
   --sig-border-color: var(--sig-neutral-700);
+  --sig-border-color-hover: var(--sig-neutral-600);
   --sig-border-color-strong: var(--sig-neutral-600);
 
   --sig-text-primary: var(--sig-neutral-50);
@@ -270,6 +331,19 @@
   --sig-text-tertiary: var(--sig-neutral-500);
   --sig-text-placeholder: var(--sig-neutral-500);
   --sig-text-disabled: var(--sig-neutral-600);
+  --sig-text-muted: var(--sig-neutral-500);
+
+  /* Gray aliases for dark mode */
+  --sig-gray-50: var(--sig-neutral-900);
+  --sig-gray-100: var(--sig-neutral-800);
+  --sig-gray-200: var(--sig-neutral-700);
+  --sig-gray-300: var(--sig-neutral-600);
+  --sig-gray-400: var(--sig-neutral-500);
+  --sig-gray-500: var(--sig-neutral-400);
+  --sig-gray-600: var(--sig-neutral-300);
+  --sig-gray-700: var(--sig-neutral-200);
+  --sig-gray-800: var(--sig-neutral-100);
+  --sig-gray-900: var(--sig-neutral-50);
 
   --sig-shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --sig-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
@@ -288,7 +362,11 @@
     --sig-bg-hover: var(--sig-neutral-800);
     --sig-bg-active: var(--sig-neutral-700);
 
+    /* Surface alias */
+    --sig-surface: var(--sig-bg-surface);
+
     --sig-border-color: var(--sig-neutral-700);
+    --sig-border-color-hover: var(--sig-neutral-600);
     --sig-border-color-strong: var(--sig-neutral-600);
 
     --sig-text-primary: var(--sig-neutral-50);
@@ -296,6 +374,19 @@
     --sig-text-tertiary: var(--sig-neutral-500);
     --sig-text-placeholder: var(--sig-neutral-500);
     --sig-text-disabled: var(--sig-neutral-600);
+    --sig-text-muted: var(--sig-neutral-500);
+
+    /* Gray aliases for dark mode */
+    --sig-gray-50: var(--sig-neutral-900);
+    --sig-gray-100: var(--sig-neutral-800);
+    --sig-gray-200: var(--sig-neutral-700);
+    --sig-gray-300: var(--sig-neutral-600);
+    --sig-gray-400: var(--sig-neutral-500);
+    --sig-gray-500: var(--sig-neutral-400);
+    --sig-gray-600: var(--sig-neutral-300);
+    --sig-gray-700: var(--sig-neutral-200);
+    --sig-gray-800: var(--sig-neutral-100);
+    --sig-gray-900: var(--sig-neutral-50);
 
     --sig-shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
     --sig-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
