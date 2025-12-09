@@ -1,41 +1,189 @@
-@import '../abstract/mixins';
+/* ==========================================================================
+   sig-alert - Alert/Banner Component
+   ========================================================================== */
+
+@use '../abstract/mixins' as *;
 
 .sig-alert {
+  position: relative;
   display: flex;
-  gap: var(--sig-spacing-3);
-  padding: var(--sig-spacing-3);
-  border-radius: var(--sig-radius-md);
+  gap: var(--sig-space-3);
+  padding: var(--sig-space-4);
+  border-radius: var(--sig-radius-lg);
   border: 1px solid transparent;
-  @include text-sm;
+  font-size: var(--sig-text-sm);
+  line-height: var(--sig-leading-normal);
+
+  /* Icon */
+  &__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 1px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  /* Content */
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-weight: var(--sig-font-semibold);
+    margin-bottom: var(--sig-space-1);
+  }
+
+  &__description {
+    color: inherit;
+    opacity: 0.9;
+  }
+
+  /* Actions */
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sig-space-2);
+    margin-top: var(--sig-space-3);
+  }
+
+  /* Close button */
+  &__close {
+    position: absolute;
+    top: var(--sig-space-3);
+    right: var(--sig-space-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    color: inherit;
+    opacity: 0.6;
+    background: none;
+    border: none;
+    border-radius: var(--sig-radius-sm);
+    cursor: pointer;
+    transition: all var(--sig-transition-normal);
+
+    &:hover {
+      opacity: 1;
+      background-color: rgb(0 0 0 / 0.1);
+    }
+  }
+
+  /* ============================================
+     VARIANTS
+     ============================================ */
 
   &--info {
-    background-color: var(--sig-color-primary-subtle);
-    border-color: var(--sig-color-primary-subtle);
-    color: var(--sig-color-primary-text-subtle);
-    .sig-alert__icon { color: var(--sig-color-primary); }
+    background-color: var(--sig-info-50);
+    border-color: var(--sig-info-100);
+    color: var(--sig-info-600);
+
+    .sig-alert__icon {
+      color: var(--sig-info-500);
+    }
   }
 
   &--success {
-    background-color: var(--sig-color-success-bg);
-    border-color: var(--sig-color-success-bg);
-    color: var(--sig-color-success-text);
-    .sig-alert__icon { color: var(--sig-color-success); }
+    background-color: var(--sig-success-50);
+    border-color: var(--sig-success-100);
+    color: var(--sig-success-700);
+
+    .sig-alert__icon {
+      color: var(--sig-success-500);
+    }
   }
 
   &--warning {
-    background-color: var(--sig-color-warning-bg);
-    border-color: var(--sig-color-warning-bg);
-    color: var(--sig-color-warning-text);
-    .sig-alert__icon { color: var(--sig-color-warning); }
+    background-color: var(--sig-warning-50);
+    border-color: var(--sig-warning-100);
+    color: var(--sig-warning-700);
+
+    .sig-alert__icon {
+      color: var(--sig-warning-500);
+    }
   }
 
+  &--error,
   &--danger {
-    background-color: var(--sig-color-danger-bg);
-    border-color: var(--sig-color-danger-bg);
-    color: var(--sig-color-danger-text);
-    .sig-alert__icon { color: var(--sig-color-danger); }
+    background-color: var(--sig-error-50);
+    border-color: var(--sig-error-100);
+    color: var(--sig-error-700);
+
+    .sig-alert__icon {
+      color: var(--sig-error-500);
+    }
   }
 
-  &__content { flex: 1; }
-  &__title { font-weight: 600; margin-bottom: 0.25rem; }
+  /* Neutral */
+  &--neutral {
+    background-color: var(--sig-neutral-100);
+    border-color: var(--sig-neutral-200);
+    color: var(--sig-text-primary);
+
+    .sig-alert__icon {
+      color: var(--sig-text-secondary);
+    }
+  }
+
+  /* ============================================
+     STYLES
+     ============================================ */
+
+  /* Bordered variant - stronger border */
+  &--bordered {
+    border-left-width: 4px;
+  }
+
+  /* Filled variant - solid background */
+  &--filled {
+    &.sig-alert--info {
+      background-color: var(--sig-info-500);
+      border-color: var(--sig-info-500);
+      color: white;
+    }
+
+    &.sig-alert--success {
+      background-color: var(--sig-success-500);
+      border-color: var(--sig-success-500);
+      color: white;
+    }
+
+    &.sig-alert--warning {
+      background-color: var(--sig-warning-500);
+      border-color: var(--sig-warning-500);
+      color: white;
+    }
+
+    &.sig-alert--error,
+    &.sig-alert--danger {
+      background-color: var(--sig-error-500);
+      border-color: var(--sig-error-500);
+      color: white;
+    }
+
+    .sig-alert__icon {
+      color: inherit;
+    }
+  }
+
+  /* Compact size */
+  &--compact {
+    padding: var(--sig-space-2) var(--sig-space-3);
+    gap: var(--sig-space-2);
+
+    .sig-alert__icon {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
 }

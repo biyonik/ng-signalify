@@ -1,56 +1,223 @@
-@import '../abstract/mixins';
+/* ==========================================================================
+   sig-radio - Radio Button Component
+   ========================================================================== */
+
+@use '../abstract/mixins' as *;
 
 .sig-radio {
   display: inline-flex;
-  align-items: center;
-  gap: var(--sig-spacing-2);
+  align-items: flex-start;
+  gap: var(--sig-space-2);
   cursor: pointer;
+  user-select: none;
 
+  /* Hidden native input */
   &__input {
-    appearance: none;
-    width: 1.25rem;
-    height: 1.25rem;
-    border: 1px solid var(--sig-border-color);
-    border-radius: 50%;
-    background-color: var(--sig-bg-surface);
-    transition: var(--sig-transition);
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  /* Custom radio circle */
+  &__circle {
     position: relative;
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: 1px;
+    background-color: var(--sig-bg-surface);
+    border: 1px solid var(--sig-border-color);
+    border-radius: var(--sig-radius-full);
+    transition: all var(--sig-transition-normal);
     @include flex-center;
 
+    /* Inner dot */
     &::after {
       content: '';
-      width: 0.625rem;
-      height: 0.625rem;
-      border-radius: 50%;
+      position: absolute;
+      width: 0.5rem;
+      height: 0.5rem;
       background-color: white;
-      opacity: 0;
+      border-radius: var(--sig-radius-full);
       transform: scale(0);
-      transition: all 0.2s;
+      transition: transform var(--sig-transition-fast);
+    }
+  }
+
+  /* Hover state */
+  &:hover:not(&--disabled) &__circle {
+    border-color: var(--sig-border-color-strong);
+  }
+
+  /* Focus state */
+  &__input:focus-visible + &__circle {
+    border-color: var(--sig-border-color-focus);
+    box-shadow: var(--sig-focus-ring);
+  }
+
+  /* Checked state */
+  &__input:checked + &__circle {
+    background-color: var(--sig-color-primary);
+    border-color: var(--sig-color-primary);
+
+    &::after {
+      transform: scale(1);
+    }
+  }
+
+  &:hover:not(&--disabled) &__input:checked + &__circle {
+    background-color: var(--sig-color-primary-hover);
+    border-color: var(--sig-color-primary-hover);
+  }
+
+  /* Disabled state */
+  &--disabled {
+    cursor: not-allowed;
+
+    .sig-radio__circle {
+      background-color: var(--sig-bg-disabled);
+      border-color: var(--sig-border-color);
     }
 
-    &:checked {
-      background-color: var(--sig-color-primary);
-      border-color: var(--sig-color-primary);
+    .sig-radio__input:checked + .sig-radio__circle {
+      background-color: var(--sig-neutral-300);
+      border-color: var(--sig-neutral-300);
+    }
+
+    .sig-radio__label {
+      color: var(--sig-text-disabled);
+    }
+  }
+
+  /* Error state */
+  &--error &__circle {
+    border-color: var(--sig-border-color-error);
+  }
+
+  &--error &__input:focus-visible + &__circle {
+    box-shadow: var(--sig-focus-ring-error);
+  }
+
+  /* Label */
+  &__label {
+    font-size: var(--sig-text-base);
+    color: var(--sig-text-primary);
+    line-height: var(--sig-leading-normal);
+  }
+
+  /* Description */
+  &__description {
+    font-size: var(--sig-text-sm);
+    color: var(--sig-text-secondary);
+    margin-top: var(--sig-space-0-5);
+  }
+
+  /* Size variants */
+  &--sm {
+    gap: var(--sig-space-1-5);
+
+    .sig-radio__circle {
+      width: 1rem;
+      height: 1rem;
 
       &::after {
-        opacity: 1;
-        transform: scale(1);
+        width: 0.375rem;
+        height: 0.375rem;
       }
     }
 
-    &:disabled {
-      background-color: var(--sig-bg-disabled);
-      border-color: var(--sig-border-color);
-      cursor: not-allowed;
+    .sig-radio__label {
+      font-size: var(--sig-text-sm);
+    }
+  }
+
+  &--lg {
+    gap: var(--sig-space-3);
+
+    .sig-radio__circle {
+      width: 1.25rem;
+      height: 1.25rem;
+
+      &::after {
+        width: 0.5625rem;
+        height: 0.5625rem;
+      }
     }
 
-    @include focus-ring;
+    .sig-radio__label {
+      font-size: var(--sig-text-md);
+    }
+  }
+}
+
+/* Radio Group */
+.sig-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sig-space-2);
+
+  &--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--sig-space-4);
   }
 
   &__label {
-    color: var(--sig-text-main);
-    @include text-sm;
-    
-    &--disabled { color: var(--sig-text-disabled); }
+    font-size: var(--sig-text-sm);
+    font-weight: var(--sig-font-medium);
+    color: var(--sig-text-primary);
+    margin-bottom: var(--sig-space-1);
+  }
+
+  &__error {
+    font-size: var(--sig-text-xs);
+    color: var(--sig-text-error);
+    margin-top: var(--sig-space-1);
+  }
+}
+
+/* Radio Card variant */
+.sig-radio-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sig-space-3);
+  padding: var(--sig-space-4);
+  background-color: var(--sig-bg-surface);
+  border: 1px solid var(--sig-border-color);
+  border-radius: var(--sig-radius-lg);
+  cursor: pointer;
+  transition: all var(--sig-transition-normal);
+
+  &:hover:not(&--disabled) {
+    border-color: var(--sig-border-color-strong);
+  }
+
+  &--selected {
+    border-color: var(--sig-color-primary);
+    background-color: var(--sig-color-primary-light);
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &__content {
+    flex: 1;
+  }
+
+  &__title {
+    font-size: var(--sig-text-base);
+    font-weight: var(--sig-font-medium);
+    color: var(--sig-text-primary);
+  }
+
+  &__description {
+    font-size: var(--sig-text-sm);
+    color: var(--sig-text-secondary);
+    margin-top: var(--sig-space-0-5);
   }
 }

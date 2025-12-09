@@ -1,30 +1,60 @@
-/* lib/styles/components/_tabs.scss */
+/* ==========================================================================
+   sig-tabs - Tabs Component
+   ========================================================================== */
+
+@use '../abstract/mixins' as *;
+
 .sig-tabs {
   display: flex;
   flex-direction: column;
   width: 100%;
 
-  &__header {
+  /* ============================================
+     TAB LIST / HEADER
+     ============================================ */
+
+  &__list {
     display: flex;
+    gap: var(--sig-space-1);
     border-bottom: 1px solid var(--sig-border-color);
-    margin-bottom: var(--sig-spacing-4);
-    gap: var(--sig-spacing-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
     overflow-x: auto;
+    @include custom-scrollbar;
+
+    /* Hide scrollbar but keep functionality */
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
-  &__btn {
-    padding: var(--sig-spacing-3) var(--sig-spacing-1);
+  /* Tab button/trigger */
+  &__trigger {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sig-space-2);
+    padding: var(--sig-space-3) var(--sig-space-4);
+    font-size: var(--sig-text-sm);
+    font-weight: var(--sig-font-medium);
+    color: var(--sig-text-secondary);
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    color: var(--sig-text-secondary);
-    font-weight: 500;
+    margin-bottom: -1px;
     cursor: pointer;
     white-space: nowrap;
-    transition: var(--sig-transition);
+    transition: all var(--sig-transition-normal);
 
-    &:hover {
-      color: var(--sig-text-main);
+    &:hover:not(:disabled) {
+      color: var(--sig-text-primary);
+    }
+
+    &:focus-visible {
+      outline: none;
+      background-color: var(--sig-bg-hover);
     }
 
     &--active {
@@ -36,9 +66,149 @@
       color: var(--sig-text-disabled);
       cursor: not-allowed;
     }
+
+    /* Icon in tab */
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    /* Badge/count in tab */
+    .sig-badge {
+      margin-left: var(--sig-space-1);
+    }
   }
 
-  &__content {
-    padding: var(--sig-spacing-2) 0;
+  /* ============================================
+     TAB PANELS
+     ============================================ */
+
+  &__panels {
+    flex: 1;
+  }
+
+  &__panel {
+    padding: var(--sig-space-4) 0;
+
+    &--flush {
+      padding: 0;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  /* ============================================
+     VARIANTS
+     ============================================ */
+
+  /* Contained/boxed style */
+  &--contained {
+    .sig-tabs__list {
+      gap: 0;
+      background-color: var(--sig-bg-surface-tertiary);
+      border-radius: var(--sig-radius-lg);
+      border-bottom: none;
+      padding: var(--sig-space-1);
+    }
+
+    .sig-tabs__trigger {
+      border-radius: var(--sig-radius-md);
+      border-bottom: none;
+      margin-bottom: 0;
+
+      &--active {
+        background-color: var(--sig-bg-surface);
+        color: var(--sig-text-primary);
+        box-shadow: var(--sig-shadow-sm);
+      }
+    }
+  }
+
+  /* Pill/segmented style */
+  &--pills {
+    .sig-tabs__list {
+      gap: var(--sig-space-1);
+      border-bottom: none;
+    }
+
+    .sig-tabs__trigger {
+      border-radius: var(--sig-radius-full);
+      border-bottom: none;
+      margin-bottom: 0;
+
+      &--active {
+        background-color: var(--sig-color-primary);
+        color: var(--sig-color-primary-text);
+      }
+
+      &:hover:not(:disabled):not(&--active) {
+        background-color: var(--sig-bg-hover);
+      }
+    }
+  }
+
+  /* Vertical tabs */
+  &--vertical {
+    flex-direction: row;
+
+    .sig-tabs__list {
+      flex-direction: column;
+      border-bottom: none;
+      border-right: 1px solid var(--sig-border-color);
+      gap: var(--sig-space-0-5);
+      min-width: 180px;
+      overflow-x: visible;
+      overflow-y: auto;
+    }
+
+    .sig-tabs__trigger {
+      justify-content: flex-start;
+      border-bottom: none;
+      border-right: 2px solid transparent;
+      margin-bottom: 0;
+      margin-right: -1px;
+      text-align: left;
+
+      &--active {
+        border-right-color: var(--sig-color-primary);
+        background-color: var(--sig-color-primary-light);
+      }
+    }
+
+    .sig-tabs__panels {
+      padding-left: var(--sig-space-4);
+    }
+  }
+
+  /* ============================================
+     SIZES
+     ============================================ */
+
+  &--sm {
+    .sig-tabs__trigger {
+      padding: var(--sig-space-2) var(--sig-space-3);
+      font-size: var(--sig-text-xs);
+    }
+  }
+
+  &--lg {
+    .sig-tabs__trigger {
+      padding: var(--sig-space-4) var(--sig-space-5);
+      font-size: var(--sig-text-base);
+    }
+  }
+
+  /* Full width tabs */
+  &--full {
+    .sig-tabs__list {
+      width: 100%;
+    }
+
+    .sig-tabs__trigger {
+      flex: 1;
+      justify-content: center;
+    }
   }
 }

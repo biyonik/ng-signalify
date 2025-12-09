@@ -1,43 +1,254 @@
-/* lib/styles/components/_button.scss */
-@import '../abstract/mixins';
+/* ==========================================================================
+   sig-button - Button Component
+   ========================================================================== */
+
+@use '../abstract/mixins' as *;
 
 .sig-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--sig-spacing-2) var(--sig-spacing-4);
-  font-weight: 500;
-  border-radius: var(--sig-radius-md);
-  transition: var(--sig-transition);
-  cursor: pointer;
-  @include text-sm;
-  @include focus-ring;
+  @include button-base;
+  border: 1px solid transparent;
 
-  /* Primary Button */
+  /* ============================================
+     VARIANTS
+     ============================================ */
+
+  /* Primary - Filled */
   &--primary {
-    background-color: var(--sig-color-primary);
     color: var(--sig-color-primary-text);
-    border: 1px solid transparent;
+    background-color: var(--sig-color-primary);
+    border-color: var(--sig-color-primary);
 
     &:hover:not(:disabled) {
       background-color: var(--sig-color-primary-hover);
+      border-color: var(--sig-color-primary-hover);
     }
 
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    &:active:not(:disabled) {
+      background-color: var(--sig-color-primary-active);
+      border-color: var(--sig-color-primary-active);
     }
   }
 
-  /* Secondary / Cancel Button */
-  &--secondary {
+  /* Secondary - Outlined */
+  &--secondary,
+  &--outline {
+    color: var(--sig-text-primary);
     background-color: var(--sig-bg-surface);
-    color: var(--sig-text-main);
-    border: 1px solid var(--sig-border-color);
+    border-color: var(--sig-border-color);
 
-    &:hover {
-      background-color: var(--sig-bg-background);
-      border-color: var(--sig-text-muted);
+    &:hover:not(:disabled) {
+      background-color: var(--sig-bg-hover);
+      border-color: var(--sig-border-color-strong);
+    }
+
+    &:active:not(:disabled) {
+      background-color: var(--sig-bg-active);
+    }
+  }
+
+  /* Ghost - No border */
+  &--ghost {
+    color: var(--sig-text-primary);
+    background-color: transparent;
+    border-color: transparent;
+
+    &:hover:not(:disabled) {
+      background-color: var(--sig-bg-hover);
+    }
+
+    &:active:not(:disabled) {
+      background-color: var(--sig-bg-active);
+    }
+  }
+
+  /* Link style */
+  &--link {
+    height: auto;
+    padding: 0;
+    color: var(--sig-text-link);
+    background: none;
+    border: none;
+
+    &:hover:not(:disabled) {
+      color: var(--sig-text-link-hover);
+      text-decoration: underline;
+    }
+  }
+
+  /* Danger */
+  &--danger {
+    color: var(--sig-neutral-0);
+    background-color: var(--sig-error-500);
+    border-color: var(--sig-error-500);
+
+    &:hover:not(:disabled) {
+      background-color: var(--sig-error-600);
+      border-color: var(--sig-error-600);
+    }
+
+    &:active:not(:disabled) {
+      background-color: var(--sig-error-700);
+      border-color: var(--sig-error-700);
+    }
+
+    &:focus-visible {
+      box-shadow: var(--sig-focus-ring-error);
+    }
+  }
+
+  /* Danger outline */
+  &--danger-outline {
+    color: var(--sig-error-600);
+    background-color: transparent;
+    border-color: var(--sig-error-500);
+
+    &:hover:not(:disabled) {
+      background-color: var(--sig-error-50);
+    }
+
+    &:active:not(:disabled) {
+      background-color: var(--sig-error-100);
+    }
+
+    &:focus-visible {
+      box-shadow: var(--sig-focus-ring-error);
+    }
+  }
+
+  /* Success */
+  &--success {
+    color: var(--sig-neutral-0);
+    background-color: var(--sig-success-500);
+    border-color: var(--sig-success-500);
+
+    &:hover:not(:disabled) {
+      background-color: var(--sig-success-600);
+      border-color: var(--sig-success-600);
+    }
+
+    &:active:not(:disabled) {
+      background-color: var(--sig-success-700);
+      border-color: var(--sig-success-700);
+    }
+  }
+
+  /* ============================================
+     SIZES
+     ============================================ */
+
+  &--sm {
+    @include button-sm;
+  }
+
+  &--lg {
+    @include button-lg;
+  }
+
+  /* ============================================
+     STATES
+     ============================================ */
+
+  /* Full width */
+  &--block {
+    width: 100%;
+  }
+
+  /* Loading state */
+  &--loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: sig-spin 0.6s linear infinite;
+    }
+  }
+
+  &--primary.sig-btn--loading::after,
+  &--danger.sig-btn--loading::after,
+  &--success.sig-btn--loading::after {
+    border-color: rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+  }
+
+  /* Icon only */
+  &--icon-only {
+    width: var(--sig-btn-height-md);
+    padding: 0;
+
+    &.sig-btn--sm {
+      width: var(--sig-btn-height-sm);
+    }
+
+    &.sig-btn--lg {
+      width: var(--sig-btn-height-lg);
+    }
+  }
+
+  /* Rounded */
+  &--rounded {
+    border-radius: var(--sig-radius-full);
+  }
+
+  /* ============================================
+     ICON WITHIN BUTTON
+     ============================================ */
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg {
+      width: 1.125em;
+      height: 1.125em;
+    }
+  }
+
+  &__icon--start {
+    margin-right: var(--sig-space-1);
+  }
+
+  &__icon--end {
+    margin-left: var(--sig-space-1);
+  }
+}
+
+/* ============================================
+   BUTTON GROUP
+   ============================================ */
+
+.sig-btn-group {
+  display: inline-flex;
+
+  .sig-btn {
+    border-radius: 0;
+
+    &:first-child {
+      border-top-left-radius: var(--sig-radius-md);
+      border-bottom-left-radius: var(--sig-radius-md);
+    }
+
+    &:last-child {
+      border-top-right-radius: var(--sig-radius-md);
+      border-bottom-right-radius: var(--sig-radius-md);
+    }
+
+    &:not(:first-child) {
+      margin-left: -1px;
+    }
+
+    &:hover,
+    &:focus {
+      z-index: 1;
     }
   }
 }

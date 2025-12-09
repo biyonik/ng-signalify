@@ -1,26 +1,142 @@
-/* lib/styles/components/_textarea.scss */
-@import '../abstract/mixins';
+/* ==========================================================================
+   sig-textarea - Textarea Component
+   ========================================================================== */
+
+@use '../abstract/mixins' as *;
 
 .sig-textarea {
+  position: relative;
   width: 100%;
-  padding: var(--sig-spacing-2) var(--sig-spacing-3);
-  border: 1px solid var(--sig-border-color);
-  border-radius: var(--sig-radius-md);
-  background-color: var(--sig-bg-surface);
-  color: var(--sig-text-main);
-  transition: var(--sig-transition);
-  min-height: 5rem;
-  resize: vertical; /* Sadece dikey resize */
-  @include text-sm;
-  @include focus-ring;
 
-  &:disabled {
-    background-color: var(--sig-bg-disabled);
-    color: var(--sig-text-disabled);
-    cursor: not-allowed;
+  &__field {
+    @include input-base;
+    min-height: 5rem;
+    height: auto;
+    padding: var(--sig-space-3);
+    resize: vertical;
+    line-height: var(--sig-leading-relaxed);
+
+    /* Auto-resize when needed */
+    &--auto-resize {
+      resize: none;
+      overflow: hidden;
+    }
+
+    /* No resize */
+    &--no-resize {
+      resize: none;
+    }
   }
 
-  &::placeholder {
-    color: var(--sig-text-muted);
+  /* Size variants */
+  &--sm &__field {
+    min-height: 4rem;
+    padding: var(--sig-space-2);
+    font-size: var(--sig-text-sm);
+  }
+
+  &--lg &__field {
+    min-height: 8rem;
+    padding: var(--sig-space-4);
+    font-size: var(--sig-text-md);
+  }
+
+  /* Error state */
+  &--error &__field {
+    @include input-error;
+  }
+
+  /* Success state */
+  &--success &__field {
+    border-color: var(--sig-border-color-success);
+
+    &:focus,
+    &:focus-visible {
+      border-color: var(--sig-border-color-success);
+      box-shadow: 0 0 0 var(--sig-ring-offset) var(--sig-bg-surface),
+      0 0 0 calc(var(--sig-ring-offset) + var(--sig-ring-width)) var(--sig-success-500);
+    }
+  }
+
+  /* Character counter */
+  &__counter {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--sig-space-1);
+    font-size: var(--sig-text-xs);
+    color: var(--sig-text-tertiary);
+
+    &--warning {
+      color: var(--sig-warning-600);
+    }
+
+    &--error {
+      color: var(--sig-text-error);
+    }
+  }
+
+  /* Footer area (for counter, hints, etc) */
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--sig-space-1);
+    gap: var(--sig-space-2);
+  }
+
+  /* With toolbar (for rich text) */
+  &--with-toolbar {
+    .sig-textarea__field {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sig-space-1);
+    padding: var(--sig-space-2);
+    background-color: var(--sig-bg-surface-secondary);
+    border: 1px solid var(--sig-border-color);
+    border-bottom: none;
+    border-radius: var(--sig-radius-md) var(--sig-radius-md) 0 0;
+  }
+
+  &__toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: var(--sig-text-secondary);
+    background: none;
+    border: none;
+    border-radius: var(--sig-radius-sm);
+    cursor: pointer;
+    transition: all var(--sig-transition-fast);
+
+    &:hover {
+      color: var(--sig-text-primary);
+      background-color: var(--sig-bg-hover);
+    }
+
+    &--active {
+      color: var(--sig-color-primary);
+      background-color: var(--sig-color-primary-light);
+    }
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  &__toolbar-divider {
+    width: 1px;
+    height: 1.5rem;
+    background-color: var(--sig-border-color);
+    margin: 0 var(--sig-space-1);
   }
 }

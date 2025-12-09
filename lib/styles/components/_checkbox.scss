@@ -1,52 +1,194 @@
-/* lib/styles/components/_checkbox.scss */
-@import '../abstract/mixins';
+/* ==========================================================================
+   sig-checkbox - Checkbox Component
+   ========================================================================== */
+
+@use '../abstract/mixins' as *;
 
 .sig-checkbox {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
+  gap: var(--sig-space-2);
   cursor: pointer;
-  gap: var(--sig-spacing-2);
+  user-select: none;
 
+  /* Hidden native input */
   &__input {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 1.25rem;
-    height: 1.25rem;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  /* Custom checkbox */
+  &__box {
+    position: relative;
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: 1px;
+    background-color: var(--sig-bg-surface);
     border: 1px solid var(--sig-border-color);
     border-radius: var(--sig-radius-sm);
-    background-color: var(--sig-bg-surface);
-    transition: var(--sig-transition);
-    position: relative;
+    transition: all var(--sig-transition-normal);
     @include flex-center;
 
-    &:checked {
-      background-color: var(--sig-color-primary);
-      border-color: var(--sig-color-primary);
+    /* Checkmark icon */
+    &::after {
+      content: '';
+      position: absolute;
+      width: 0.375rem;
+      height: 0.625rem;
+      border: solid transparent;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg) scale(0);
+      transition: transform var(--sig-transition-fast);
+    }
+  }
+
+  /* Hover state */
+  &:hover:not(&--disabled) &__box {
+    border-color: var(--sig-border-color-strong);
+  }
+
+  /* Focus state */
+  &__input:focus-visible + &__box {
+    border-color: var(--sig-border-color-focus);
+    box-shadow: var(--sig-focus-ring);
+  }
+
+  /* Checked state */
+  &__input:checked + &__box {
+    background-color: var(--sig-color-primary);
+    border-color: var(--sig-color-primary);
+
+    &::after {
+      border-color: white;
+      transform: rotate(45deg) scale(1);
+    }
+  }
+
+  &:hover:not(&--disabled) &__input:checked + &__box {
+    background-color: var(--sig-color-primary-hover);
+    border-color: var(--sig-color-primary-hover);
+  }
+
+  /* Indeterminate state */
+  &__input:indeterminate + &__box {
+    background-color: var(--sig-color-primary);
+    border-color: var(--sig-color-primary);
+
+    &::after {
+      width: 0.5rem;
+      height: 0;
+      border-width: 0 0 2px 0;
+      border-color: white;
+      transform: rotate(0) scale(1);
+    }
+  }
+
+  /* Disabled state */
+  &--disabled {
+    cursor: not-allowed;
+
+    .sig-checkbox__box {
+      background-color: var(--sig-bg-disabled);
+      border-color: var(--sig-border-color);
+    }
+
+    .sig-checkbox__input:checked + .sig-checkbox__box {
+      background-color: var(--sig-neutral-300);
+      border-color: var(--sig-neutral-300);
+    }
+
+    .sig-checkbox__label {
+      color: var(--sig-text-disabled);
+    }
+  }
+
+  /* Error state */
+  &--error &__box {
+    border-color: var(--sig-border-color-error);
+  }
+
+  &--error &__input:focus-visible + &__box {
+    box-shadow: var(--sig-focus-ring-error);
+  }
+
+  /* Label */
+  &__label {
+    font-size: var(--sig-text-base);
+    color: var(--sig-text-primary);
+    line-height: var(--sig-leading-normal);
+  }
+
+  /* Description */
+  &__description {
+    font-size: var(--sig-text-sm);
+    color: var(--sig-text-secondary);
+    margin-top: var(--sig-space-0-5);
+  }
+
+  /* Size variants */
+  &--sm {
+    gap: var(--sig-space-1-5);
+
+    .sig-checkbox__box {
+      width: 1rem;
+      height: 1rem;
 
       &::after {
-        content: '✓';
-        color: white;
-        font-size: 0.875rem;
-        font-weight: bold;
+        width: 0.3125rem;
+        height: 0.5rem;
       }
     }
 
-    &:disabled {
-      background-color: var(--sig-bg-disabled);
-      border-color: var(--sig-border-color);
-      cursor: not-allowed;
+    .sig-checkbox__label {
+      font-size: var(--sig-text-sm);
+    }
+  }
+
+  &--lg {
+    gap: var(--sig-space-3);
+
+    .sig-checkbox__box {
+      width: 1.25rem;
+      height: 1.25rem;
+
+      &::after {
+        width: 0.4375rem;
+        height: 0.75rem;
+      }
     }
 
-    @include focus-ring;
+    .sig-checkbox__label {
+      font-size: var(--sig-text-md);
+    }
+  }
+}
+
+/* Checkbox Group */
+.sig-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sig-space-2);
+
+  &--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--sig-space-4);
   }
 
   &__label {
-    font-size: var(--sig-font-size-base);
-    color: var(--sig-text-main);
-    user-select: none;
+    font-size: var(--sig-text-sm);
+    font-weight: var(--sig-font-medium);
+    color: var(--sig-text-primary);
+    margin-bottom: var(--sig-space-1);
+  }
 
-    &--disabled {
-      color: var(--sig-text-disabled);
-    }
+  &__error {
+    font-size: var(--sig-text-xs);
+    color: var(--sig-text-error);
+    margin-top: var(--sig-space-1);
   }
 }

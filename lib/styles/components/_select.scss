@@ -1,78 +1,235 @@
-/* lib/styles/components/_select.scss */
-@import '../abstract/mixins';
+/* ==========================================================================
+   sig-select - Dropdown Select Component
+   ========================================================================== */
+
+@use '../abstract/mixins' as *;
 
 .sig-select {
   position: relative;
   width: 100%;
 
+  /* Trigger button */
   &__trigger {
-    width: 100%;
-    padding: var(--sig-spacing-2) var(--sig-spacing-3);
-    padding-right: 2.5rem; /* Chevron için yer */
-    background-color: var(--sig-bg-surface);
-    border: 1px solid var(--sig-border-color);
-    border-radius: var(--sig-radius-md);
-    color: var(--sig-text-main);
+    @include input-base;
+    @include flex-between;
     text-align: left;
     cursor: pointer;
-    transition: var(--sig-transition);
-    @include text-sm;
-    @include focus-ring;
 
     &:disabled {
-      background-color: var(--sig-bg-disabled);
-      color: var(--sig-text-disabled);
       cursor: not-allowed;
     }
   }
 
-  &__icon {
-    position: absolute;
-    right: var(--sig-spacing-3);
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: var(--sig-text-muted);
-    font-size: 0.75rem;
+  /* Size variants */
+  &--sm &__trigger {
+    @include input-sm;
   }
 
+  &--lg &__trigger {
+    @include input-lg;
+  }
+
+  /* Error state */
+  &--error &__trigger {
+    @include input-error;
+  }
+
+  /* Open state */
+  &--open &__trigger {
+    border-color: var(--sig-border-color-focus);
+    box-shadow: var(--sig-focus-ring);
+  }
+
+  &--open &__arrow {
+    transform: rotate(180deg);
+  }
+
+  /* Disabled state */
+  &--disabled {
+    pointer-events: none;
+
+    .sig-select__trigger {
+      background-color: var(--sig-bg-disabled);
+      color: var(--sig-text-disabled);
+    }
+  }
+
+  /* Value display */
+  &__value {
+    flex: 1;
+    @include text-truncate;
+  }
+
+  &__placeholder {
+    color: var(--sig-text-placeholder);
+  }
+
+  /* Arrow icon */
+  &__arrow {
+    flex-shrink: 0;
+    margin-left: var(--sig-space-2);
+    color: var(--sig-text-tertiary);
+    font-size: var(--sig-text-xs);
+    transition: transform var(--sig-transition-normal);
+  }
+
+  /* Dropdown panel */
   &__dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + var(--sig-space-1));
     left: 0;
     right: 0;
-    margin-top: var(--sig-spacing-1);
+    z-index: var(--sig-z-dropdown);
     background-color: var(--sig-bg-surface);
     border: 1px solid var(--sig-border-color);
-    border-radius: var(--sig-radius-md);
+    border-radius: var(--sig-radius-lg);
     box-shadow: var(--sig-shadow-lg);
-    z-index: var(--sig-z-dropdown);
-    max-height: 15rem;
-    overflow-y: auto;
-    animation: sig-fade-in 0.1s ease-out;
+    overflow: hidden;
+    @include fade-in;
+    @include slide-up;
   }
 
-  &__option {
-    padding: var(--sig-spacing-2) var(--sig-spacing-3);
-    color: var(--sig-text-main);
-    cursor: pointer;
-    transition: background-color 0.1s;
-    @include text-sm;
+  /* Dropdown positioned above */
+  &--dropup &__dropdown {
+    top: auto;
+    bottom: calc(100% + var(--sig-space-1));
+  }
 
-    &:hover {
-      background-color: var(--sig-bg-background);
+  /* Search input */
+  &__search {
+    padding: var(--sig-space-2);
+    border-bottom: 1px solid var(--sig-border-color);
+  }
+
+  &__search-input {
+    @include input-base;
+    height: var(--sig-input-height-sm);
+    font-size: var(--sig-text-sm);
+  }
+
+  /* Options container */
+  &__options {
+    max-height: 240px;
+    overflow-y: auto;
+    padding: var(--sig-space-1);
+    @include custom-scrollbar;
+  }
+
+  /* Option item */
+  &__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--sig-space-2) var(--sig-space-3);
+    font-size: var(--sig-text-base);
+    color: var(--sig-text-primary);
+    background: none;
+    border: none;
+    border-radius: var(--sig-radius-md);
+    cursor: pointer;
+    transition: background-color var(--sig-transition-fast);
+    text-align: left;
+
+    &:hover:not(&--disabled) {
+      background-color: var(--sig-bg-hover);
+    }
+
+    &:active:not(&--disabled) {
+      background-color: var(--sig-bg-active);
     }
 
     &--selected {
-      background-color: var(--sig-color-primary-subtle);
+      background-color: var(--sig-color-primary-light);
       color: var(--sig-color-primary);
-      font-weight: 500;
+      font-weight: var(--sig-font-medium);
+
+      &:hover {
+        background-color: var(--sig-primary-100);
+      }
     }
 
     &--disabled {
       color: var(--sig-text-disabled);
       cursor: not-allowed;
-      &:hover { background: none; }
+    }
+
+    &--clear {
+      color: var(--sig-text-tertiary);
+      font-size: var(--sig-text-sm);
+      border-bottom: 1px solid var(--sig-border-color);
+      border-radius: 0;
+      margin-bottom: var(--sig-space-1);
+
+      &:hover {
+        color: var(--sig-text-secondary);
+      }
+    }
+  }
+
+  /* Check icon for selected */
+  &__check {
+    flex-shrink: 0;
+    margin-left: var(--sig-space-2);
+    color: var(--sig-color-primary);
+    font-size: var(--sig-text-sm);
+  }
+
+  /* Empty state */
+  &__empty {
+    padding: var(--sig-space-6) var(--sig-space-4);
+    text-align: center;
+    color: var(--sig-text-tertiary);
+    font-size: var(--sig-text-sm);
+  }
+
+  /* Group header */
+  &__group-header {
+    padding: var(--sig-space-2) var(--sig-space-3);
+    font-size: var(--sig-text-xs);
+    font-weight: var(--sig-font-semibold);
+    color: var(--sig-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Multiple select tags */
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sig-space-1);
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sig-space-1);
+    padding: var(--sig-space-0-5) var(--sig-space-2);
+    background-color: var(--sig-bg-surface-tertiary);
+    border-radius: var(--sig-radius-sm);
+    font-size: var(--sig-text-sm);
+    color: var(--sig-text-primary);
+  }
+
+  &__tag-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    color: var(--sig-text-tertiary);
+    background: none;
+    border: none;
+    border-radius: var(--sig-radius-sm);
+    cursor: pointer;
+    transition: all var(--sig-transition-fast);
+
+    &:hover {
+      color: var(--sig-text-error);
+      background-color: var(--sig-error-50);
     }
   }
 }

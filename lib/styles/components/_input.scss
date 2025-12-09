@@ -1,5 +1,8 @@
-/* lib/styles/components/_input.scss */
-@import '../abstract/mixins';
+/* ==========================================================================
+   sig-input - Text Input Component
+   ========================================================================== */
+
+@use '../abstract/mixins' as *;
 
 .sig-input {
   position: relative;
@@ -7,66 +10,198 @@
   align-items: center;
   width: 100%;
 
+  /* Main input field */
   &__field {
-    width: 100%;
-    padding: var(--sig-spacing-2) var(--sig-spacing-3);
-    border: 1px solid var(--sig-border-color);
-    border-radius: var(--sig-radius-md);
-    background-color: var(--sig-bg-surface);
-    color: var(--sig-text-main);
-    transition: var(--sig-transition);
-    @include text-sm;
+    @include input-base;
 
-    @include focus-ring;
-
-    &:disabled {
-      background-color: var(--sig-bg-disabled);
-      color: var(--sig-text-disabled);
-      cursor: not-allowed;
-    }
-
-    &::placeholder {
-      color: var(--sig-text-muted);
-    }
-    
-    /* Number input oklarını gizle */
+    /* Hide number spinners */
     &[type="number"] {
       -moz-appearance: textfield;
+
       &::-webkit-outer-spin-button,
       &::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
       }
     }
+
+    /* Search input clear button */
+    &[type="search"]::-webkit-search-cancel-button {
+      -webkit-appearance: none;
+    }
   }
 
-  &--with-icon .sig-input__field {
-    padding-left: 2.25rem;
+  /* Size variants */
+  &--sm .sig-input__field {
+    @include input-sm;
   }
 
+  &--lg .sig-input__field {
+    @include input-lg;
+  }
+
+  /* With icon - left */
+  &--with-icon &__field,
+  &--icon-left &__field {
+    padding-left: var(--sig-space-10);
+  }
+
+  /* With icon - right */
+  &--icon-right &__field {
+    padding-right: var(--sig-space-10);
+  }
+
+  /* Error state */
+  &--error &__field {
+    @include input-error;
+  }
+
+  /* Success state */
+  &--success &__field {
+    border-color: var(--sig-border-color-success);
+
+    &:focus,
+    &:focus-visible {
+      border-color: var(--sig-border-color-success);
+      box-shadow: 0 0 0 var(--sig-ring-offset) var(--sig-bg-surface),
+      0 0 0 calc(var(--sig-ring-offset) + var(--sig-ring-width)) var(--sig-success-500);
+    }
+  }
+
+  /* Icon styling */
   &__icon {
     position: absolute;
-    color: var(--sig-text-muted);
-    font-size: 1rem;
-    pointer-events: none; /* İkona tıklanmasını engelle */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sig-space-10);
+    height: 100%;
+    color: var(--sig-text-tertiary);
+    font-size: var(--sig-text-md);
+    pointer-events: none;
+    transition: color var(--sig-transition-normal);
 
-    &--left { left: var(--sig-spacing-3); }
-    &--right { right: var(--sig-spacing-3); }
+    &--left {
+      left: 0;
+    }
+
+    &--right {
+      right: 0;
+    }
+
+    svg {
+      width: 1.125rem;
+      height: 1.125rem;
+    }
   }
 
+  /* Focus state icon color */
+  &:focus-within &__icon {
+    color: var(--sig-text-secondary);
+  }
+
+  /* Password toggle & clear button */
   &__toggle,
   &__clear {
     position: absolute;
-    right: 0.5rem;
-    background: none;
+    right: var(--sig-space-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sig-space-8);
+    height: var(--sig-space-8);
+    padding: 0;
+    color: var(--sig-text-tertiary);
+    background: transparent;
     border: none;
+    border-radius: var(--sig-radius-sm);
     cursor: pointer;
-    padding: var(--sig-spacing-1);
-    color: var(--sig-text-muted);
-    @include flex-center;
+    transition: all var(--sig-transition-normal);
 
     &:hover {
-      color: var(--sig-text-main);
+      color: var(--sig-text-secondary);
+      background-color: var(--sig-bg-hover);
     }
+
+    &:active {
+      background-color: var(--sig-bg-active);
+    }
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  /* Clear button positioning when toggle also exists */
+  &__toggle + &__clear {
+    right: calc(var(--sig-space-8) + var(--sig-space-1));
+  }
+
+  /* Prefix & Suffix */
+  &__prefix,
+  &__suffix {
+    display: flex;
+    align-items: center;
+    height: var(--sig-input-height-md);
+    padding: 0 var(--sig-space-3);
+    color: var(--sig-text-secondary);
+    background-color: var(--sig-bg-surface-tertiary);
+    border: 1px solid var(--sig-border-color);
+    font-size: var(--sig-text-base);
+    white-space: nowrap;
+  }
+
+  &__prefix {
+    border-right: none;
+    border-radius: var(--sig-radius-md) 0 0 var(--sig-radius-md);
+  }
+
+  &__suffix {
+    border-left: none;
+    border-radius: 0 var(--sig-radius-md) var(--sig-radius-md) 0;
+  }
+
+  &--has-prefix &__field {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &--has-suffix &__field {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  /* Loading state */
+  &--loading &__field {
+    padding-right: var(--sig-space-10);
+  }
+
+  &__spinner {
+    position: absolute;
+    right: var(--sig-space-3);
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--sig-border-color);
+    border-top-color: var(--sig-color-primary);
+    border-radius: 50%;
+    animation: sig-spin 0.6s linear infinite;
+  }
+}
+
+/* Character counter */
+.sig-input-counter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--sig-space-1);
+  font-size: var(--sig-text-xs);
+  color: var(--sig-text-tertiary);
+
+  &--warning {
+    color: var(--sig-warning-600);
+  }
+
+  &--error {
+    color: var(--sig-text-error);
   }
 }

@@ -1,41 +1,249 @@
-@import '../abstract/mixins';
+/* ==========================================================================
+   sig-form-field - Form Field Wrapper Component
+   ========================================================================== */
+
+@use '../abstract/mixins' as *;
 
 .sig-form-field {
   display: flex;
   flex-direction: column;
-  gap: var(--sig-spacing-1);
-  margin-bottom: var(--sig-spacing-4);
+  gap: var(--sig-space-1-5);
+  width: 100%;
 
+  /* Label */
   &__label {
     display: flex;
-    justify-content: space-between;
-    font-weight: 500;
-    color: var(--sig-text-main);
-    @include text-sm;
-
-    &-text { display: flex; align-items: center; gap: 0.25rem; }
-    &-required { color: var(--sig-color-danger); }
+    align-items: center;
+    gap: var(--sig-space-1);
+    font-size: var(--sig-text-sm);
+    font-weight: var(--sig-font-medium);
+    color: var(--sig-text-primary);
+    line-height: var(--sig-leading-normal);
   }
 
+  /* Required indicator */
+  &__required {
+    color: var(--sig-error-500);
+    font-weight: var(--sig-font-normal);
+  }
+
+  /* Optional indicator */
+  &__optional {
+    color: var(--sig-text-tertiary);
+    font-size: var(--sig-text-xs);
+    font-weight: var(--sig-font-normal);
+  }
+
+  /* Control wrapper */
+  &__control {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Loading spinner */
+  &__loading {
+    position: absolute;
+    right: var(--sig-space-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--sig-border-color);
+    border-top-color: var(--sig-color-primary);
+    border-radius: 50%;
+    animation: sig-spin 0.6s linear infinite;
+  }
+
+  /* Hint text */
   &__hint {
-    color: var(--sig-text-muted);
-    font-size: var(--sig-font-size-xs);
+    font-size: var(--sig-text-xs);
+    color: var(--sig-text-tertiary);
+    line-height: var(--sig-leading-normal);
   }
 
+  /* Error message */
   &__error {
-    color: var(--sig-color-danger);
-    font-size: var(--sig-font-size-xs);
-    animation: sig-slide-down 0.2s ease-out;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sig-space-1);
+    font-size: var(--sig-text-xs);
+    color: var(--sig-text-error);
+    line-height: var(--sig-leading-normal);
+
+    svg {
+      flex-shrink: 0;
+      width: 0.875rem;
+      height: 0.875rem;
+      margin-top: 1px;
+    }
   }
 
-  &--invalid .sig-input__field,
-  &--invalid .sig-select__trigger {
-    border-color: var(--sig-color-danger);
-    &:focus { box-shadow: 0 0 0 3px var(--sig-color-danger-bg); }
+  /* Character counter */
+  &__counter {
+    font-size: var(--sig-text-xs);
+    color: var(--sig-text-tertiary);
+    text-align: right;
+    margin-top: var(--sig-space-0-5);
+  }
+
+  /* ============================================
+     STATES
+     ============================================ */
+
+  /* Error state */
+  &--error {
+    .sig-form-field__label {
+      color: var(--sig-text-error);
+    }
+
+    .sig-form-field__counter {
+      color: var(--sig-text-error);
+    }
+
+    /* Apply error style to nested inputs */
+    .sig-input__field,
+    .sig-select__trigger,
+    .sig-textarea__field {
+      @include input-error;
+    }
+  }
+
+  /* Disabled state */
+  &--disabled {
+    .sig-form-field__label {
+      color: var(--sig-text-disabled);
+    }
+
+    .sig-form-field__hint {
+      color: var(--sig-text-disabled);
+    }
+  }
+
+  /* ============================================
+     LAYOUT VARIANTS
+     ============================================ */
+
+  /* Horizontal layout */
+  &--horizontal {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--sig-space-4);
+
+    .sig-form-field__label {
+      flex-shrink: 0;
+      width: 120px;
+      padding-top: var(--sig-space-2);
+      text-align: right;
+    }
+
+    .sig-form-field__body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sig-space-1-5);
+    }
+  }
+
+  /* Inline layout */
+  &--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--sig-space-2);
+
+    .sig-form-field__label {
+      flex-shrink: 0;
+    }
+
+    .sig-form-field__control {
+      flex: 1;
+    }
+  }
+
+  /* Compact spacing */
+  &--compact {
+    gap: var(--sig-space-1);
   }
 }
 
-@keyframes sig-slide-down {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ============================================
+   FORM LAYOUT HELPERS
+   ============================================ */
+
+.sig-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sig-space-5);
+}
+
+.sig-form-row {
+  display: flex;
+  gap: var(--sig-space-4);
+
+  > * {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+.sig-form-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sig-space-3);
+  padding-top: var(--sig-space-4);
+  border-top: 1px solid var(--sig-border-color);
+  margin-top: var(--sig-space-2);
+
+  &--right {
+    justify-content: flex-end;
+  }
+
+  &--between {
+    justify-content: space-between;
+  }
+
+  &--center {
+    justify-content: center;
+  }
+}
+
+/* ============================================
+   FIELDSET / FORM SECTION
+   ============================================ */
+
+.sig-fieldset {
+  padding: 0;
+  margin: 0;
+  border: none;
+
+  &__legend {
+    font-size: var(--sig-text-md);
+    font-weight: var(--sig-font-semibold);
+    color: var(--sig-text-primary);
+    margin-bottom: var(--sig-space-4);
+    padding-bottom: var(--sig-space-2);
+    border-bottom: 1px solid var(--sig-border-color);
+    width: 100%;
+  }
+
+  &__description {
+    font-size: var(--sig-text-sm);
+    color: var(--sig-text-secondary);
+    margin-top: calc(var(--sig-space-2) * -1);
+    margin-bottom: var(--sig-space-4);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sig-space-5);
+  }
 }
