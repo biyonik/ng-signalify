@@ -21,21 +21,24 @@
     "crud",
     "entity-store"
   ],
-
   "peerDependencies": {
     "@angular/common": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "@angular/core": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "@angular/forms": "^17.0.0 || ^18.0.0 || ^19.0.0",
-    "zod": "^3.22.0",
-    "rxjs": "^7.0.0"
+    "rxjs": "^7.0.0",
+    "zod": "^3.22.0"
   },
-
   "peerDependenciesMeta": {
-    "zod": { "optional": false }
+    "zod": {
+      "optional": false
+    },
+    "xlsx": {
+      "optional": false
+    }
   },
-
-  "dependencies": {},
-
+  "dependencies": {
+    "ts-node": "^10.9.2"
+  },
   "devDependencies": {
     "@angular-devkit/build-angular": "^17.0.0",
     "@angular/cli": "^17.0.0",
@@ -49,24 +52,24 @@
     "jest": "^29.7.0",
     "jest-preset-angular": "^14.0.0",
     "ng-packagr": "^17.0.0",
+    "sass": "^1.69.0",
     "typescript": "~5.2.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.22.0"
   },
-
   "scripts": {
-    "build": "ng-packagr -p ng-package.json",
+    "build": "ng-packagr -p ng-package.json && npm run build:styles",
     "build:watch": "ng-packagr -p ng-package.json --watch",
+    "build:styles": "npm run build:css && npm run build:css:min",
+    "build:css": "sass lib/styles/main.scss dist/ng-signalify.css --load-path=lib/styles",
+    "build:css:min": "sass lib/styles/main.scss dist/ng-signalify.min.css --style=compressed --load-path=lib/styles",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint \"lib/**/*.ts\"",
-    "prepublishOnly": "npm run build"
+    "lint": "eslint \"lib/**/*.ts\""
   },
-
   "sideEffects": false,
-
   "typesVersions": {},
-
   "engines": {
     "node": ">=18.0.0"
   }

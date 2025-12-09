@@ -200,21 +200,39 @@ export class TimeField extends BaseField<Time> {
     return null;
   }
 
-  /**
-   * TR: "HH:mm" veya "HH:mm:ss" formatındaki stringi Time objesine çevirir.
-   *
-   * EN: Converts string in "HH:mm" or "HH:mm:ss" format to Time object.
-   */
-  private parseTimeString(str: string): Time {
-    const parts = str.split(':').map(Number);
-    return {
-      hours: parts[0] ?? 0,
-      minutes: parts[1] ?? 0,
-      seconds: parts[2],
-    };
-  }
+    /**
+     * TR: "HH:mm" veya "HH:mm:ss" formatındaki stringi Time objesine çevirir.
+     * Geçersiz değerler için güvenli fallback sağlar.
+     *
+     * EN: Converts string in "HH:mm" or "HH:mm:ss" format to Time object.
+     * Provides safe fallback for invalid values.
+     */
+    private parseTimeString(str: string): Time {
+        const parts = str.split(':');
 
-  /**
+        // TR: Güvenli number parse (NaN kontrolü ile)
+        // EN: Safe number parse (with NaN check)
+        const parseNum = (value: string | undefined, fallback: number = 0): number => {
+            if (value === undefined || value === '') return fallback;
+            const num = parseInt(value, 10);
+            return isNaN(num) ? fallback : num;
+        };
+
+        const hours = parseNum(parts[0]);
+        const minutes = parseNum(parts[1]);
+        const seconds = parts[2] !== undefined ? parseNum(parts[2]) : undefined;
+
+        // TR: Sınır kontrolü (0-23 saat, 0-59 dakika/saniye)
+        // EN: Boundary check (0-23 hours, 0-59 minutes/seconds)
+        return {
+            hours: Math.max(0, Math.min(23, hours)),
+            minutes: Math.max(0, Math.min(59, minutes)),
+            seconds: seconds !== undefined ? Math.max(0, Math.min(59, seconds)) : undefined,
+        };
+    }
+
+
+    /**
    * TR: Time objesini string formatına dönüştüren yardımcı metod.
    * 12 saatlik (AM/PM) veya 24 saatlik formata göre çıktı üretir.
    *
