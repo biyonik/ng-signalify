@@ -1,204 +1,147 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import {
-  Directive,
-  input,
-  ElementRef,
-  inject,
-  OnDestroy,
-  HostListener,
-  PLATFORM_ID,
+    Directive,
+    input,
+    ElementRef,
+    inject,
+    OnDestroy,
+    OnInit,
+    HostListener,
+    PLATFORM_ID,
 } from '@angular/core';
+import { generateId } from '../../utils/a11y.utils';
 
 /**
- * SigTooltip - Signal-based tooltip directive
- * 
- * Usage:
- * <button [sigTooltip]="'Bu bir tooltip'" position="top">
- *   Hover me
- * </button>
+ * SigTooltip - Signal-based accessible tooltip directive
+ *
+ * ARIA Pattern: Tooltip
+ * https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
  */
 @Directive({
-  selector: '[sigTooltip]',
-  standalone: true,
+    selector: '[sigTooltip]',
+    standalone: true,
+    host: {
+        '[attr.aria-describedby]': 'tooltipId',
+    }
 })
-export class SigTooltipDirective implements OnDestroy {
-  readonly content = input.required<string>({ alias: 'sigTooltip' });
-  readonly position = input<'top' | 'bottom' | 'left' | 'right'>('top');
-  readonly delay = input<number>(200);
-  readonly disabled = input<boolean>(false);
+export class SigTooltipDirective implements OnInit, OnDestroy {
+    readonly content = input.required<string>({ alias: 'sigTooltip' });
+    readonly position = input<'top' | 'bottom' | 'left' | 'right'>('top');
+    readonly delay = input<number>(200);
+    readonly disabled = input<boolean>(false);
 
-  private readonly elementRef = inject(ElementRef);
-  private tooltipElement: HTMLDivElement | null = null;
-  private showTimeout: ReturnType<typeof setTimeout> | null = null;
+    private readonly elementRef = inject(ElementRef);
+    private tooltipElement: HTMLDivElement | null = null;
+    private showTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  private document: Document = inject(DOCUMENT);
-  private platformId: Object = inject(PLATFORM_ID);
+    private document: Document = inject(DOCUMENT);
+    private platformId: Object = inject(PLATFORM_ID);
 
-  private get isBrowser(): boolean {
-    return isPlatformBrowser(this.platformId);
-  }
+    tooltipId = '';
 
-  @HostListener('mouseenter')
-  onMouseEnter(): void {
-    if (this.disabled()) return;
-    
-    this.showTimeout = setTimeout(() => {
-      this.show();
-    }, this.delay());
-  }
-
-  @HostListener('mouseleave')
-  onMouseLeave(): void {
-    this.hide();
-  }
-
-  @HostListener('focus')
-  onFocus(): void {
-    if (this.disabled()) return;
-    this.show();
-  }
-
-  @HostListener('blur')
-  onBlur(): void {
-    this.hide();
-  }
-
-  private show(): void {
-    if (!this.isBrowser || this.tooltipElement) return;
-    this.tooltipElement = this.document.createElement('div');
-    this.tooltipElement.className = `sig-tooltip sig-tooltip--${this.position()}`;
-    this.tooltipElement.textContent = this.content();
-    this.document.body.appendChild(this.tooltipElement);
-
-    this.updatePosition();
-  }
-
-  private hide(): void {
-    if (this.showTimeout) {
-      clearTimeout(this.showTimeout);
-      this.showTimeout = null;
+    private get isBrowser(): boolean {
+        return isPlatformBrowser(this.platformId);
     }
 
-    if (this.tooltipElement) {
-      this.tooltipElement.remove();
-      this.tooltipElement = null;
-    }
-  }
-
-  private updatePosition(): void {
-    if (!this.tooltipElement) return;
-
-    const hostRect = this.elementRef.nativeElement.getBoundingClientRect();
-    const tooltipRect = this.tooltipElement.getBoundingClientRect();
-    const pos = this.position();
-    const gap = 8;
-
-    let top = 0;
-    let left = 0;
-
-    switch (pos) {
-      case 'top':
-        top = hostRect.top - tooltipRect.height - gap;
-        left = hostRect.left + (hostRect.width - tooltipRect.width) / 2;
-        break;
-      case 'bottom':
-        top = hostRect.bottom + gap;
-        left = hostRect.left + (hostRect.width - tooltipRect.width) / 2;
-        break;
-      case 'left':
-        top = hostRect.top + (hostRect.height - tooltipRect.height) / 2;
-        left = hostRect.left - tooltipRect.width - gap;
-        break;
-      case 'right':
-        top = hostRect.top + (hostRect.height - tooltipRect.height) / 2;
-        left = hostRect.right + gap;
-        break;
+    ngOnInit(): void {
+        this.tooltipId = generateId('sig-tooltip');
     }
 
-    // Keep within viewport
-    const win = this.document.defaultView || window;
-    top = Math.max(8, Math.min(top, win.innerHeight - tooltipRect.height - 8));
-    left = Math.max(8, Math.min(left, win.innerWidth - tooltipRect.width - 8));
+    @HostListener('mouseenter')
+    onMouseEnter(): void {
+        if (this.disabled()) return;
 
-    this.tooltipElement.style.top = `${top + window.scrollY}px`;
-    this.tooltipElement.style.left = `${left + window.scrollX}px`;
-  }
+        this.showTimeout = setTimeout(() => {
+            this.show();
+        }, this.delay());
+    }
 
-  ngOnDestroy(): void {
-    this.hide();
-  }
-}
+    @HostListener('mouseleave')
+    onMouseLeave(): void {
+        this.hide();
+    }
 
-// Global styles for tooltip (add to styles.css)
-const tooltipStyles = `
-.sig-tooltip {
-  position: absolute;
-  z-index: 9999;
-  padding: 0.5rem 0.75rem;
-  background-color: #1f2937;
-  color: white;
-  font-size: 0.75rem;
-  border-radius: 0.375rem;
-  max-width: 250px;
-  word-wrap: break-word;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  animation: tooltip-fade 0.15s ease-out;
-  pointer-events: none;
-}
+    @HostListener('focus')
+    onFocus(): void {
+        if (this.disabled()) return;
+        this.show();
+    }
 
-.sig-tooltip::after {
-  content: '';
-  position: absolute;
-  border: 6px solid transparent;
-}
+    @HostListener('blur')
+    onBlur(): void {
+        this.hide();
+    }
 
-.sig-tooltip--top::after {
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-top-color: #1f2937;
-}
+    @HostListener('keydown.escape')
+    onEscape(): void {
+        this.hide();
+    }
 
-.sig-tooltip--bottom::after {
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-bottom-color: #1f2937;
-}
+    private show(): void {
+        if (!this.isBrowser || this.tooltipElement) return;
 
-.sig-tooltip--left::after {
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border-left-color: #1f2937;
-}
+        this.tooltipElement = this.document.createElement('div');
+        this.tooltipElement.id = this.tooltipId;
+        this.tooltipElement.className = `sig-tooltip sig-tooltip--${this.position()}`;
+        this.tooltipElement.textContent = this.content();
+        this.tooltipElement.setAttribute('role', 'tooltip');
+        this.tooltipElement.setAttribute('aria-hidden', 'false');
 
-.sig-tooltip--right::after {
-  right: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border-right-color: #1f2937;
-}
+        this.document.body.appendChild(this.tooltipElement);
+        this.updatePosition();
+    }
 
-@keyframes tooltip-fade {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-`;
+    private hide(): void {
+        if (this.showTimeout) {
+            clearTimeout(this.showTimeout);
+            this.showTimeout = null;
+        }
 
-// Inject styles
-if (typeof document !== 'undefined') {
-  const styleId = 'sig-tooltip-styles';
-  if (!document.getElementById(styleId)) {
-    const style = document.createElement('style');
-    style.id = styleId;
-    style.textContent = tooltipStyles;
-    document.head.appendChild(style);
-  }
+        if (this.tooltipElement) {
+            this.tooltipElement.remove();
+            this.tooltipElement = null;
+        }
+    }
+
+    private updatePosition(): void {
+        if (!this.tooltipElement) return;
+
+        const hostRect = this.elementRef.nativeElement.getBoundingClientRect();
+        const tooltipRect = this.tooltipElement.getBoundingClientRect();
+        const pos = this.position();
+        const gap = 8;
+
+        let top = 0;
+        let left = 0;
+
+        switch (pos) {
+            case 'top':
+                top = hostRect.top - tooltipRect.height - gap;
+                left = hostRect.left + (hostRect.width - tooltipRect.width) / 2;
+                break;
+            case 'bottom':
+                top = hostRect.bottom + gap;
+                left = hostRect.left + (hostRect.width - tooltipRect.width) / 2;
+                break;
+            case 'left':
+                top = hostRect.top + (hostRect.height - tooltipRect.height) / 2;
+                left = hostRect.left - tooltipRect.width - gap;
+                break;
+            case 'right':
+                top = hostRect.top + (hostRect.height - tooltipRect.height) / 2;
+                left = hostRect.right + gap;
+                break;
+        }
+
+        const win = this.document.defaultView || window;
+        top = Math.max(8, Math.min(top, win.innerHeight - tooltipRect.height - 8));
+        left = Math.max(8, Math.min(left, win.innerWidth - tooltipRect.width - 8));
+
+        this.tooltipElement.style.top = `${top + window.scrollY}px`;
+        this.tooltipElement.style.left = `${left + window.scrollX}px`;
+    }
+
+    ngOnDestroy(): void {
+        this.hide();
+    }
 }

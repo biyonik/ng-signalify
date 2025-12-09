@@ -1,406 +1,334 @@
 import {
-  Component,
-  ChangeDetectionStrategy,
-  forwardRef,
-  signal,
-  computed,
-  input,
-  model,
-  output,
-  ElementRef,
-  viewChild,
-  ViewEncapsulation,
+    Component,
+    ChangeDetectionStrategy,
+    forwardRef,
+    signal,
+    computed,
+    input,
+    model,
+    ViewEncapsulation,
+    OnInit,
+    ElementRef,
+    ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { generateId, Keys, announce } from '../../utils/a11y.utils';
 
 /**
- * SigColorPicker - Signal-based color picker
- * 
- * Usage:
- * <sig-color-picker
- *   [(value)]="selectedColor"
- *   [presetColors]="['#ff0000', '#00ff00', '#0000ff']"
- *   [showInput]="true"
- * />
+ * SigColorPicker - Signal-based accessible color picker
  */
 @Component({
-  selector: 'sig-color-picker',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SigColorPickerComponent),
-      multi: true,
-    },
-  ],
-  template: `
-    <div class="sig-color-picker" [class.sig-color-picker--open]="isOpen()">
-      <!-- Trigger -->
-      <button
-        type="button"
-        class="sig-color-picker__trigger"
-        [disabled]="disabled()"
-        (click)="toggle()"
-      >
-        <span 
-          class="sig-color-picker__preview"
-          [style.background-color]="value() || '#ffffff'"
-        ></span>
-        @if (showValue()) {
-          <span class="sig-color-picker__value">{{ value() || 'Seçiniz' }}</span>
-        }
-      </button>
+    selector: 'sig-color-picker',
+    standalone: true,
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SigColorPickerComponent),
+            multi: true,
+        },
+    ],
+    template: `
+        <div
+                class="sig-color-picker"
+                [class.sig-color-picker--open]="isOpen()"
+                [class.sig-color-picker--disabled]="isDisabled()"
+        >
+            @if (label()) {
+                <label [id]="labelId" [for]="triggerId" class="sig-color-picker__label">
+                    {{ label() }}
+                </label>
+            }
 
-      <!-- Dropdown -->
-      @if (isOpen()) {
-        <div class="sig-color-picker__dropdown">
-          <!-- Saturation/Brightness Picker -->
-          <div 
-            class="sig-color-picker__saturation"
-            #saturationRef
-            [style.background-color]="hueColor()"
-            (mousedown)="onSaturationMouseDown($event)"
-          >
-            <div class="sig-color-picker__saturation-white"></div>
-            <div class="sig-color-picker__saturation-black"></div>
-            <div 
-              class="sig-color-picker__saturation-cursor"
-              [style.left.%]="saturation()"
-              [style.top.%]="100 - brightness()"
-            ></div>
-          </div>
-
-          <!-- Hue Slider -->
-          <div 
-            class="sig-color-picker__hue"
-            #hueRef
-            (mousedown)="onHueMouseDown($event)"
-          >
-            <div 
-              class="sig-color-picker__hue-cursor"
-              [style.left.%]="(hue() / 360) * 100"
-            ></div>
-          </div>
-
-          <!-- Alpha Slider -->
-          @if (showAlpha()) {
-            <div 
-              class="sig-color-picker__alpha"
-              [style.--alpha-color]="rgbString()"
-              (mousedown)="onAlphaMouseDown($event)"
+            <button
+                    #triggerBtn
+                    type="button"
+                    class="sig-color-picker__trigger"
+                    [id]="triggerId"
+                    [disabled]="isDisabled()"
+                    [attr.aria-expanded]="isOpen()"
+                    [attr.aria-haspopup]="'dialog'"
+                    [attr.aria-controls]="dialogId"
+                    [attr.aria-label]="getButtonLabel()"
+                    [attr.aria-labelledby]="label() ? labelId : null"
+                    [attr.aria-describedby]="ariaDescribedBy() || null"
+                    (click)="toggle()"
+                    (keydown)="onTriggerKeydown($event)"
             >
-              <div 
-                class="sig-color-picker__alpha-cursor"
-                [style.left.%]="alpha() * 100"
-              ></div>
-            </div>
-          }
-
-          <!-- Preset Colors -->
-          @if (presetColors().length > 0) {
-            <div class="sig-color-picker__presets">
-              @for (color of presetColors(); track color) {
-                <button
-                  type="button"
-                  class="sig-color-picker__preset"
-                  [style.background-color]="color"
-                  [class.sig-color-picker__preset--selected]="value() === color"
-                  (click)="selectPreset(color)"
-                  [title]="color"
-                ></button>
-              }
-            </div>
-          }
-
-          <!-- Input -->
-          @if (showInput()) {
-            <div class="sig-color-picker__input-container">
-              <input
-                type="text"
-                class="sig-color-picker__input"
-                [value]="value()"
-                (input)="onInputChange($event)"
-                (blur)="onInputBlur($event)"
-                placeholder="#000000"
-              />
-              @if (showEyeDropper() && hasEyeDropper) {
-                <button
-                  type="button"
-                  class="sig-color-picker__eyedropper"
-                  (click)="pickFromScreen()"
-                  title="Ekrandan seç"
-                >
-                  💉
-                </button>
-              }
-            </div>
-          }
-
-          <!-- Footer -->
-          <div class="sig-color-picker__footer">
-            <button type="button" (click)="cancel()">İptal</button>
-            <button type="button" class="sig-color-picker__apply" (click)="apply()">
-              Uygula
+        <span
+                class="sig-color-picker__swatch"
+                [style.backgroundColor]="value() || '#ffffff'"
+                aria-hidden="true"
+        ></span>
+                <span class="sig-color-picker__value">{{ value() || placeholder() }}</span>
             </button>
-          </div>
+
+            @if (isOpen()) {
+                <div
+                        #dialog
+                        class="sig-color-picker__dropdown"
+                        [id]="dialogId"
+                        role="dialog"
+                        aria-modal="true"
+                        [attr.aria-label]="'Renk seçici'"
+                        (keydown)="onDialogKeydown($event)"
+                >
+                    <!-- Preset Colors -->
+                    @if (presets().length > 0) {
+                        <div
+                                class="sig-color-picker__presets"
+                                role="listbox"
+                                [attr.aria-label]="'Hazır renkler'"
+                        >
+                            @for (color of presets(); track color; let i = $index) {
+                                <button
+                                        type="button"
+                                        role="option"
+                                        class="sig-color-picker__preset"
+                                        [class.sig-color-picker__preset--selected]="color === value()"
+                                        [style.backgroundColor]="color"
+                                        [attr.aria-selected]="color === value()"
+                                        [attr.aria-label]="'Renk: ' + color"
+                                        [tabindex]="color === value() ? 0 : -1"
+                                        (click)="selectColor(color)"
+                                        (keydown)="onPresetKeydown($event, i)"
+                                >
+                                    @if (color === value()) {
+                                        <span class="sig-color-picker__check" aria-hidden="true">✓</span>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    }
+
+                    <!-- Custom Color Input -->
+                    <div class="sig-color-picker__custom">
+                        <label [for]="customInputId" class="sig-color-picker__custom-label">
+                            Özel renk
+                        </label>
+                        <div class="sig-color-picker__custom-row">
+                            <input
+                                    type="color"
+                                    [id]="customInputId"
+                                    [value]="value() || '#000000'"
+                                    (input)="onColorInput($event)"
+                                    class="sig-color-picker__native"
+                                    [attr.aria-label]="'Özel renk seçici'"
+                            />
+                            <input
+                                    type="text"
+                                    [value]="value()"
+                                    (input)="onTextInput($event)"
+                                    (blur)="onTextBlur()"
+                                    placeholder="#000000"
+                                    class="sig-color-picker__hex"
+                                    [attr.aria-label]="'HEX renk kodu'"
+                                    maxlength="7"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="sig-color-picker__actions">
+                        @if (clearable()) {
+                            <button
+                                    type="button"
+                                    class="sig-color-picker__clear"
+                                    (click)="clear()"
+                            >
+                                Temizle
+                            </button>
+                        }
+                        <button
+                                type="button"
+                                class="sig-color-picker__done"
+                                (click)="close()"
+                        >
+                            Tamam
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
-      }
-    </div>
-  `,
+    `,
     host: {
-    '(document:click)': 'onClickOutside($event)',
-  },
+        '(document:click)': 'onClickOutside($event)',
+    },
 })
-export class SigColorPickerComponent implements ControlValueAccessor {
-  readonly saturationRef = viewChild<ElementRef>('saturationRef');
-  readonly hueRef = viewChild<ElementRef>('hueRef');
+export class SigColorPickerComponent implements ControlValueAccessor, OnInit {
+    @ViewChild('triggerBtn') triggerBtn!: ElementRef<HTMLButtonElement>;
+    @ViewChild('dialog') dialog?: ElementRef<HTMLDivElement>;
 
-  readonly value = model<string>('#000000');
-  readonly disabled = input<boolean>(false);
-  readonly showValue = input<boolean>(true);
-  readonly showInput = input<boolean>(true);
-  readonly showAlpha = input<boolean>(false);
-  readonly showEyeDropper = input<boolean>(true);
-  readonly presetColors = input<string[]>([
-    '#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff',
-    '#ffff00', '#00ffff', '#ff00ff', '#f59e0b', '#10b981',
-  ]);
+    readonly value = model<string | null>(null);
+    readonly placeholder = input<string>('Renk seçin');
+    readonly disabled = input<boolean>(false);
+    readonly label = input<string>('');
+    readonly ariaDescribedBy = input<string>('');
+    readonly clearable = input<boolean>(true);
+    readonly presets = input<string[]>([
+        '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6',
+        '#3b82f6', '#8b5cf6', '#ec4899', '#000000', '#ffffff'
+    ]);
 
-  readonly colorSelected = output<string>();
+    readonly isOpen = signal(false);
 
-  readonly isOpen = signal(false);
-  readonly hue = signal(0);
-  readonly saturation = signal(100);
-  readonly brightness = signal(100);
-  readonly alpha = signal(1);
+    // IDs
+    triggerId = '';
+    dialogId = '';
+    labelId = '';
+    customInputId = '';
 
-  readonly hasEyeDropper = 'EyeDropper' in window;
+    private _disabledByForm = signal(false);
+    readonly isDisabled = computed(() => this.disabled() || this._disabledByForm());
 
-  private _onChange: (value: string) => void = () => {};
-  private _onTouched: () => void = () => {};
+    private _onChange: (value: string | null) => void = () => {};
+    private _onTouched: () => void = () => {};
 
-  readonly hueColor = computed(() => {
-    return `hsl(${this.hue()}, 100%, 50%)`;
-  });
-
-  readonly rgbString = computed(() => {
-    const rgb = this.hsvToRgb(this.hue(), this.saturation(), this.brightness());
-    return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-  });
-
-  toggle(): void {
-    if (!this.disabled()) {
-      this.isOpen.update((v) => !v);
-      if (this.isOpen()) {
-        this.parseColor(this.value());
-      }
+    ngOnInit(): void {
+        const baseId = generateId('sig-color');
+        this.triggerId = `${baseId}-trigger`;
+        this.dialogId = `${baseId}-dialog`;
+        this.labelId = `${baseId}-label`;
+        this.customInputId = `${baseId}-custom`;
     }
-  }
 
-  onSaturationMouseDown(event: MouseEvent): void {
-    this.updateSaturation(event);
-    
-    const onMove = (e: MouseEvent) => this.updateSaturation(e);
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  }
-
-  private updateSaturation(event: MouseEvent): void {
-    const el = this.saturationRef()?.nativeElement;
-    if (!el) return;
-    
-    const rect = el.getBoundingClientRect();
-    const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
-    const y = Math.max(0, Math.min(event.clientY - rect.top, rect.height));
-    
-    this.saturation.set((x / rect.width) * 100);
-    this.brightness.set(100 - (y / rect.height) * 100);
-    this.updateColor();
-  }
-
-  onHueMouseDown(event: MouseEvent): void {
-    this.updateHue(event);
-    
-    const onMove = (e: MouseEvent) => this.updateHue(e);
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  }
-
-  private updateHue(event: MouseEvent): void {
-    const el = this.hueRef()?.nativeElement;
-    if (!el) return;
-    
-    const rect = el.getBoundingClientRect();
-    const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
-    
-    this.hue.set((x / rect.width) * 360);
-    this.updateColor();
-  }
-
-  onAlphaMouseDown(event: MouseEvent): void {
-    const el = event.currentTarget as HTMLElement;
-    const rect = el.getBoundingClientRect();
-    const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
-    this.alpha.set(x / rect.width);
-    this.updateColor();
-  }
-
-  private updateColor(): void {
-    const rgb = this.hsvToRgb(this.hue(), this.saturation(), this.brightness());
-    const hex = this.rgbToHex(rgb.r, rgb.g, rgb.b);
-    this.value.set(hex);
-  }
-
-  selectPreset(color: string): void {
-    this.value.set(color);
-    this.parseColor(color);
-  }
-
-  onInputChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const value = input.value;
-    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
-      this.value.set(value);
-      this.parseColor(value);
-    }
-  }
-
-  onInputBlur(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!/^#[0-9A-Fa-f]{6}$/.test(input.value)) {
-      input.value = this.value();
-    }
-  }
-
-  async pickFromScreen(): Promise<void> {
-    if ('EyeDropper' in window) {
-      try {
-        const eyeDropper = new (window as any).EyeDropper();
-        const result = await eyeDropper.open();
-        this.value.set(result.sRGBHex);
-        this.parseColor(result.sRGBHex);
-      } catch (e) {
-        // User cancelled
-      }
-    }
-  }
-
-  apply(): void {
-    this._onChange(this.value());
-    this.colorSelected.emit(this.value());
-    this.isOpen.set(false);
-  }
-
-  cancel(): void {
-    this.isOpen.set(false);
-  }
-
-  onClickOutside(event: Event): void {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.sig-color-picker')) {
-      this.isOpen.set(false);
-    }
-  }
-
-  private parseColor(hex: string): void {
-    const rgb = this.hexToRgb(hex);
-    if (rgb) {
-      const hsv = this.rgbToHsv(rgb.r, rgb.g, rgb.b);
-      this.hue.set(hsv.h);
-      this.saturation.set(hsv.s);
-      this.brightness.set(hsv.v);
-    }
-  }
-
-  private hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-      ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
+    getButtonLabel(): string {
+        const val = this.value();
+        if (val) {
+            return `Seçili renk: ${val}. Değiştirmek için tıklayın.`;
         }
-      : null;
-  }
-
-  private rgbToHex(r: number, g: number, b: number): string {
-    return '#' + [r, g, b].map((x) => {
-      const hex = Math.round(x).toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    }).join('');
-  }
-
-  private hsvToRgb(h: number, s: number, v: number): { r: number; g: number; b: number } {
-    s /= 100;
-    v /= 100;
-    
-    const c = v * s;
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    const m = v - c;
-    
-    let r = 0, g = 0, b = 0;
-    
-    if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
-    else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
-    else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
-    else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
-    else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
-    else { r = c; g = 0; b = x; }
-    
-    return {
-      r: (r + m) * 255,
-      g: (g + m) * 255,
-      b: (b + m) * 255,
-    };
-  }
-
-  private rgbToHsv(r: number, g: number, b: number): { h: number; s: number; v: number } {
-    r /= 255; g /= 255; b /= 255;
-    
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const d = max - min;
-    
-    let h = 0;
-    const s = max === 0 ? 0 : (d / max) * 100;
-    const v = max * 100;
-    
-    if (d !== 0) {
-      switch (max) {
-        case r: h = ((g - b) / d + (g < b ? 6 : 0)) * 60; break;
-        case g: h = ((b - r) / d + 2) * 60; break;
-        case b: h = ((r - g) / d + 4) * 60; break;
-      }
+        return 'Renk seçmek için tıklayın';
     }
-    
-    return { h, s, v };
-  }
 
-  writeValue(value: string): void {
-    this.value.set(value || '#000000');
-  }
+    toggle(): void {
+        if (this.isDisabled()) return;
 
-  registerOnChange(fn: (value: string) => void): void {
-    this._onChange = fn;
-  }
+        if (this.isOpen()) {
+            this.close();
+        } else {
+            this.open();
+        }
+    }
 
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
+    private open(): void {
+        this.isOpen.set(true);
+        announce('Renk seçici açıldı', 'polite');
+    }
 
-  setDisabledState(_isDisabled: boolean): void {}
+    close(): void {
+        this.isOpen.set(false);
+        this.triggerBtn.nativeElement.focus();
+    }
+
+    selectColor(color: string): void {
+        this.value.set(color);
+        this._onChange(color);
+        announce(`${color} seçildi`, 'polite');
+    }
+
+    onColorInput(event: Event): void {
+        const color = (event.target as HTMLInputElement).value;
+        this.selectColor(color);
+    }
+
+    onTextInput(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        let color = input.value;
+
+        if (color && !color.startsWith('#')) {
+            color = '#' + color;
+        }
+
+        if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+            this.selectColor(color);
+        }
+    }
+
+    onTextBlur(): void {
+        this._onTouched();
+    }
+
+    clear(): void {
+        this.value.set(null);
+        this._onChange(null);
+        announce('Renk temizlendi', 'polite');
+    }
+
+    onTriggerKeydown(event: KeyboardEvent): void {
+        if (event.key === Keys.ARROW_DOWN || event.key === Keys.ENTER || event.key === Keys.SPACE) {
+            event.preventDefault();
+            if (!this.isOpen()) {
+                this.open();
+            }
+        }
+    }
+
+    onDialogKeydown(event: KeyboardEvent): void {
+        if (event.key === Keys.ESCAPE) {
+            event.preventDefault();
+            this.close();
+        }
+    }
+
+    onPresetKeydown(event: KeyboardEvent, index: number): void {
+        const presets = this.presets();
+        let newIndex = index;
+
+        switch (event.key) {
+            case Keys.ARROW_RIGHT:
+            case Keys.ARROW_DOWN:
+                event.preventDefault();
+                newIndex = (index + 1) % presets.length;
+                break;
+            case Keys.ARROW_LEFT:
+            case Keys.ARROW_UP:
+                event.preventDefault();
+                newIndex = (index - 1 + presets.length) % presets.length;
+                break;
+            case Keys.HOME:
+                event.preventDefault();
+                newIndex = 0;
+                break;
+            case Keys.END:
+                event.preventDefault();
+                newIndex = presets.length - 1;
+                break;
+            case Keys.ENTER:
+            case Keys.SPACE:
+                event.preventDefault();
+                this.selectColor(presets[index]);
+                return;
+        }
+
+        if (newIndex !== index) {
+            const buttons = this.dialog?.nativeElement.querySelectorAll('.sig-color-picker__preset');
+            (buttons?.[newIndex] as HTMLButtonElement)?.focus();
+        }
+    }
+
+    onClickOutside(event: Event): void {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.sig-color-picker') && this.isOpen()) {
+            this.close();
+        }
+    }
+
+    writeValue(value: string | null): void {
+        this.value.set(value);
+    }
+
+    registerOnChange(fn: (value: string | null) => void): void {
+        this._onChange = fn;
+    }
+
+    registerOnTouched(fn: () => void): void {
+        this._onTouched = fn;
+    }
+
+    setDisabledState(isDisabled: boolean): void {
+        this._disabledByForm.set(isDisabled);
+    }
 }
