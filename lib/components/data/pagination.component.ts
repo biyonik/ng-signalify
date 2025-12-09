@@ -1,216 +1,228 @@
 import {
-  Component,
-  ChangeDetectionStrategy,
-  computed,
-  input,
-  output,
-  model,
-  ViewEncapsulation,
+    Component,
+    ChangeDetectionStrategy,
+    input,
+    output,
+    computed,
+    model,
+    ViewEncapsulation,
+    OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { generateId, announce } from '../../utils/a11y.utils';
 
 /**
- * SigPagination - Signal-based pagination controls
+ * SigPagination - Signal-based accessible pagination
+ *
+ * ARIA: Uses nav landmark with aria-label
  */
 @Component({
-  selector: 'sig-pagination',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  template: `
-    <div class="sig-pagination" [class.sig-pagination--compact]="compact()">
-      @if (showInfo()) {
-        <div class="sig-pagination__info">
-          {{ infoText() }}
-        </div>
-      }
-
-      @if (showPageSize() && pageSizeOptions().length > 0) {
-        <div class="sig-pagination__size">
-          <label>
-            <span class="sig-pagination__size-label">Sayfa başına:</span>
-            <select
-              [value]="pageSize()"
-              (change)="onPageSizeSelect($event)"
-              class="sig-pagination__size-select"
+    selector: 'sig-pagination',
+    standalone: true,
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    template: `
+        <nav
+                class="sig-pagination"
+                [class.sig-pagination--sm]="size() === 'sm'"
+                [class.sig-pagination--lg]="size() === 'lg'"
+                [attr.aria-label]="ariaLabel()"
+                role="navigation"
+        >
+            <!-- Previous button -->
+            <button
+                    type="button"
+                    class="sig-pagination__btn sig-pagination__btn--prev"
+                    [disabled]="isFirstPage()"
+                    [attr.aria-label]="'Önceki sayfa'"
+                    (click)="goToPrevious()"
             >
-              @for (size of pageSizeOptions(); track size) {
-                <option [value]="size">{{ size }}</option>
-              }
-            </select>
-          </label>
-        </div>
-      }
+                <span aria-hidden="true">‹</span>
+                @if (showLabels()) {
+                    <span>Önceki</span>
+                }
+            </button>
 
-      <div class="sig-pagination__nav">
-        @if (showFirstLast()) {
-          <button
-            type="button"
-            class="sig-pagination__btn"
-            [disabled]="!hasPrev()"
-            (click)="goFirst()"
-            title="İlk sayfa"
-          >
-            ««
-          </button>
-        }
+            <!-- Page numbers -->
+            <ul class="sig-pagination__pages" role="list">
+                @for (page of visiblePages(); track page.value) {
+                    @if (page.type === 'ellipsis') {
+                        <li class="sig-pagination__ellipsis" aria-hidden="true">…</li>
+                    } @else {
+                        <li>
+                            <button
+                                    type="button"
+                                    class="sig-pagination__page"
+                                    [class.sig-pagination__page--active]="page.value === currentPage()"
+                                    [attr.aria-label]="'Sayfa ' + page.value + ' / ' + totalPages()"
+                                    [attr.aria-current]="page.value === currentPage() ? 'page' : null"
+                                    (click)="goToPage(page.value!)"
+                            >
+                                {{ page.value }}
+                            </button>
+                        </li>
+                    }
+                }
+            </ul>
 
-        <button
-          type="button"
-          class="sig-pagination__btn"
-          [disabled]="!hasPrev()"
-          (click)="goPrev()"
-          title="Önceki sayfa"
-        >
-          ‹
-        </button>
+            <!-- Next button -->
+            <button
+                    type="button"
+                    class="sig-pagination__btn sig-pagination__btn--next"
+                    [disabled]="isLastPage()"
+                    [attr.aria-label]="'Sonraki sayfa'"
+                    (click)="goToNext()"
+            >
+                @if (showLabels()) {
+                    <span>Sonraki</span>
+                }
+                <span aria-hidden="true">›</span>
+            </button>
 
-        @if (!compact()) {
-          @for (p of visiblePages(); track $index) {
-            @if (p === -1) {
-              <span class="sig-pagination__ellipsis">...</span>
-            } @else {
-              <button
-                type="button"
-                class="sig-pagination__btn sig-pagination__btn--page"
-                [class.sig-pagination__btn--active]="p === page()"
-                (click)="goTo(p)"
-              >
-                {{ p }}
-              </button>
+            <!-- Page info (screen reader) -->
+            <div class="sig-visually-hidden" aria-live="polite" aria-atomic="true">
+                Sayfa {{ currentPage() }} / {{ totalPages() }}
+            </div>
+
+            <!-- Page size selector -->
+            @if (showPageSize()) {
+                <div class="sig-pagination__size">
+                    <label [for]="pageSizeId" class="sig-pagination__size-label">
+                        Sayfa başına:
+                    </label>
+                    <select
+                            [id]="pageSizeId"
+                            class="sig-pagination__size-select"
+                            [value]="pageSize()"
+                            (change)="onPageSizeChange($event)"
+                    >
+                        @for (size of pageSizeOptions(); track size) {
+                            <option [value]="size">{{ size }}</option>
+                        }
+                    </select>
+                </div>
             }
-          }
-        } @else {
-          <span class="sig-pagination__current">
-            {{ page() }} / {{ totalPages() }}
-          </span>
+
+            <!-- Total info -->
+            @if (showTotal()) {
+                <div class="sig-pagination__total">
+                    {{ getRangeLabel() }}
+                </div>
+            }
+        </nav>
+    `,
+    styles: [`
+    .sig-visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  `]
+})
+export class SigPaginationComponent implements OnInit {
+    readonly currentPage = model<number>(1);
+    readonly totalItems = input<number>(0);
+    readonly pageSize = model<number>(10);
+    readonly pageSizeOptions = input<number[]>([10, 25, 50, 100]);
+    readonly siblingCount = input<number>(1);
+    readonly showLabels = input<boolean>(false);
+    readonly showPageSize = input<boolean>(false);
+    readonly showTotal = input<boolean>(false);
+    readonly size = input<'sm' | 'md' | 'lg'>('md');
+    readonly ariaLabel = input<string>('Sayfalama');
+
+    readonly pageChanged = output<number>();
+    readonly pageSizeChanged = output<number>();
+
+    pageSizeId = '';
+
+    ngOnInit(): void {
+        this.pageSizeId = generateId('sig-pagination-size');
+    }
+
+    readonly totalPages = computed(() => {
+        return Math.ceil(this.totalItems() / this.pageSize()) || 1;
+    });
+
+    readonly isFirstPage = computed(() => this.currentPage() <= 1);
+    readonly isLastPage = computed(() => this.currentPage() >= this.totalPages());
+
+    readonly visiblePages = computed(() => {
+        const current = this.currentPage();
+        const total = this.totalPages();
+        const siblings = this.siblingCount();
+
+        const pages: Array<{ type: 'page' | 'ellipsis'; value?: number }> = [];
+
+        // Always show first page
+        pages.push({ type: 'page', value: 1 });
+
+        // Calculate range around current page
+        const rangeStart = Math.max(2, current - siblings);
+        const rangeEnd = Math.min(total - 1, current + siblings);
+
+        // Add ellipsis after first page if needed
+        if (rangeStart > 2) {
+            pages.push({ type: 'ellipsis' });
         }
 
-        <button
-          type="button"
-          class="sig-pagination__btn"
-          [disabled]="!hasNext()"
-          (click)="goNext()"
-          title="Sonraki sayfa"
-        >
-          ›
-        </button>
-
-        @if (showFirstLast()) {
-          <button
-            type="button"
-            class="sig-pagination__btn"
-            [disabled]="!hasNext()"
-            (click)="goLast()"
-            title="Son sayfa"
-          >
-            »»
-          </button>
+        // Add pages in range
+        for (let i = rangeStart; i <= rangeEnd; i++) {
+            pages.push({ type: 'page', value: i });
         }
-      </div>
-    </div>
-  `,
-  })
-export class SigPaginationComponent {
-  // Inputs
-  readonly page = model<number>(1);
-  readonly pageSize = model<number>(10);
-  readonly total = input<number>(0);
-  readonly pageSizeOptions = input<number[]>([10, 20, 50, 100]);
-  readonly maxButtons = input<number>(5);
-  readonly showInfo = input<boolean>(true);
-  readonly showPageSize = input<boolean>(true);
-  readonly showFirstLast = input<boolean>(true);
-  readonly compact = input<boolean>(false);
 
-  // Outputs
-  readonly pageSizeChanged = output<number>();
+        // Add ellipsis before last page if needed
+        if (rangeEnd < total - 1) {
+            pages.push({ type: 'ellipsis' });
+        }
 
-  // Computed
-  readonly totalPages = computed(() => {
-    const size = this.pageSize();
-    return size > 0 ? Math.ceil(this.total() / size) : 0;
-  });
+        // Always show last page if more than 1 page
+        if (total > 1) {
+            pages.push({ type: 'page', value: total });
+        }
 
-  readonly startIndex = computed(() => {
-    return (this.page() - 1) * this.pageSize() + 1;
-  });
+        return pages;
+    });
 
-  readonly endIndex = computed(() => {
-    return Math.min(this.page() * this.pageSize(), this.total());
-  });
+    goToPage(page: number): void {
+        if (page < 1 || page > this.totalPages() || page === this.currentPage()) return;
 
-  readonly infoText = computed(() => {
-    if (this.total() === 0) return 'Kayıt bulunamadı';
-    return `${this.startIndex()} - ${this.endIndex()} / ${this.total()} kayıt`;
-  });
-
-  readonly hasPrev = computed(() => this.page() > 1);
-  readonly hasNext = computed(() => this.page() < this.totalPages());
-
-  readonly visiblePages = computed(() => {
-    const total = this.totalPages();
-    const current = this.page();
-    const max = this.maxButtons();
-
-    if (total <= max) {
-      return Array.from({ length: total }, (_, i) => i + 1);
+        this.currentPage.set(page);
+        this.pageChanged.emit(page);
+        announce(`Sayfa ${page} / ${this.totalPages()}`, 'polite');
     }
 
-    const pages: number[] = [];
-    const half = Math.floor(max / 2);
-
-    let start = Math.max(1, current - half);
-    let end = Math.min(total, start + max - 1);
-
-    if (end - start + 1 < max) {
-      start = Math.max(1, end - max + 1);
+    goToPrevious(): void {
+        this.goToPage(this.currentPage() - 1);
     }
 
-    if (start > 1) {
-      pages.push(1);
-      if (start > 2) pages.push(-1);
+    goToNext(): void {
+        this.goToPage(this.currentPage() + 1);
     }
 
-    for (let i = start; i <= end; i++) {
-      if (!pages.includes(i)) pages.push(i);
+    onPageSizeChange(event: Event): void {
+        const select = event.target as HTMLSelectElement;
+        const newSize = parseInt(select.value, 10);
+        this.pageSize.set(newSize);
+        this.currentPage.set(1);
+        this.pageSizeChanged.emit(newSize);
+        announce(`Sayfa başına ${newSize} öğe gösteriliyor`, 'polite');
     }
 
-    if (end < total) {
-      if (end < total - 1) pages.push(-1);
-      pages.push(total);
+    getRangeLabel(): string {
+        const total = this.totalItems();
+        if (total === 0) return 'Sonuç bulunamadı';
+
+        const start = (this.currentPage() - 1) * this.pageSize() + 1;
+        const end = Math.min(this.currentPage() * this.pageSize(), total);
+
+        return `${start}-${end} / ${total}`;
     }
-
-    return pages;
-  });
-
-  goTo(pageNum: number): void {
-    if (pageNum >= 1 && pageNum <= this.totalPages() && pageNum !== this.page()) {
-      this.page.set(pageNum);
-    }
-  }
-
-  goFirst(): void {
-    this.goTo(1);
-  }
-
-  goLast(): void {
-    this.goTo(this.totalPages());
-  }
-
-  goPrev(): void {
-    this.goTo(this.page() - 1);
-  }
-
-  goNext(): void {
-    this.goTo(this.page() + 1);
-  }
-
-  onPageSizeSelect(event: Event): void {
-    const value = Number((event.target as HTMLSelectElement).value);
-    this.pageSize.set(value);
-    this.pageSizeChanged.emit(value);
-    this.page.set(1); // Reset to first page
-  }
 }

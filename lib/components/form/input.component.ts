@@ -8,14 +8,16 @@ import {
     output,
     model,
     ViewEncapsulation,
+    OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { generateId } from '../../utils/a11y.utils';
 
 export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url';
 
 /**
- * SigInput - Signal-based text input
+ * SigInput - Signal-based accessible text input
  */
 @Component({
     selector: 'sig-input',
@@ -33,55 +35,67 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
     template: `
         <div class="sig-input" [class.sig-input--with-icon]="icon()">
             @if (icon() && iconPosition() === 'left') {
-                <span class="sig-input__icon sig-input__icon--left">{{ icon() }}</span>
+                <span class="sig-input__icon sig-input__icon--left" aria-hidden="true">{{ icon() }}</span>
             }
 
             <input
-                    [type]="actualType()"
-                    [value]="value() ?? ''"
-                    [placeholder]="placeholder()"
-                    [disabled]="disabled()"
-                    [readonly]="readonly()"
-                    [attr.min]="min()"
-                    [attr.max]="max()"
-                    [attr.step]="step()"
-                    [maxLength]="maxLength()"
-                    [autocomplete]="autocomplete()"
-                    (input)="onInput($event)"
-                    (blur)="onBlur()"
-                    (focus)="onFocusEvent()"
-                    class="sig-input__field"
+                [id]="inputId"
+                [type]="actualType()"
+                [value]="value() ?? ''"
+                [placeholder]="placeholder()"
+                [disabled]="disabled()"
+                [readonly]="readonly()"
+                [attr.min]="min()"
+                [attr.max]="max()"
+                [attr.step]="step()"
+                [maxLength]="maxLength()"
+                [autocomplete]="autocomplete()"
+                [attr.aria-label]="ariaLabel() || null"
+                [attr.aria-labelledby]="ariaLabelledBy() || null"
+                [attr.aria-describedby]="ariaDescribedBy() || null"
+                [attr.aria-invalid]="ariaInvalid()"
+                [attr.aria-required]="required()"
+                [attr.aria-readonly]="readonly() || null"
+                [attr.inputmode]="inputMode()"
+                (input)="onInput($event)"
+                (blur)="onBlur()"
+                (focus)="onFocusEvent()"
+                class="sig-input__field"
             />
 
             @if (type() === 'password') {
                 <button
-                        type="button"
-                        class="sig-input__toggle"
-                        (click)="togglePassword()"
-                        tabindex="-1"
+                    type="button"
+                    class="sig-input__toggle"
+                    (click)="togglePassword()"
+                    tabindex="-1"
+                    [attr.aria-label]="showPassword() ? 'Şifreyi gizle' : 'Şifreyi göster'"
+                    [attr.aria-pressed]="showPassword()"
                 >
-                    {{ showPassword() ? '👁️' : '👁️‍🗨️' }}
+                    <span aria-hidden="true">{{ showPassword() ? '👁️' : '👁️‍🗨️' }}</span>
                 </button>
             }
 
             @if (clearable() && value()) {
                 <button
-                        type="button"
-                        class="sig-input__clear"
-                        (click)="onClear()"
-                        tabindex="-1"
+                    type="button"
+                    class="sig-input__clear"
+                    (click)="onClear()"
+                    tabindex="-1"
+                    aria-label="Alanı temizle"
                 >
-                    ✕
+                    <span aria-hidden="true">✕</span>
                 </button>
             }
 
             @if (icon() && iconPosition() === 'right') {
-                <span class="sig-input__icon sig-input__icon--right">{{ icon() }}</span>
+                <span class="sig-input__icon sig-input__icon--right" aria-hidden="true">{{ icon() }}</span>
             }
         </div>
     `,
 })
-export class SigInputComponent implements ControlValueAccessor {
+export class SigInputComponent implements ControlValueAccessor, OnInit {
+    // Mevcut input'lar
     readonly type = input<InputType>('text');
     readonly value = model<string | number | null>(null);
     readonly placeholder = input<string>('');
@@ -96,10 +110,23 @@ export class SigInputComponent implements ControlValueAccessor {
     readonly maxLength = input<number | null>(null);
     readonly autocomplete = input<string>('off');
 
+    // YENİ: A11y input'ları
+    readonly ariaLabel = input<string>('');
+    readonly ariaLabelledBy = input<string>('');
+    readonly ariaDescribedBy = input<string>('');
+    readonly ariaInvalid = input<boolean>(false);
+    readonly required = input<boolean>(false);
+    readonly inputMode = input<'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url'>('text');
+
+    // Output'lar
     readonly focus = output<void>();
     readonly blur = output<void>();
 
+    // Internal signals
     readonly showPassword = signal(false);
+
+    // YENİ: Unique ID for input
+    inputId = '';
 
     readonly actualType = computed(() => {
         if (this.type() === 'password' && this.showPassword()) {
@@ -108,8 +135,16 @@ export class SigInputComponent implements ControlValueAccessor {
         return this.type();
     });
 
+    // setDisabledState için internal state
+    private _disabledByForm = signal(false);
+    readonly isDisabled = computed(() => this.disabled() || this._disabledByForm());
+
     private _onChange: (value: string | number | null) => void = () => {};
     private _onTouched: () => void = () => {};
+
+    ngOnInit(): void {
+        this.inputId = generateId('sig-input');
+    }
 
     onInput(event: Event): void {
         const target = event.target as HTMLInputElement;
@@ -118,7 +153,15 @@ export class SigInputComponent implements ControlValueAccessor {
             this._onChange(null);
             return;
         }
-        const val = this.type() === 'number' ? Number(target.value) : target.value;
+
+        let val: string | number | null;
+        if (this.type() === 'number') {
+            const parsed = Number(target.value);
+            val = Number.isNaN(parsed) ? null : parsed;
+        } else {
+            val = target.value;
+        }
+
         this.value.set(val);
         this._onChange(val);
     }
@@ -153,5 +196,7 @@ export class SigInputComponent implements ControlValueAccessor {
         this._onTouched = fn;
     }
 
-    setDisabledState(_isDisabled: boolean): void {}
+    setDisabledState(isDisabled: boolean): void {
+        this._disabledByForm.set(isDisabled);
+    }
 }

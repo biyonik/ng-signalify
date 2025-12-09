@@ -1,265 +1,166 @@
 import {
-  Component,
-  ChangeDetectionStrategy,
-  signal,
-  computed,
-  Injectable,
-  inject,
-  input,
-  ViewEncapsulation,
+    Component,
+    ChangeDetectionStrategy,
+    signal,
+    input,
+    output,
+    Injectable,
+    ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
-export type ToastPosition = 
-  | 'top-left' | 'top-center' | 'top-right' 
-  | 'bottom-left' | 'bottom-center' | 'bottom-right';
+import { generateId, announce } from '../../utils/a11y.utils';
 
 export interface ToastConfig {
-  id?: string;
-  type?: ToastType;
-  title?: string;
-  message: string;
-  duration?: number;
-  closable?: boolean;
-  action?: { label: string; onClick: () => void };
-}
-
-export interface Toast extends Required<Omit<ToastConfig, 'action'>> {
-  action?: ToastConfig['action'];
-  createdAt: number;
-}
-
-export interface ToastServiceConfig {
-  maxToasts?: number;
-  queueMode?: boolean;
-  defaultDuration?: number;
+    id?: string;
+    message: string;
+    title?: string;
+    variant?: 'info' | 'success' | 'warning' | 'error';
+    duration?: number;
+    dismissible?: boolean;
+    action?: {
+        label: string;
+        callback: () => void;
+    };
 }
 
 /**
- * ToastService - Signal-based toast management
- */
-@Injectable({ providedIn: 'root' })
-export class ToastService {
-  private readonly _toasts = signal<Toast[]>([]);
-  private readonly _queue = signal<Toast[]>([]);
-  private readonly _timers = new Map<string, ReturnType<typeof setTimeout>>();
-  private _counter = 0;
-
-  private _config: Required<ToastServiceConfig> = {
-    maxToasts: 5,
-    queueMode: false,
-    defaultDuration: 5000,
-  };
-
-  readonly toasts = this._toasts.asReadonly();
-  readonly queueCount = computed(() => this._queue().length);
-
-  configure(config: Partial<ToastServiceConfig>): void {
-    this._config = { ...this._config, ...config };
-  }
-
-  show(config: ToastConfig): string {
-    const id = config.id ?? `toast-${++this._counter}`;
-    
-    const toast: Toast = {
-      id,
-      type: config.type ?? 'info',
-      title: config.title ?? this.getDefaultTitle(config.type ?? 'info'),
-      message: config.message,
-      duration: config.duration ?? this._config.defaultDuration,
-      closable: config.closable ?? true,
-      action: config.action,
-      createdAt: Date.now(),
-    };
-
-    const currentToasts = this._toasts();
-    
-    if (currentToasts.length >= this._config.maxToasts) {
-      if (this._config.queueMode) {
-        this._queue.update((q) => [...q, toast]);
-        return id;
-      } else {
-        const oldest = currentToasts[0];
-        if (oldest) this.dismiss(oldest.id);
-      }
-    }
-
-    this._toasts.update((t) => [...t, toast]);
-    this.scheduleAutoDismiss(toast);
-    return id;
-  }
-
-  success(message: string, title?: string): string {
-    return this.show({ type: 'success', message, title });
-  }
-
-  error(message: string, title?: string, duration = 10000): string {
-    return this.show({ type: 'error', message, title, duration });
-  }
-
-  persistentError(message: string, title?: string): string {
-    return this.show({ type: 'error', message, title, duration: 0 });
-  }
-
-  warning(message: string, title?: string): string {
-    return this.show({ type: 'warning', message, title });
-  }
-
-  info(message: string, title?: string): string {
-    return this.show({ type: 'info', message, title });
-  }
-
-  dismiss(id: string): void {
-    const timer = this._timers.get(id);
-    if (timer) {
-      clearTimeout(timer);
-      this._timers.delete(id);
-    }
-
-    this._toasts.update((t) => t.filter((toast) => toast.id !== id));
-
-    if (this._config.queueMode) {
-      setTimeout(() => this.showNextFromQueue(), 100);
-    }
-  }
-
-  dismissAll(): void {
-    this._timers.forEach((timer) => clearTimeout(timer));
-    this._timers.clear();
-    this._toasts.set([]);
-    this._queue.set([]);
-  }
-
-  private scheduleAutoDismiss(toast: Toast): void {
-    if (toast.duration > 0) {
-      const timer = setTimeout(() => this.dismiss(toast.id), toast.duration);
-      this._timers.set(toast.id, timer);
-    }
-  }
-
-  private showNextFromQueue(): void {
-    const queue = this._queue();
-    if (queue.length === 0) return;
-
-    if (this._toasts().length >= this._config.maxToasts) return;
-
-    const [next, ...remaining] = queue;
-    this._queue.set(remaining);
-    this._toasts.update((t) => [...t, next]);
-    this.scheduleAutoDismiss(next);
-  }
-
-  private getDefaultTitle(type: ToastType): string {
-    const titles: Record<ToastType, string> = {
-      success: 'Başarılı',
-      error: 'Hata',
-      warning: 'Uyarı',
-      info: 'Bilgi',
-    };
-    return titles[type];
-  }
-}
-
-/**
- * SigToastItem - Single toast component
+ * SigToast - Signal-based accessible toast notification
  */
 @Component({
-  selector: 'sig-toast-item',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  template: `
+    selector: 'sig-toast',
+    standalone: true,
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    template: `
     <div 
       class="sig-toast"
-      [class.sig-toast--success]="toast().type === 'success'"
-      [class.sig-toast--error]="toast().type === 'error'"
-      [class.sig-toast--warning]="toast().type === 'warning'"
-      [class.sig-toast--info]="toast().type === 'info'"
+      [class.sig-toast--info]="variant() === 'info'"
+      [class.sig-toast--success]="variant() === 'success'"
+      [class.sig-toast--warning]="variant() === 'warning'"
+      [class.sig-toast--error]="variant() === 'error'"
+      [id]="toastId"
       role="alert"
+      [attr.aria-live]="variant() === 'error' ? 'assertive' : 'polite'"
+      aria-atomic="true"
     >
-      <div class="sig-toast__icon">
-        @switch (toast().type) {
-          @case ('success') { ✓ }
-          @case ('error') { ✕ }
-          @case ('warning') { ⚠ }
-          @case ('info') { ℹ }
+      <!-- Icon -->
+      <div class="sig-toast__icon" aria-hidden="true">
+        @switch (variant()) {
+          @case ('info') { ℹ️ }
+          @case ('success') { ✅ }
+          @case ('warning') { ⚠️ }
+          @case ('error') { ❌ }
         }
       </div>
 
+      <!-- Content -->
       <div class="sig-toast__content">
-        @if (toast().title) {
-          <div class="sig-toast__title">{{ toast().title }}</div>
+        @if (title()) {
+          <div class="sig-toast__title">{{ title() }}</div>
         }
-        <div class="sig-toast__message">{{ toast().message }}</div>
-        
-        @if (toast().action) {
-          <button 
-            class="sig-toast__action"
-            (click)="toast().action!.onClick()"
-          >
-            {{ toast().action!.label }}
-          </button>
-        }
+        <div class="sig-toast__message">{{ message() }}</div>
       </div>
 
-      @if (toast().closable) {
+      <!-- Action -->
+      @if (actionLabel()) {
         <button
-          class="sig-toast__close"
-          (click)="onClose()"
-          aria-label="Kapat"
+          type="button"
+          class="sig-toast__action"
+          (click)="onAction()"
         >
-          ✕
+          {{ actionLabel() }}
         </button>
       }
 
-      @if (toast().duration > 0) {
-        <div 
-          class="sig-toast__progress"
-          [style.animation-duration.ms]="toast().duration"
-        ></div>
+      <!-- Dismiss -->
+      @if (dismissible()) {
+        <button
+          type="button"
+          class="sig-toast__dismiss"
+          (click)="dismiss()"
+          aria-label="Bildirimi kapat"
+        >
+          <span aria-hidden="true">✕</span>
+        </button>
       }
     </div>
   `,
-  })
-export class SigToastItemComponent {
-  readonly toast = input.required<Toast>();
-  
-  private readonly toastService = inject(ToastService);
+})
+export class SigToastComponent {
+    readonly message = input.required<string>();
+    readonly title = input<string>('');
+    readonly variant = input<'info' | 'success' | 'warning' | 'error'>('info');
+    readonly dismissible = input<boolean>(true);
+    readonly actionLabel = input<string>('');
 
-  onClose(): void {
-    this.toastService.dismiss(this.toast().id);
-  }
+    readonly dismissed = output<void>();
+    readonly actionClicked = output<void>();
+
+    toastId = generateId('sig-toast');
+
+    dismiss(): void {
+        this.dismissed.emit();
+    }
+
+    onAction(): void {
+        this.actionClicked.emit();
+    }
 }
 
 /**
- * SigToastContainer - Toast container
+ * Toast Service - Manages toast notifications with accessibility
  */
-@Component({
-  selector: 'sig-toast-container',
-  standalone: true,
-  imports: [CommonModule, SigToastItemComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div 
-      class="sig-toast-container"
-      [class.sig-toast-container--top-left]="position() === 'top-left'"
-      [class.sig-toast-container--top-center]="position() === 'top-center'"
-      [class.sig-toast-container--top-right]="position() === 'top-right'"
-      [class.sig-toast-container--bottom-left]="position() === 'bottom-left'"
-      [class.sig-toast-container--bottom-center]="position() === 'bottom-center'"
-      [class.sig-toast-container--bottom-right]="position() === 'bottom-right'"
-    >
-      @for (toast of toasts(); track toast.id) {
-        <sig-toast-item [toast]="toast" />
-      }
-    </div>
-  `,
-  })
-export class SigToastContainerComponent {
-  readonly position = input<ToastPosition>('top-right');
-  
-  private readonly toastService = inject(ToastService);
-  readonly toasts = this.toastService.toasts;
+@Injectable({ providedIn: 'root' })
+export class ToastService {
+    private readonly _toasts = signal<ToastConfig[]>([]);
+    readonly toasts = this._toasts.asReadonly();
+
+    show(config: ToastConfig): string {
+        const id = config.id || generateId('toast');
+        const toast: ToastConfig = {
+            ...config,
+            id,
+            duration: config.duration ?? 5000,
+            dismissible: config.dismissible ?? true,
+        };
+
+        this._toasts.update(t => [...t, toast]);
+
+        // Announce to screen readers
+        const priority = toast.variant === 'error' ? 'assertive' : 'polite';
+        const message = toast.title ? `${toast.title}: ${toast.message}` : toast.message;
+        announce(message, priority);
+
+        // Auto dismiss
+        if (toast.duration && toast.duration > 0) {
+            setTimeout(() => this.dismiss(id), toast.duration);
+        }
+
+        return id;
+    }
+
+    success(message: string, title?: string): string {
+        return this.show({ message, title, variant: 'success' });
+    }
+
+    error(message: string, title?: string): string {
+        return this.show({ message, title, variant: 'error', duration: 0 });
+    }
+
+    warning(message: string, title?: string): string {
+        return this.show({ message, title, variant: 'warning' });
+    }
+
+    info(message: string, title?: string): string {
+        return this.show({ message, title, variant: 'info' });
+    }
+
+    dismiss(id: string): void {
+        this._toasts.update(t => t.filter(toast => toast.id !== id));
+    }
+
+    dismissAll(): void {
+        this._toasts.set([]);
+    }
 }

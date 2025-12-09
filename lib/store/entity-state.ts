@@ -1,4 +1,4 @@
-import { Signal, WritableSignal } from '@angular/core';
+import {Signal} from '@angular/core';
 
 /**
  * TR: Varlık (Entity) kimliği için tip tanımı.
@@ -22,7 +22,7 @@ export type EntityId = string | number;
  * Must have at least one `id` field for the system to track the entity.
  */
 export interface Entity {
-  id: EntityId;
+    id: EntityId;
 }
 
 /**
@@ -49,8 +49,8 @@ export type SortDirection = 'asc' | 'desc';
  * Determines by which field and in which direction sorting will be performed.
  */
 export interface SortConfig {
-  field: string;
-  direction: SortDirection;
+    field: string;
+    direction: SortDirection;
 }
 
 /**
@@ -61,7 +61,7 @@ export interface SortConfig {
  * Can carry any filter criteria in Key-Value structure.
  */
 export interface FilterParams {
-  [key: string]: unknown;
+    [key: string]: unknown;
 }
 
 /**
@@ -72,11 +72,11 @@ export interface FilterParams {
  * Contains metadata (total records, page count, etc.) along with the data array.
  */
 export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
+    data: T[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
 }
 
 /**
@@ -89,89 +89,89 @@ export interface PaginatedResponse<T> {
  * @template T - TR: Yönetilen varlık tipi. / EN: Type of the managed entity.
  */
 export interface EntityState<T extends Entity> {
-  /**
-   * TR: ID ile hızlı erişim için varlık haritası.
-   *
-   * EN: Entity map for fast access by ID.
-   */
-  entities: Map<EntityId, T>;
+    /**
+     * TR: ID ile hızlı erişim için varlık haritası.
+     *
+     * EN: Entity map for fast access by ID.
+     */
+    entities: Map<EntityId, T>;
 
-  /**
-   * TR: Varlıkların görüntüleme sırasını tutan ID listesi.
-   *
-   * EN: List of IDs holding the display order of entities.
-   */
-  ids: EntityId[];
+    /**
+     * TR: Varlıkların görüntüleme sırasını tutan ID listesi.
+     *
+     * EN: List of IDs holding the display order of entities.
+     */
+    ids: EntityId[];
 
-  /**
-   * TR: Seçili olan tekil varlığın ID'si.
-   *
-   * EN: ID of the selected single entity.
-   */
-  selectedId: EntityId | null;
+    /**
+     * TR: Seçili olan tekil varlığın ID'si.
+     *
+     * EN: ID of the selected single entity.
+     */
+    selectedId: EntityId | null;
 
-  /**
-   * TR: Çoklu seçimlerde seçili varlıkların ID kümesi.
-   *
-   * EN: Set of IDs of selected entities in multiple selections.
-   */
-  selectedIds: Set<EntityId>;
+    /**
+     * TR: Çoklu seçimlerde seçili varlıkların ID kümesi.
+     *
+     * EN: Set of IDs of selected entities in multiple selections.
+     */
+    selectedIds: Set<EntityId>;
 
-  /**
-   * TR: Veri yükleme durumu.
-   *
-   * EN: Data loading state.
-   */
-  loading: LoadingState;
+    /**
+     * TR: Veri yükleme durumu.
+     *
+     * EN: Data loading state.
+     */
+    loading: LoadingState;
 
-  /**
-   * TR: Varsa hata mesajı.
-   *
-   * EN: Error message if exists.
-   */
-  error: string | null;
+    /**
+     * TR: Varsa hata mesajı.
+     *
+     * EN: Error message if exists.
+     */
+    error: string | null;
 
-  /**
-   * TR: Mevcut sayfa numarası.
-   *
-   * EN: Current page number.
-   */
-  page: number;
+    /**
+     * TR: Mevcut sayfa numarası.
+     *
+     * EN: Current page number.
+     */
+    page: number;
 
-  /**
-   * TR: Sayfa başına kayıt sayısı.
-   *
-   * EN: Items per page.
-   */
-  pageSize: number;
+    /**
+     * TR: Sayfa başına kayıt sayısı.
+     *
+     * EN: Items per page.
+     */
+    pageSize: number;
 
-  /**
-   * TR: Toplam kayıt sayısı (Backend'den gelen).
-   *
-   * EN: Total items count (From backend).
-   */
-  total: number;
+    /**
+     * TR: Toplam kayıt sayısı (Backend'den gelen).
+     *
+     * EN: Total items count (From backend).
+     */
+    total: number;
 
-  /**
-   * TR: Aktif sıralama ayarı.
-   *
-   * EN: Active sort configuration.
-   */
-  sort: SortConfig | null;
+    /**
+     * TR: Aktif sıralama ayarı.
+     *
+     * EN: Active sort configuration.
+     */
+    sort: SortConfig | null;
 
-  /**
-   * TR: Aktif filtreler.
-   *
-   * EN: Active filters.
-   */
-  filters: FilterParams;
+    /**
+     * TR: Aktif filtreler.
+     *
+     * EN: Active filters.
+     */
+    filters: FilterParams;
 
-  /**
-   * TR: Son veri çekme zamanı (Cache invalidation için).
-   *
-   * EN: Last fetch timestamp (For cache invalidation).
-   */
-  lastFetch: number | null;
+    /**
+     * TR: Son veri çekme zamanı (Cache invalidation için).
+     *
+     * EN: Last fetch timestamp (For cache invalidation).
+     */
+    lastFetch: number | null;
 }
 
 /**
@@ -184,145 +184,145 @@ export interface EntityState<T extends Entity> {
  * @template T - TR: Varlık tipi. / EN: Entity type.
  */
 export interface EntitySignals<T extends Entity> {
-  /**
-   * TR: Tüm varlıkları dizi olarak döner.
-   *
-   * EN: Returns all entities as an array.
-   */
-  all: Signal<T[]>;
+    /**
+     * TR: Tüm varlıkları dizi olarak döner.
+     *
+     * EN: Returns all entities as an array.
+     */
+    all: Signal<T[]>;
 
-  /**
-   * TR: Varlık haritasını döner.
-   *
-   * EN: Returns the entity map.
-   */
-  entities: Signal<Map<EntityId, T>>;
+    /**
+     * TR: Varlık haritasını döner.
+     *
+     * EN: Returns the entity map.
+     */
+    entities: Signal<Map<EntityId, T>>;
 
-  /**
-   * TR: ID listesini döner.
-   *
-   * EN: Returns the list of IDs.
-   */
-  ids: Signal<EntityId[]>;
+    /**
+     * TR: ID listesini döner.
+     *
+     * EN: Returns the list of IDs.
+     */
+    ids: Signal<EntityId[]>;
 
-  /**
-   * TR: Seçili olan varlığı döner.
-   *
-   * EN: Returns the selected entity.
-   */
-  selected: Signal<T | null>;
+    /**
+     * TR: Seçili olan varlığı döner.
+     *
+     * EN: Returns the selected entity.
+     */
+    selected: Signal<T | null>;
 
-  /**
-   * TR: Çoklu seçimdeki varlıkları dizi olarak döner.
-   *
-   * EN: Returns selected entities in multiple selection as an array.
-   */
-  selectedItems: Signal<T[]>;
+    /**
+     * TR: Çoklu seçimdeki varlıkları dizi olarak döner.
+     *
+     * EN: Returns selected entities in multiple selection as an array.
+     */
+    selectedItems: Signal<T[]>;
 
-  /**
-   * TR: Yüklenmiş varlık sayısını döner.
-   *
-   * EN: Returns the count of loaded entities.
-   */
-  count: Signal<number>;
+    /**
+     * TR: Yüklenmiş varlık sayısını döner.
+     *
+     * EN: Returns the count of loaded entities.
+     */
+    count: Signal<number>;
 
-  /**
-   * TR: Listenin boş olup olmadığını döner.
-   *
-   * EN: Returns whether the list is empty.
-   */
-  isEmpty: Signal<boolean>;
+    /**
+     * TR: Listenin boş olup olmadığını döner.
+     *
+     * EN: Returns whether the list is empty.
+     */
+    isEmpty: Signal<boolean>;
 
-  /**
-   * TR: Yükleme durumunu (idle, loading, etc.) döner.
-   *
-   * EN: Returns the loading state (idle, loading, etc.).
-   */
-  loading: Signal<LoadingState>;
+    /**
+     * TR: Yükleme durumunu (idle, loading, etc.) döner.
+     *
+     * EN: Returns the loading state (idle, loading, etc.).
+     */
+    loading: Signal<LoadingState>;
 
-  /**
-   * TR: Yükleme işleminin devam edip etmediğini döner (Boolean).
-   *
-   * EN: Returns whether the loading process is ongoing (Boolean).
-   */
-  isLoading: Signal<boolean>;
+    /**
+     * TR: Yükleme işleminin devam edip etmediğini döner (Boolean).
+     *
+     * EN: Returns whether the loading process is ongoing (Boolean).
+     */
+    isLoading: Signal<boolean>;
 
-  /**
-   * TR: Hata mesajını döner.
-   *
-   * EN: Returns the error message.
-   */
-  error: Signal<string | null>;
+    /**
+     * TR: Hata mesajını döner.
+     *
+     * EN: Returns the error message.
+     */
+    error: Signal<string | null>;
 
-  /**
-   * TR: Hata olup olmadığını döner.
-   *
-   * EN: Returns whether there is an error.
-   */
-  hasError: Signal<boolean>;
+    /**
+     * TR: Hata olup olmadığını döner.
+     *
+     * EN: Returns whether there is an error.
+     */
+    hasError: Signal<boolean>;
 
-  /**
-   * TR: Mevcut sayfa numarasını döner.
-   *
-   * EN: Returns the current page number.
-   */
-  page: Signal<number>;
+    /**
+     * TR: Mevcut sayfa numarasını döner.
+     *
+     * EN: Returns the current page number.
+     */
+    page: Signal<number>;
 
-  /**
-   * TR: Sayfa boyutunu döner.
-   *
-   * EN: Returns the page size.
-   */
-  pageSize: Signal<number>;
+    /**
+     * TR: Sayfa boyutunu döner.
+     *
+     * EN: Returns the page size.
+     */
+    pageSize: Signal<number>;
 
-  /**
-   * TR: Toplam kayıt sayısını döner.
-   *
-   * EN: Returns the total items count.
-   */
-  total: Signal<number>;
+    /**
+     * TR: Toplam kayıt sayısını döner.
+     *
+     * EN: Returns the total items count.
+     */
+    total: Signal<number>;
 
-  /**
-   * TR: Toplam sayfa sayısını döner.
-   *
-   * EN: Returns the total number of pages.
-   */
-  totalPages: Signal<number>;
+    /**
+     * TR: Toplam sayfa sayısını döner.
+     *
+     * EN: Returns the total number of pages.
+     */
+    totalPages: Signal<number>;
 
-  /**
-   * TR: Sonraki sayfanın olup olmadığını döner.
-   *
-   * EN: Returns whether there is a next page.
-   */
-  hasNextPage: Signal<boolean>;
+    /**
+     * TR: Sonraki sayfanın olup olmadığını döner.
+     *
+     * EN: Returns whether there is a next page.
+     */
+    hasNextPage: Signal<boolean>;
 
-  /**
-   * TR: Önceki sayfanın olup olmadığını döner.
-   *
-   * EN: Returns whether there is a previous page.
-   */
-  hasPrevPage: Signal<boolean>;
+    /**
+     * TR: Önceki sayfanın olup olmadığını döner.
+     *
+     * EN: Returns whether there is a previous page.
+     */
+    hasPrevPage: Signal<boolean>;
 
-  /**
-   * TR: Aktif sıralama bilgisini döner.
-   *
-   * EN: Returns active sort information.
-   */
-  sort: Signal<SortConfig | null>;
+    /**
+     * TR: Aktif sıralama bilgisini döner.
+     *
+     * EN: Returns active sort information.
+     */
+    sort: Signal<SortConfig | null>;
 
-  /**
-   * TR: Aktif filtreleri döner.
-   *
-   * EN: Returns active filters.
-   */
-  filters: Signal<FilterParams>;
+    /**
+     * TR: Aktif filtreleri döner.
+     *
+     * EN: Returns active filters.
+     */
+    filters: Signal<FilterParams>;
 
-  /**
-   * TR: Verinin bayatlayıp bayatlamadığını (Cache TTL süresinin dolup dolmadığını) döner.
-   *
-   * EN: Returns whether the data is stale (Cache TTL expired).
-   */
-  isStale: Signal<boolean>;
+    /**
+     * TR: Verinin bayatlayıp bayatlamadığını (Cache TTL süresinin dolup dolmadığını) döner.
+     *
+     * EN: Returns whether the data is stale (Cache TTL expired).
+     */
+    isStale: Signal<boolean>;
 }
 
 /**
@@ -333,53 +333,62 @@ export interface EntitySignals<T extends Entity> {
  * Used to customize the behavior of the store.
  */
 export interface StoreConfig<T extends Entity> {
-  /**
-   * TR: Depo adı (Debug ve Loglama için).
-   *
-   * EN: Store name (For Debugging and Logging).
-   */
-  name: string;
+    /**
+     * TR: Depo adı (Debug ve Loglama için).
+     *
+     * EN: Store name (For Debugging and Logging).
+     */
+    name: string;
 
-  /**
-   * TR: Varlıktan ID'yi seçen fonksiyon.
-   * Varsayılan olarak `entity.id` kullanılır, ancak özel ID alanları için değiştirilebilir.
-   *
-   * EN: Function selecting ID from the entity.
-   * Defaults to `entity.id`, but can be changed for custom ID fields.
-   */
-  selectId?: (entity: T) => EntityId;
+    /**
+     * TR: Varlıktan ID'yi seçen fonksiyon.
+     * Varsayılan olarak `entity.id` kullanılır, ancak özel ID alanları için değiştirilebilir.
+     *
+     * EN: Function selecting ID from the entity.
+     * Defaults to `entity.id`, but can be changed for custom ID fields.
+     */
+    selectId?: (entity: T) => EntityId;
 
-  /**
-   * TR: İstemci tarafı sıralama fonksiyonu (Comparator).
-   *
-   * EN: Client-side sort function (Comparator).
-   */
-  sortCompare?: (a: T, b: T) => number;
+    /**
+     * TR: İstemci tarafı sıralama fonksiyonu (Comparator).
+     *
+     * EN: Client-side sort function (Comparator).
+     */
+    sortCompare?: (a: T, b: T) => number;
 
-  /**
-   * TR: Varsayılan sayfa boyutu.
-   *
-   * EN: Default page size.
-   */
-  defaultPageSize?: number;
+    /**
+     * TR: Varsayılan sayfa boyutu.
+     *
+     * EN: Default page size.
+     */
+    defaultPageSize?: number;
 
-  /**
-   * TR: Önbellek geçerlilik süresi (milisaniye).
-   * Bu süre dolmadan tekrar istek atılırsa, mevcut veri kullanılır.
-   *
-   * EN: Cache Time-To-Live (milliseconds).
-   * If requested again before this time expires, existing data is used.
-   */
-  cacheTTL?: number;
+    /**
+     * TR: Önbellek geçerlilik süresi (milisaniye).
+     * Bu süre dolmadan tekrar istek atılırsa, mevcut veri kullanılır.
+     *
+     * EN: Cache Time-To-Live (milliseconds).
+     * If requested again before this time expires, existing data is used.
+     */
+    cacheTTL?: number;
 
-  /**
-   * TR: İyimser güncellemelerin (Optimistic Updates) aktif olup olmadığı.
-   * Aktifse, API yanıtı beklenmeden UI güncellenir.
-   *
-   * EN: Whether optimistic updates are enabled.
-   * If enabled, UI is updated without waiting for API response.
-   */
-  optimistic?: boolean;
+    /**
+     * TR: İyimser güncellemelerin (Optimistic Updates) aktif olup olmadığı.
+     * Aktifse, API yanıtı beklenmeden UI güncellenir.
+     *
+     * EN: Whether optimistic updates are enabled.
+     * If enabled, UI is updated without waiting for API response.
+     */
+    optimistic?: boolean;
+
+    /**
+     * TR: İstemci tarafı sayfalandırmanın (Local Pagination) aktif olup olmadığı.
+     * Aktifse, tüm veriler tek seferde çekilir ve sayfalandırma istemci tarafında yapılır.
+     *
+     * EN: Whether client-side pagination (Local Pagination) is enabled.
+     * If enabled, all data is fetched at once and pagination is done on the client side.
+     */
+    localPagination?: boolean;
 }
 
 /**
@@ -390,19 +399,19 @@ export interface StoreConfig<T extends Entity> {
  * Manages rollback operations if failed, and confirm operations if successful.
  */
 export interface OptimisticResult {
-  /**
-   * TR: Değişiklikleri geri alır (Hata durumunda).
-   *
-   * EN: Reverts changes (In case of error).
-   */
-  rollback: () => void;
+    /**
+     * TR: Değişiklikleri geri alır (Hata durumunda).
+     *
+     * EN: Reverts changes (In case of error).
+     */
+    rollback: () => void;
 
-  /**
-   * TR: Değişiklikleri onaylar ve kalıcı hale getirir (Başarı durumunda).
-   *
-   * EN: Confirms and persists changes (In case of success).
-   */
-  confirm: () => void;
+    /**
+     * TR: Değişiklikleri onaylar ve kalıcı hale getirir (Başarı durumunda).
+     *
+     * EN: Confirms and persists changes (In case of success).
+     */
+    confirm: () => void;
 }
 
 /**
@@ -417,40 +426,40 @@ export interface OptimisticResult {
  * @template UpdateDto - TR: Güncelleme veri transfer objesi. / EN: Update data transfer object.
  */
 export interface EntityApi<T extends Entity, CreateDto = Partial<T>, UpdateDto = Partial<T>> {
-  /**
-   * TR: Sayfalandırılmış liste çeker.
-   *
-   * EN: Fetches paginated list.
-   */
-  fetchAll: (params: FetchParams) => Promise<PaginatedResponse<T>>;
+    /**
+     * TR: Sayfalandırılmış liste çeker.
+     *
+     * EN: Fetches paginated list.
+     */
+    fetchAll: (params: FetchParams) => Promise<PaginatedResponse<T>>;
 
-  /**
-   * TR: Tek bir kayıt çeker.
-   *
-   * EN: Fetches a single record.
-   */
-  fetchOne: (id: EntityId) => Promise<T>;
+    /**
+     * TR: Tek bir kayıt çeker.
+     *
+     * EN: Fetches a single record.
+     */
+    fetchOne: (id: EntityId) => Promise<T>;
 
-  /**
-   * TR: Yeni kayıt oluşturur.
-   *
-   * EN: Creates a new record.
-   */
-  create: (data: CreateDto) => Promise<T>;
+    /**
+     * TR: Yeni kayıt oluşturur.
+     *
+     * EN: Creates a new record.
+     */
+    create: (data: CreateDto) => Promise<T>;
 
-  /**
-   * TR: Mevcut kaydı günceller.
-   *
-   * EN: Updates an existing record.
-   */
-  update: (id: EntityId, data: UpdateDto) => Promise<T>;
+    /**
+     * TR: Mevcut kaydı günceller.
+     *
+     * EN: Updates an existing record.
+     */
+    update: (id: EntityId, data: UpdateDto) => Promise<T>;
 
-  /**
-   * TR: Kaydı siler.
-   *
-   * EN: Deletes the record.
-   */
-  delete: (id: EntityId) => Promise<void>;
+    /**
+     * TR: Kaydı siler.
+     *
+     * EN: Deletes the record.
+     */
+    delete: (id: EntityId) => Promise<void>;
 }
 
 /**
@@ -459,10 +468,10 @@ export interface EntityApi<T extends Entity, CreateDto = Partial<T>, UpdateDto =
  * EN: API fetch parameters.
  */
 export interface FetchParams {
-  page?: number;
-  pageSize?: number;
-  sort?: SortConfig;
-  filters?: FilterParams;
+    page?: number;
+    pageSize?: number;
+    sort?: SortConfig;
+    filters?: FilterParams;
 }
 
 /**
@@ -475,20 +484,20 @@ export interface FetchParams {
  * @param config - TR: Opsiyonel yapılandırma. / EN: Optional configuration.
  */
 export function createInitialState<T extends Entity>(
-  config?: Partial<StoreConfig<T>>
+    config?: Partial<StoreConfig<T>>
 ): EntityState<T> {
-  return {
-    entities: new Map(),
-    ids: [],
-    selectedId: null,
-    selectedIds: new Set(),
-    loading: 'idle',
-    error: null,
-    page: 1,
-    pageSize: config?.defaultPageSize ?? 10,
-    total: 0,
-    sort: null,
-    filters: {},
-    lastFetch: null,
-  };
+    return {
+        entities: new Map(),
+        ids: [],
+        selectedId: null,
+        selectedIds: new Set(),
+        loading: 'idle',
+        error: null,
+        page: 1,
+        pageSize: config?.defaultPageSize ?? 10,
+        total: 0,
+        sort: null,
+        filters: {},
+        lastFetch: null,
+    };
 }
