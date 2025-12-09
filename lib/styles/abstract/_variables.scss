@@ -1,76 +1,195 @@
 /* lib/styles/abstract/_variables.scss */
+
+// ============================================================================
+// SCSS Variables (Kullanıcı override edebilir - !default sayesinde)
+// ============================================================================
+
+// --- Renk Paleti (Primitives) ---
+$sig-blue-50: #eff6ff !default;
+$sig-blue-100: #dbeafe !default;
+$sig-blue-500: #3b82f6 !default;
+$sig-blue-600: #2563eb !default;
+$sig-blue-700: #1d4ed8 !default;
+
+$sig-gray-50: #f9fafb !default;
+$sig-gray-100: #f3f4f6 !default;
+$sig-gray-200: #e5e7eb !default;
+$sig-gray-300: #d1d5db !default;
+$sig-gray-400: #9ca3af !default;
+$sig-gray-500: #6b7280 !default;
+$sig-gray-600: #4b5563 !default;
+$sig-gray-700: #374151 !default;
+$sig-gray-800: #1f2937 !default;
+$sig-gray-900: #111827 !default;
+
+$sig-red-100: #fee2e2 !default;
+$sig-red-500: #ef4444 !default;
+$sig-red-700: #b91c1c !default;
+
+$sig-green-100: #dcfce7 !default;
+$sig-green-500: #22c55e !default;
+$sig-green-700: #15803d !default;
+
+$sig-yellow-100: #fef9c3 !default;
+$sig-yellow-500: #eab308 !default;
+
+// --- Semantic Tokens ---
+$sig-color-primary: $sig-blue-500 !default;
+$sig-color-primary-hover: $sig-blue-600 !default;
+$sig-color-primary-text: #ffffff !default;
+
+$sig-color-success: $sig-green-500 !default;
+$sig-color-error: $sig-red-500 !default;
+$sig-color-warning: $sig-yellow-500 !default;
+
+// Surface & Background
+$sig-bg-surface: #ffffff !default;
+$sig-bg-background: $sig-gray-50 !default;
+$sig-bg-disabled: $sig-gray-100 !default;
+
+// Borders
+$sig-border-color: $sig-gray-300 !default;
+$sig-border-color-focus: $sig-blue-500 !default;
+
+// Text
+$sig-text-main: $sig-gray-900 !default;
+$sig-text-muted: $sig-gray-500 !default;
+$sig-text-disabled: $sig-gray-400 !default;
+
+// Spacing
+$sig-spacing-1: 0.25rem !default;
+$sig-spacing-2: 0.5rem !default;
+$sig-spacing-3: 0.75rem !default;
+$sig-spacing-4: 1rem !default;
+$sig-spacing-6: 1.5rem !default;
+$sig-spacing-8: 2rem !default;
+
+// Radius
+$sig-radius-sm: 0.25rem !default;
+$sig-radius-md: 0.375rem !default;
+$sig-radius-lg: 0.5rem !default;
+$sig-radius-xl: 0.75rem !default;
+$sig-radius-full: 9999px !default;
+
+// Transitions
+$sig-transition-fast: all 0.1s ease-in-out !default;
+$sig-transition: all 0.15s ease-in-out !default;
+$sig-transition-slow: all 0.3s ease-in-out !default;
+
+// Shadows
+$sig-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !default;
+$sig-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !default;
+$sig-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !default;
+
+// Focus Ring
+$sig-focus-ring-color: rgba($sig-blue-500, 0.3) !default;
+$sig-focus-ring: 0 0 0 3px $sig-focus-ring-color !default;
+
+// ============================================================================
+// CSS Custom Properties (Runtime'da değiştirilebilir)
+// ============================================================================
+
 :root {
-  /* --- Renk Paleti (Primitives) --- */
-  --sig-blue-50: #eff6ff;
-  --sig-blue-100: #dbeafe;
-  --sig-blue-500: #3b82f6;
-  --sig-blue-600: #2563eb;
-  --sig-blue-700: #1d4ed8;
+  // Renk Paleti
+  --sig-blue-50: #{$sig-blue-50};
+  --sig-blue-100: #{$sig-blue-100};
+  --sig-blue-500: #{$sig-blue-500};
+  --sig-blue-600: #{$sig-blue-600};
+  --sig-blue-700: #{$sig-blue-700};
 
-  --sig-gray-50: #f9fafb;
-  --sig-gray-100: #f3f4f6;
-  --sig-gray-200: #e5e7eb;
-  --sig-gray-300: #d1d5db;
-  --sig-gray-400: #9ca3af;
-  --sig-gray-500: #6b7280;
-  --sig-gray-600: #4b5563;
-  --sig-gray-700: #374151;
-  --sig-gray-800: #1f2937;
-  --sig-gray-900: #111827;
+  --sig-gray-50: #{$sig-gray-50};
+  --sig-gray-100: #{$sig-gray-100};
+  --sig-gray-200: #{$sig-gray-200};
+  --sig-gray-300: #{$sig-gray-300};
+  --sig-gray-400: #{$sig-gray-400};
+  --sig-gray-500: #{$sig-gray-500};
+  --sig-gray-600: #{$sig-gray-600};
+  --sig-gray-700: #{$sig-gray-700};
+  --sig-gray-800: #{$sig-gray-800};
+  --sig-gray-900: #{$sig-gray-900};
 
-  --sig-red-100: #fee2e2;
-  --sig-red-500: #ef4444;
-  --sig-red-700: #b91c1c;
+  --sig-red-100: #{$sig-red-100};
+  --sig-red-500: #{$sig-red-500};
+  --sig-red-700: #{$sig-red-700};
 
-  /* --- Semantic Tokens --- */
-  
-  /* Brand */
-  --sig-color-primary: var(--sig-blue-500);
-  --sig-color-primary-hover: var(--sig-blue-600);
-  --sig-color-primary-text: #ffffff;
+  --sig-green-100: #{$sig-green-100};
+  --sig-green-500: #{$sig-green-500};
+  --sig-green-700: #{$sig-green-700};
 
-  /* Surface & Background */
-  --sig-bg-surface: #ffffff;
-  --sig-bg-background: var(--sig-gray-50);
-  --sig-bg-disabled: var(--sig-gray-100);
+  // Semantic
+  --sig-color-primary: #{$sig-color-primary};
+  --sig-color-primary-hover: #{$sig-color-primary-hover};
+  --sig-color-primary-text: #{$sig-color-primary-text};
+  --sig-color-success: #{$sig-color-success};
+  --sig-color-error: #{$sig-color-error};
+  --sig-color-warning: #{$sig-color-warning};
 
-  /* Borders */
-  --sig-border-color: var(--sig-gray-300);
-  --sig-border-color-focus: var(--sig-blue-500);
+  // Surface & Background
+  --sig-bg-surface: #{$sig-bg-surface};
+  --sig-bg-background: #{$sig-bg-background};
+  --sig-bg-disabled: #{$sig-bg-disabled};
 
-  /* Text */
-  --sig-text-main: var(--sig-gray-900);
-  --sig-text-muted: var(--sig-gray-500);
-  --sig-text-disabled: var(--sig-gray-400);
+  // Borders
+  --sig-border-color: #{$sig-border-color};
+  --sig-border-color-focus: #{$sig-border-color-focus};
 
-  /* Spacing */
-  --sig-spacing-1: 0.25rem;
-  --sig-spacing-2: 0.5rem;
-  --sig-spacing-3: 0.75rem;
-  --sig-spacing-4: 1rem;
-  --sig-spacing-6: 1.5rem;
+  // Text
+  --sig-text-main: #{$sig-text-main};
+  --sig-text-muted: #{$sig-text-muted};
+  --sig-text-disabled: #{$sig-text-disabled};
 
-  /* Radius */
-  --sig-radius-md: 0.375rem;
-  --sig-radius-lg: 0.5rem;
+  // Spacing
+  --sig-spacing-1: #{$sig-spacing-1};
+  --sig-spacing-2: #{$sig-spacing-2};
+  --sig-spacing-3: #{$sig-spacing-3};
+  --sig-spacing-4: #{$sig-spacing-4};
+  --sig-spacing-6: #{$sig-spacing-6};
+  --sig-spacing-8: #{$sig-spacing-8};
 
-  /* Transitions */
-  --sig-transition: all 0.15s ease-in-out;
+  // Radius
+  --sig-radius-sm: #{$sig-radius-sm};
+  --sig-radius-md: #{$sig-radius-md};
+  --sig-radius-lg: #{$sig-radius-lg};
+  --sig-radius-xl: #{$sig-radius-xl};
+  --sig-radius-full: #{$sig-radius-full};
 
-  /* Shadows */
-  --sig-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  
-  /* Focus Ring */
-  --sig-focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  // Transitions
+  --sig-transition-fast: #{$sig-transition-fast};
+  --sig-transition: #{$sig-transition};
+  --sig-transition-slow: #{$sig-transition-slow};
+
+  // Shadows
+  --sig-shadow-sm: #{$sig-shadow-sm};
+  --sig-shadow-md: #{$sig-shadow-md};
+  --sig-shadow-lg: #{$sig-shadow-lg};
+
+  // Focus Ring
+  --sig-focus-ring: #{$sig-focus-ring};
 }
+
+// ============================================================================
+// Dark Mode
+// ============================================================================
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --sig-bg-surface: var(--sig-gray-800);
-    --sig-bg-background: var(--sig-gray-900);
-    --sig-text-main: var(--sig-gray-50);
-    --sig-text-muted: var(--sig-gray-400);
-    --sig-border-color: var(--sig-gray-600);
-    --sig-bg-disabled: var(--sig-gray-800);
+    --sig-bg-surface: #{$sig-gray-800};
+    --sig-bg-background: #{$sig-gray-900};
+    --sig-bg-disabled: #{$sig-gray-700};
+    --sig-text-main: #{$sig-gray-50};
+    --sig-text-muted: #{$sig-gray-400};
+    --sig-text-disabled: #{$sig-gray-500};
+    --sig-border-color: #{$sig-gray-600};
   }
+}
+
+// Manuel dark mode class desteği
+.dark {
+  --sig-bg-surface: #{$sig-gray-800};
+  --sig-bg-background: #{$sig-gray-900};
+  --sig-bg-disabled: #{$sig-gray-700};
+  --sig-text-main: #{$sig-gray-50};
+  --sig-text-muted: #{$sig-gray-400};
+  --sig-text-disabled: #{$sig-gray-500};
+  --sig-border-color: #{$sig-gray-600};
 }

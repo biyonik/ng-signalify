@@ -1,4 +1,4 @@
-import { signal, computed, effect, Signal, WritableSignal } from '@angular/core';
+import { signal, effect, Signal } from '@angular/core';
 
 /**
  * TR: Bir alanın diğer alanlara olan bağımlılığını tanımlayan yapılandırma.
@@ -133,6 +133,17 @@ export class DependencyResolver {
     // TR: Önceki effect'leri temizle (Memory Leak önlemi)
     // EN: Clean up previous effects (Memory Leak prevention)
     this.cleanup();
+
+      // TR: Döngüsel bağımlılık kontrolü - KRİTİK!
+      // EN: Circular dependency check - CRITICAL!
+      if (this.hasCircularDependency()) {
+          const cycles = this.findCircularDependencies();
+          const cycleStr = cycles.map(c => c.join(' → ')).join(', ');
+          throw new Error(
+              `[ng-signalify] Circular dependency detected: ${cycleStr}. ` +
+              `This will cause infinite loops. Please review your field dependencies.`
+          );
+      }
 
     for (const [fieldName, dep] of this.dependencies) {
       // TR: Durum sinyallerini oluştur
@@ -296,7 +307,58 @@ export class DependencyResolver {
     return false;
   }
 
-  /**
+    /**
+     * TR: Döngüsel bağımlılık zincirlerini bulur ve döndürür.
+     * Debug için kullanışlıdır.
+     *
+     * EN: Finds and returns circular dependency chains.
+     * Useful for debugging.
+     *
+     * @returns TR: Döngüsel bağımlılık zincirleri. / EN: Circular dependency chains.
+     */
+    findCircularDependencies(): string[][] {
+        const cycles: string[][] = [];
+        const visited = new Set<string>();
+        const recursionStack = new Set<string>();
+        const path: string[] = [];
+
+        const findCycles = (node: string): void => {
+            if (recursionStack.has(node)) {
+                // TR: Döngü bulundu, yolu kaydet
+                // EN: Cycle found, record the path
+                const cycleStart = path.indexOf(node);
+                if (cycleStart !== -1) {
+                    cycles.push([...path.slice(cycleStart), node]);
+                }
+                return;
+            }
+
+            if (visited.has(node)) return;
+
+            visited.add(node);
+            recursionStack.add(node);
+            path.push(node);
+
+            const deps = this.dependencies.get(node)?.dependsOn ?? [];
+            for (const dep of deps) {
+                findCycles(dep);
+            }
+
+            path.pop();
+            recursionStack.delete(node);
+        };
+
+        for (const name of this.dependencies.keys()) {
+            visited.clear();
+            recursionStack.clear();
+            path.length = 0;
+            findCycles(name);
+        }
+
+        return cycles;
+    }
+
+    /**
    * TR: Tüm effect'leri ve durumları temizler.
    * Bileşen (Component) yok edilirken çağrılmalıdır.
    *

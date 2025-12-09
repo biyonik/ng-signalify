@@ -367,7 +367,129 @@ export abstract class EntityStore<
     }
   }
 
-/**
+    /**
+     * TR: Birden fazla kaydı aynı anda oluşturur.
+     * Kısmi başarı durumunda sadece başarılı olanları state'e ekler.
+     *
+     * EN: Creates multiple records at once.
+     * In case of partial success, only adds successful ones to state.
+     *
+     * @param items - TR: Oluşturulacak kayıtlar. / EN: Records to create.
+     * @returns TR: Başarılı ve başarısız sonuçlar. / EN: Successful and failed results.
+     */
+    async createMany(items: CreateDto[]): Promise<{ success: T[]; failed: { data: CreateDto; error: string }[] }> {
+        if (items.length === 0) {
+            return { success: [], failed: [] };
+        }
+
+        this.setLoading('loading');
+        this.clearError();
+
+        const results = await Promise.allSettled(
+            items.map(async (data) => {
+                const entity = await this.createOne(data);
+                return entity;
+            })
+        );
+
+        const success: T[] = [];
+        const failed: { data: CreateDto; error: string }[] = [];
+
+        results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+                success.push(result.value);
+            } else {
+                failed.push({
+                    data: items[index],
+                    error: result.reason?.message ?? 'Unknown error',
+                });
+            }
+        });
+
+        // TR: Başarılı olanları toplu ekle (Tek state güncellemesi)
+        // EN: Add successful ones in batch (Single state update)
+        if (success.length > 0) {
+            this._state.update((s) => ({
+                ...adapter.addMany(s, success, this.config.selectId),
+                loading: failed.length > 0 ? 'error' : 'success',
+                error: failed.length > 0
+                    ? `${failed.length} kayıt oluşturulamadı`
+                    : null,
+            }));
+
+            this.pagination.setTotal(this.pagination.total() + success.length);
+        } else {
+            this.setError(new Error('Tüm oluşturma işlemleri başarısız'));
+        }
+
+        return { success, failed };
+    }
+
+    /**
+     * TR: Birden fazla kaydı aynı anda günceller.
+     * Her kayıt için ayrı API çağrısı yapar, sonuçları toplu olarak state'e yansıtır.
+     *
+     * EN: Updates multiple records at once.
+     * Makes separate API call for each record, reflects results to state in batch.
+     *
+     * @param updates - TR: ID ve güncelleme verisi çiftleri. / EN: ID and update data pairs.
+     * @returns TR: Başarılı ve başarısız sonuçlar. / EN: Successful and failed results.
+     */
+    async updateMany(
+        updates: Array<{ id: EntityId; data: UpdateDto }>
+    ): Promise<{ success: T[]; failed: { id: EntityId; error: string }[] }> {
+        if (updates.length === 0) {
+            return { success: [], failed: [] };
+        }
+
+        this.setLoading('loading');
+        this.clearError();
+
+        const results = await Promise.allSettled(
+            updates.map(async ({ id, data }) => {
+                const entity = await this.updateOne(id, data);
+                return entity;
+            })
+        );
+
+        const success: T[] = [];
+        const failed: { id: EntityId; error: string }[] = [];
+
+        results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+                success.push(result.value);
+            } else {
+                failed.push({
+                    id: updates[index].id,
+                    error: result.reason?.message ?? 'Unknown error',
+                });
+            }
+        });
+
+        // TR: Başarılı olanları toplu güncelle (Tek state güncellemesi)
+        // EN: Update successful ones in batch (Single state update)
+        if (success.length > 0) {
+            this._state.update((s) => {
+                let newState = s;
+                for (const entity of success) {
+                    newState = adapter.upsertOne(newState, entity, this.config.selectId);
+                }
+                return {
+                    ...newState,
+                    loading: failed.length > 0 ? 'error' : 'success',
+                    error: failed.length > 0
+                        ? `${failed.length} kayıt güncellenemedi`
+                        : null,
+                };
+            });
+        } else {
+            this.setError(new Error('Tüm güncelleme işlemleri başarısız'));
+        }
+
+        return { success, failed };
+    }
+
+    /**
    * TR: Birden fazla kaydı siler.
    * Kısmi başarı durumunda sadece başarılı olanları state'den kaldırır.
    *

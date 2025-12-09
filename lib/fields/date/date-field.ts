@@ -214,25 +214,41 @@ export class DateField extends BaseField<Date> {
     });
   }
 
-  /**
-   * TR: Excel'in kullandığı sayısal tarih formatını JavaScript Date objesine çevirir.
-   * Excel, tarihleri 30 Aralık 1899'dan itibaren geçen gün sayısı olarak saklar.
-   * Bu metod aradaki farkı hesaplayarak doğru dönüşümü yapar.
-   *
-   * EN: Converts the numeric date format used by Excel to a JavaScript Date object.
-   * Excel stores dates as the number of days elapsed since December 30, 1899.
-   * This method performs the correct conversion by calculating the difference.
-   *
-   * @param serial - TR: Excel seri numarası. / EN: Excel serial number.
-   */
-  private excelDateToJs(serial: number): Date {
-    // 25569 = Days between 1970-01-01 (Unix Epoch) and 1899-12-30 (Excel Epoch)
-    const utcDays = Math.floor(serial - 25569);
-    const utcValue = utcDays * 86400; // Seconds in a day
-    return new Date(utcValue * 1000); // Convert to milliseconds
-  }
+    /**
+     * TR: Excel'in kullandığı sayısal tarih formatını JavaScript Date objesine çevirir.
+     * Excel, tarihleri 30 Aralık 1899'dan itibaren geçen gün sayısı olarak saklar.
+     * Bu metod aradaki farkı hesaplayarak doğru dönüşümü yapar.
+     * Opsiyonel timezone parametresi ile yerel saat dilimine dönüşüm yapılabilir.
+     *
+     * EN: Converts the numeric date format used by Excel to a JavaScript Date object.
+     * Excel stores dates as the number of days elapsed since December 30, 1899.
+     * This method performs the correct conversion by calculating the difference.
+     * Optional timezone parameter allows conversion to local time zone.
+     *
+     * @param serial - TR: Excel seri numarası. / EN: Excel serial number.
+     * @returns TR: Date objesi (yerel timezone'da). / EN: Date object (in local timezone).
+     */
+    private excelDateToJs(serial: number): Date {
+        // 25569 = Days between 1970-01-01 (Unix Epoch) and 1899-12-30 (Excel Epoch)
+        const utcDays = Math.floor(serial - 25569);
+        const utcValue = utcDays * 86400 * 1000; // Milliseconds
 
-  /**
+        // TR: UTC tarihini oluştur
+        // EN: Create UTC date
+        const utcDate = new Date(utcValue);
+
+        // TR: Yerel timezone'a çevir (gün başlangıcı olarak)
+        // EN: Convert to local timezone (as start of day)
+        return new Date(
+            utcDate.getUTCFullYear(),
+            utcDate.getUTCMonth(),
+            utcDate.getUTCDate(),
+            0, 0, 0, 0
+        );
+    }
+
+
+    /**
    * TR: Verilen tarihin "bugün" olup olmadığını kontrol eder.
    * Gün, Ay ve Yıl bazında eşitlik arar (saat bilgisini göz ardı eder).
    *

@@ -3,6 +3,24 @@ import { z } from 'zod';
 import { IField, FieldConfig, FieldValue } from './field.interface';
 
 /**
+ * TR: Import işlemi sonucu.
+ * Başarı durumunda data, hata durumunda error bilgisi içerir.
+ *
+ * EN: Import operation result.
+ * Contains data on success, error info on failure.
+ */
+export interface ImportResult<T> {
+    success: boolean;
+    data: T | null;
+    error?: {
+        message: string;
+        path?: (string | number)[];
+        code?: string;
+    };
+}
+
+
+/**
  * TR: Tüm form alanı türlerinin (Input, Select, Datepicker vb.) türetildiği soyut temel sınıf.
  * IField arayüzünü implemente eder ve tüm alanlar için ortak olan reaktif durum yönetimi,
  * validasyon tetikleme mantığı ve veri dönüştürme işlemlerini merkezi olarak yönetir.
@@ -115,19 +133,57 @@ export abstract class BaseField<T> implements IField<T> {
     return value;
   }
 
-  /**
-   * TR: Dış kaynaktan gelen veriyi işler.
-   * Gelen veriyi şema (schema) üzerinden geçirerek güvenli bir şekilde parse eder (`safeParse`).
-   *
-   * EN: Processes data coming from an external source.
-   * Safely parses the incoming data by passing it through the schema (`safeParse`).
-   */
-  fromImport(raw: unknown): T | null {
-    const result = this.schema().safeParse(raw);
-    return result.success ? result.data : null;
-  }
+    /**
+     * TR: Dış kaynaktan gelen veriyi işler.
+     * Gelen veriyi şema (schema) üzerinden geçirerek güvenli bir şekilde parse eder (`safeParse`).
+     * Hata durumunda detaylı hata bilgisi döndürür.
+     *
+     * EN: Processes data coming from an external source.
+     * Safely parses the incoming data by passing it through the schema (`safeParse`).
+     * Returns detailed error information on failure.
+     *
+     * @param raw - TR: Ham veri. / EN: Raw data.
+     * @returns TR: Import sonucu. / EN: Import result.
+     */
+    fromImport(raw: unknown): T | null {
+        const result = this.schema().safeParse(raw);
+        return result.success ? result.data : null;
+    }
 
-  /**
+    /**
+     * TR: Dış kaynaktan gelen veriyi detaylı sonuçla işler.
+     * Hata durumunda tam hata bilgisi döndürür.
+     *
+     * EN: Processes data from external source with detailed result.
+     * Returns full error information on failure.
+     *
+     * @param raw - TR: Ham veri. / EN: Raw data.
+     * @returns TR: Detaylı import sonucu. / EN: Detailed import result.
+     */
+    fromImportWithDetails(raw: unknown): ImportResult<T> {
+        const result = this.schema().safeParse(raw);
+
+        if (result.success) {
+            return {
+                success: true,
+                data: result.data,
+            };
+        }
+
+        const firstError = result.error.errors[0];
+        return {
+            success: false,
+            data: null,
+            error: {
+                message: firstError?.message ?? 'Geçersiz veri',
+                path: firstError?.path,
+                code: firstError?.code,
+            },
+        };
+    }
+
+
+    /**
    * TR: Filtreleme alanlarında kullanılacak önizleme metni.
    * Varsayılan olarak `present` metodunu kullanır.
    *

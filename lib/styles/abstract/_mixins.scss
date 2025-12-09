@@ -1,19 +1,106 @@
-/* lib/styles/abstract/_mixins.scss */
+@mixin focus-ring {
+  &:focus {
+    outline: none;
+    box-shadow: var(--sig-focus-ring);
+    border-color: var(--sig-border-color-focus);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--sig-focus-ring);
+    border-color: var(--sig-border-color-focus);
+  }
+}
+
+// Flexbox helpers
 @mixin flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-@mixin focus-ring {
-  &:focus {
-    outline: none;
-    border-color: var(--sig-border-color-focus);
-    box-shadow: var(--sig-focus-ring);
-  }
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// Typography
+@mixin text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 
 @mixin text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+
+@mixin text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+@mixin text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+// Truncate text
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Visually hidden (accessibility)
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Scrollbar styling
+@mixin custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--sig-bg-background);
+    border-radius: var(--sig-radius-full);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--sig-gray-300);
+    border-radius: var(--sig-radius-full);
+
+    &:hover {
+      background: var(--sig-gray-400);
+    }
+  }
+}
+
+// Disabled state
+@mixin disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// Interactive element base
+@mixin interactive {
+  cursor: pointer;
+  transition: var(--sig-transition);
+
+  &:disabled {
+    @include disabled;
+  }
 }
