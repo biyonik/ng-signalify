@@ -55,19 +55,39 @@ export const phoneNumber = z
   .string()
   .regex(/^(\+90|0)?[5][0-9]{9}$/, 'Geçerli bir telefon numarası girin');
 
+
 /**
- * TR: Türk IBAN numarası doğrulama şeması.
- * TR ile başlamalı ve toplam 26 karakter (TR + 24 hane) olmalıdır.
- * Otomatik olarak büyük harfe dönüştürür (transform).
- *
- * EN: Turkish IBAN number validation schema.
- * Must start with TR and contain a total of 26 characters (TR + 24 digits).
- * Automatically transforms to uppercase.
+ * TR: IBAN checksum doğrulaması (ISO 7064 Mod 97-10).
+ * EN: IBAN checksum validation (ISO 7064 Mod 97-10).
  */
+function validateIBANChecksum(iban: string): boolean {
+
+    const rearranged = iban.slice(4) + iban.slice(0, 4);
+
+    let numericString = '';
+    for (const char of rearranged) {
+        if (char >= 'A' && char <= 'Z') {
+            numericString += (char.charCodeAt(0) - 55).toString();
+        } else {
+            numericString += char;
+        }
+    }
+
+    let remainder = 0;
+    for (let i = 0; i < numericString.length; i++) {
+        remainder = (remainder * 10 + parseInt(numericString[i], 10)) % 97;
+    }
+
+    return remainder === 1;
+}
+
 export const iban = z.preprocess(
-    (val) => String(val).toUpperCase(),
-    z.string().regex(/^TR\d{24}$/, 'Geçerli bir IBAN girin')
+    (val) => String(val).toUpperCase().replace(/\s/g, ''),
+    z.string()
+        .regex(/^TR\d{24}$/, 'IBAN formatı geçersiz (TR + 24 rakam olmalı)')
+        .refine(validateIBANChecksum, 'IBAN kontrol kodu geçersiz')
 );
+
 
 /**
  * TR: Vergi Kimlik Numarası doğrulama şeması.

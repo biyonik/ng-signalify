@@ -85,7 +85,9 @@ export class SigInputComponent implements ControlValueAccessor {
     readonly type = input<InputType>('text');
     readonly value = model<string | number | null>(null);
     readonly placeholder = input<string>('');
-    readonly disabled = input<boolean>(false);
+    private _disabledByForm = signal(false);
+    readonly disabledInput = input<boolean>(false, { alias: 'disabled' });
+    readonly disabled = computed(() => this.disabledInput() || this._disabledByForm());
     readonly readonly = input<boolean>(false);
     readonly clearable = input<boolean>(false);
     readonly icon = input<string>('');
@@ -118,10 +120,19 @@ export class SigInputComponent implements ControlValueAccessor {
             this._onChange(null);
             return;
         }
-        const val = this.type() === 'number' ? Number(target.value) : target.value;
+
+        let val: string | number | null;
+        if (this.type() === 'number') {
+            const parsed = Number(target.value);
+            val = Number.isNaN(parsed) ? null : parsed;
+        } else {
+            val = target.value;
+        }
+
         this.value.set(val);
         this._onChange(val);
     }
+
 
     onBlur(): void {
         this._onTouched();
@@ -153,5 +164,7 @@ export class SigInputComponent implements ControlValueAccessor {
         this._onTouched = fn;
     }
 
-    setDisabledState(_isDisabled: boolean): void {}
+    setDisabledState(isDisabled: boolean): void {
+        this._disabledByForm.set(isDisabled);
+    }
 }

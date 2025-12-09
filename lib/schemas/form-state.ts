@@ -263,6 +263,7 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
     } = options;
 
     const effectRefs: Array<{ destroy: () => void }> = [];
+    let isDestroyed = false;
 
 
     // TR: Zod şemasını inşa et
@@ -325,10 +326,12 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
             // EN: Trigger async validation on value change (Effect)
             const asyncEffect = effect(async () => {
                 const v = value();
+                if (isDestroyed) return; // Early exit if destroyed
                 if (touched()) {
                     await asyncValidator.validate(v);
                 }
             }, {allowSignalWrites: true});
+
             effectRefs.push(asyncEffect);
         }
 
@@ -526,14 +529,35 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
     const validateAll = async (): Promise<boolean> => {
         touchAll();
 
-        const promises: Promise<void>[] = [];
-        for (const [name, validator] of asyncValidators) {
+        const valueSnapshots = new Map<string, unknown>();
+        for (const [name] of asyncValidators) {
             const fv = formFields[name as keyof T];
             if (fv) {
-                promises.push(validator.validate(fv.value()));
+                valueSnapshots.set(name, fv.value());
+            }
+        }
+
+        const promises: Promise<void>[] = [];
+        for (const [name, validator] of asyncValidators) {
+            const snapshotValue = valueSnapshots.get(name);
+            if (snapshotValue !== undefined) {
+                promises.push(validator.validate(snapshotValue));
             }
         }
         await Promise.all(promises);
+
+        let valuesChanged = false;
+        for (const [name] of asyncValidators) {
+            const fv = formFields[name as keyof T];
+            if (fv && !deepEqual(fv.value(), valueSnapshots.get(name))) {
+                valuesChanged = true;
+                break;
+            }
+        }
+
+        if (valuesChanged) {
+            return validateAll();
+        }
 
         return valid();
     };
@@ -567,10 +591,17 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
     }
 
     const destroy = () => {
+        isDestroyed = true;
+
         // Effect'leri temizle
         for (const effectRef of effectRefs) {
-            effectRef.destroy();
+            try {
+                effectRef.destroy();
+            } catch (e) {
+                console.warn('Effect cleanup warning:', e);
+            }
         }
+        effectRefs.length = 0; // Array'i temizle
 
         // Async validator'ları iptal et ve temizle
         for (const [, validator] of asyncValidators) {
