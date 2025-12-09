@@ -1,6 +1,6 @@
 {
   "name": "ng-signalify",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.5.1",
   "description": "Angular 17+ için modern, signal-tabanlı form yönetimi, state management ve UI component kütüphanesi",
   "author": "Ahmet ALTUN",
   "license": "MIT",
@@ -26,7 +26,8 @@
     "@angular/core": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "@angular/forms": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "rxjs": "^7.0.0",
-    "zod": "^3.22.0"
+    "zod": "^3.22.0",
+    "ts-node": "^10.9.2"
   },
   "peerDependenciesMeta": {
     "zod": {
@@ -36,9 +37,7 @@
       "optional": false
     }
   },
-  "dependencies": {
-    "ts-node": "^10.9.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@angular-devkit/build-angular": "^17.0.0",
     "@angular/cli": "^17.0.0",
