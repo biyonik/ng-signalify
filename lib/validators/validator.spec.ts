@@ -38,17 +38,26 @@ describe('Turkish Validators (Expert)', () => {
 
     describe('IBAN', () => {
         it('should validate and transform to Uppercase', () => {
-            const lower = 'tr123456789012345678901234'; // 26 char
-            const result = iban.safeParse(lower);
+            // Geçerli bir TR IBAN - checksum doğru olmalı
+            // TR + 2 checksum digit + 5 banka kodu + 1 rezerv + 16 hesap no
+            // Geçerli IBAN: TR330006100519786457841326
+            const validIban = 'tr330006100519786457841326';
+            const result = iban.safeParse(validIban);
 
             expect(result.success).toBe(true);
             if (result.success) {
-                expect(result.data).toBe(lower.toUpperCase());
+                expect(result.data).toBe(validIban.toUpperCase());
             }
         });
 
         it('should fail for non-TR IBANs', () => {
             expect(iban.safeParse('DE123456789012345678901234').success).toBe(false);
+        });
+
+        it('should fail for invalid IBAN checksum', () => {
+            // Yanlış checksum ile IBAN
+            const invalidIban = 'TR123456789012345678901234';
+            expect(iban.safeParse(invalidIban).success).toBe(false);
         });
     });
 

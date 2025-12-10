@@ -45,7 +45,7 @@ describe('SigModalComponent', () => {
             fixture.detectChanges();
 
             const title = fixture.debugElement.query(By.css('.sig-modal__title'));
-            expect(title.nativeElement.textContent).toBe('Test Modal');
+            expect(title.nativeElement.textContent.trim()).toBe('Test Modal');
         });
     });
 
@@ -158,7 +158,8 @@ describe('SigModalComponent', () => {
             component.open.set(true);
             fixture.detectChanges();
 
-            component.onEscapeKey();
+            const event = new KeyboardEvent('keydown', { key: 'Escape' });
+            component.onEscapeKey(event);
 
             expect(component.open()).toBe(false);
         });
@@ -168,7 +169,8 @@ describe('SigModalComponent', () => {
             fixture.componentRef.setInput('closeOnEsc', false);
             fixture.detectChanges();
 
-            component.onEscapeKey();
+            const event = new KeyboardEvent('keydown', { key: 'Escape' });
+            component.onEscapeKey(event);
 
             expect(component.open()).toBe(true);
         });

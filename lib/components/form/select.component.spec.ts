@@ -158,8 +158,121 @@ describe('SigSelectComponent (Dropdown Power)', () => {
         expect(component.isOpen()).toBe(true);
 
         // Escape ile kapat
-        trigger.triggerEventHandler('keydown', { key: 'Escape' });
+        trigger.triggerEventHandler('keydown', { key: 'Escape', preventDefault: () => {} });
         fixture.detectChanges();
         expect(component.isOpen()).toBe(false);
+    });
+
+    // A11Y Tests
+    describe('accessibility', () => {
+        it('should have role="combobox" on trigger', () => {
+            const trigger = fixture.debugElement.query(By.css('.sig-select__trigger'));
+            expect(trigger.attributes['role']).toBe('combobox');
+        });
+
+        it('should have aria-expanded on trigger', () => {
+            const trigger = fixture.debugElement.query(By.css('.sig-select__trigger'));
+            expect(trigger.attributes['aria-expanded']).toBe('false');
+
+            component.toggle();
+            fixture.detectChanges();
+
+            expect(trigger.attributes['aria-expanded']).toBe('true');
+        });
+
+        it('should have aria-haspopup="listbox" on trigger', () => {
+            const trigger = fixture.debugElement.query(By.css('.sig-select__trigger'));
+            expect(trigger.attributes['aria-haspopup']).toBe('listbox');
+        });
+
+        it('dropdown should have role="listbox"', () => {
+            component.toggle();
+            fixture.detectChanges();
+
+            const dropdown = fixture.debugElement.query(By.css('.sig-select__dropdown'));
+            expect(dropdown.attributes['role']).toBe('listbox');
+        });
+
+        it('options should have role="option"', () => {
+            component.toggle();
+            fixture.detectChanges();
+
+            const option = fixture.debugElement.query(By.css('.sig-select__option'));
+            expect(option.attributes['role']).toBe('option');
+        });
+
+        it('selected option should have aria-selected="true"', () => {
+            component.writeValue('1');
+            component.toggle();
+            fixture.detectChanges();
+
+            const selectedOption = fixture.debugElement.query(By.css('.sig-select__option--selected'));
+            expect(selectedOption.attributes['aria-selected']).toBe('true');
+        });
+
+        it('disabled options should have aria-disabled="true"', () => {
+            component.toggle();
+            fixture.detectChanges();
+
+            const disabledOption = fixture.debugElement.queryAll(By.css('.sig-select__option'))[2];
+            expect(disabledOption.attributes['aria-disabled']).toBe('true');
+        });
+
+        it('should have aria-controls linking trigger to listbox', () => {
+            const trigger = fixture.debugElement.query(By.css('.sig-select__trigger'));
+            component.toggle();
+            fixture.detectChanges();
+
+            const dropdown = fixture.debugElement.query(By.css('.sig-select__dropdown'));
+            expect(trigger.attributes['aria-controls']).toBe(dropdown.attributes['id']);
+        });
+
+        it('should have aria-invalid when ariaInvalid is true', () => {
+            fixture.componentRef.setInput('ariaInvalid', true);
+            fixture.detectChanges();
+
+            const trigger = fixture.debugElement.query(By.css('.sig-select__trigger'));
+            expect(trigger.attributes['aria-invalid']).toBe('true');
+        });
+
+        it('should have aria-required when required is true', () => {
+            fixture.componentRef.setInput('required', true);
+            fixture.detectChanges();
+
+            const trigger = fixture.debugElement.query(By.css('.sig-select__trigger'));
+            expect(trigger.attributes['aria-required']).toBe('true');
+        });
+
+        it('search input should have role="searchbox" when searchable', () => {
+            fixture.componentRef.setInput('searchable', true);
+            component.toggle();
+            fixture.detectChanges();
+
+            const searchInput = fixture.debugElement.query(By.css('.sig-select__search-input'));
+            expect(searchInput.attributes['role']).toBe('searchbox');
+        });
+
+        it('search input should have aria-autocomplete="list"', () => {
+            fixture.componentRef.setInput('searchable', true);
+            component.toggle();
+            fixture.detectChanges();
+
+            const searchInput = fixture.debugElement.query(By.css('.sig-select__search-input'));
+            expect(searchInput.attributes['aria-autocomplete']).toBe('list');
+        });
+
+        it('empty message should have role="alert"', () => {
+            fixture.componentRef.setInput('searchable', true);
+            component.toggle();
+            fixture.detectChanges();
+
+            const searchInput = fixture.debugElement.query(By.css('.sig-select__search-input'));
+            searchInput.nativeElement.value = 'NONEXISTENT';
+            searchInput.nativeElement.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+
+            const emptyMsg = fixture.debugElement.query(By.css('.sig-select__empty'));
+            expect(emptyMsg.attributes['role']).toBe('alert');
+        });
     });
 });

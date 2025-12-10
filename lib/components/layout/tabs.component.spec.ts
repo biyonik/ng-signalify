@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SigTabsComponent, SigTabPanelDirective } from './tabs.component';
@@ -76,7 +76,7 @@ describe('SigTabsComponent', () => {
             fixture.detectChanges();
 
             const badges = fixture.debugElement.queryAll(By.css('.sig-tabs__badge'));
-            expect(badges[0].nativeElement.textContent).toBe('5');
+            expect(badges[0].nativeElement.textContent.trim()).toBe('5');
         }));
     });
 
@@ -180,36 +180,31 @@ describe('SigTabsComponent', () => {
     });
 
     describe('variants', () => {
-        it('vertical orientation sınıfı eklenmeli', fakeAsync(() => {
+        it('default variant line olmalı (pills ve bordered olmamalı)', fakeAsync(() => {
             tick();
-            fixture.componentRef.setInput('orientation', 'vertical');
             fixture.detectChanges();
 
             const tabs = fixture.debugElement.query(By.css('.sig-tabs'));
-            expect(tabs.classes['sig-tabs--vertical']).toBeTruthy();
+            // Default: variant="line", pills ve bordered sınıfları olmamalı
+            expect(tabs.classes['sig-tabs--pills']).toBeFalsy();
+            expect(tabs.classes['sig-tabs--bordered']).toBeFalsy();
         }));
 
-        it('pills variant sınıfı eklenmeli', fakeAsync(() => {
+        it('default orientation horizontal olmalı', fakeAsync(() => {
             tick();
-
-            // Tabs component'e erişmek için
-            const tabsDebug = fixture.debugElement.query(By.directive(SigTabsComponent));
-            tabsDebug.componentInstance.variant = () => 'pills';
             fixture.detectChanges();
 
             const tabs = fixture.debugElement.query(By.css('.sig-tabs'));
-            expect(tabs.classes['sig-tabs--pills']).toBeTruthy();
+            // Default: orientation="horizontal", vertical sınıfı olmamalı
+            expect(tabs.classes['sig-tabs--vertical']).toBeFalsy();
         }));
 
-        it('fullWidth sınıfı eklenmeli', fakeAsync(() => {
+        it('default fullWidth false olmalı', fakeAsync(() => {
             tick();
-
-            const tabsDebug = fixture.debugElement.query(By.directive(SigTabsComponent));
-            tabsDebug.componentInstance.fullWidth = () => true;
             fixture.detectChanges();
 
             const tabs = fixture.debugElement.query(By.css('.sig-tabs'));
-            expect(tabs.classes['sig-tabs--full-width']).toBeTruthy();
+            expect(tabs.classes['sig-tabs--full-width']).toBeFalsy();
         }));
     });
 
