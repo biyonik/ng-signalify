@@ -1,4 +1,4 @@
-import {computed, signal, WritableSignal} from '@angular/core';
+import {computed, effect, inject, PLATFORM_ID, signal, WritableSignal} from '@angular/core';
 import {
     createInitialState,
     Entity,
@@ -15,6 +15,7 @@ import {
 } from './entity-state';
 import * as adapter from './entity-adapter';
 import {createPagination, PaginationState} from './pagination';
+import {isPlatformBrowser} from "@angular/common";
 
 /**
  * TR: Signal tabanlı Varlık Deposu (Entity Store).
@@ -90,6 +91,15 @@ export abstract class EntityStore<
     private _refreshPromise: Promise<void> | null = null;
 
     /**
+     * TR: Platform ID (SSR kontrolü için).
+     * Abstract class içinde inject() kullanımı Angular 14+ ile mümkündür.
+     *
+     * EN: Platform ID (For SSR check).
+     * Usage of inject() inside abstract class is possible with Angular 14+.
+     */
+    private readonly platformId = inject(PLATFORM_ID);
+
+    /**
      * TR: EntityStore sınıfını başlatır.
      *
      * EN: Initializes the EntityStore class.
@@ -105,21 +115,114 @@ export abstract class EntityStore<
             cacheTTL: config.cacheTTL ?? 5 * 60 * 1000, // 5 dakika / 5 minutes
             optimistic: config.optimistic ?? true,
             localPagination: config.localPagination ?? false,
+            // TR: Persistence varsayılanları
+            // EN: Persistence defaults
+            persistence: config.persistence ? {
+                enabled: config.persistence.enabled,
+                key: config.persistence.key ?? `sig_store_${config.name}`,
+                storage: config.persistence.storage ?? 'sessionStorage',
+                paths: config.persistence.paths ?? ['filters', 'sort', 'pagination']
+            }: { enabled: false }
         };
+
+        // 1. Önce kayıtlı durumu yükle (State initialize edilmeden önce!)
+        const persistedState = this.loadPersistedState();
+
+        // 2. Başlangıç durumunu oluştur (Varsayılanlar + Kayıtlı Durum)
+        const initialState = createInitialState(this.config);
+
+        // TR: Kayıtlı verileri başlangıç state'ine merge et
+        // EN: Merge persisted data into initial state
+        if (persistedState) {
+            if (persistedState.filters) initialState.filters = persistedState.filters;
+            if (persistedState.sort) initialState.sort = persistedState.sort;
+            // Pagination, store state içinde değil PaginationState içindedir, aşağıda ayarlanır.
+        }
 
         // TR: Başlangıç durumunu oluştur
         // EN: Create initial state
-        this._state = signal(createInitialState(this.config));
+        this._state = signal(initialState);
 
-        // TR: Sayfalamayı başlat
-        // EN: Initialize pagination
+        const initialPage = persistedState?.pagination?.page ?? 1;
+        const initialSize = persistedState?.pagination?.pageSize ?? this.config.defaultPageSize;
+
         this.pagination = createPagination({
-            initialPageSize: this.config.defaultPageSize,
+            initialPageSize: initialSize,
         });
+
+        // Sayfa numarasını güncelle (PaginationState sinyali olduğu için set ediyoruz)
+        if (initialPage > 1) {
+            this.pagination.setPage(initialPage);
+        }
 
         // TR: Public sinyalleri oluştur
         // EN: Create public signals
         this.signals = this.createSignals();
+
+        if (this.config.persistence?.enabled && isPlatformBrowser(this.platformId)) {
+            this.setupPersistenceEffect();
+        }
+    }
+
+    /**
+     * TR: State değişimlerini izler ve storage'a yazar.
+     *
+     * EN: Watches state changes and writes to storage.
+     */
+    private setupPersistenceEffect(): void {
+        effect(() => {
+            const state = this._state();
+            const page = this.pagination.page();
+            const pageSize = this.pagination.pageSize();
+            const paths = this.config.persistence!.paths!;
+            const dataToSave: Record<string, any> = {};
+
+            // TR: Sadece konfigürasyonda belirtilen alanları seç
+            // EN: Select only fields specified in configuration
+            if (paths.includes('filters')) dataToSave['filters'] = state.filters;
+            if (paths.includes('sort')) dataToSave['sort'] = state.sort;
+            if (paths.includes('selection')) dataToSave['ids'] = state.selectedIds; // Veya adapter'a göre değişir
+
+            if (paths.includes('pagination')) {
+                dataToSave['pagination'] = { page, pageSize };
+            }
+
+            const storageKey = this.config.persistence!.key!;
+            const storage = this.config.persistence!.storage === 'localStorage'
+                ? localStorage
+                : sessionStorage;
+
+            try {
+                storage.setItem(storageKey, JSON.stringify(dataToSave));
+            } catch (e) {
+                console.warn('ng-signalify: Failed to save state to storage', e);
+            }
+        });
+    }
+
+    /**
+     * TR: Depolama alanından geçmiş durumu okur.
+     * SSR ortamında güvenli bir şekilde null döner.
+     *
+     * EN: Reads past state from storage.
+     * Safely returns null in SSR environment.
+     */
+    private loadPersistedState(): any | null {
+        if (!this.config.persistence?.enabled || !isPlatformBrowser(this.platformId)) {
+            return null;
+        }
+
+        const storageKey = this.config.persistence.key!;
+        const storage = this.config.persistence.storage === 'localStorage'
+            ? localStorage
+            : sessionStorage;
+
+        try {
+            const raw = storage.getItem(storageKey);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
     }
 
     /**

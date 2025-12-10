@@ -389,6 +389,41 @@ export interface StoreConfig<T extends Entity> {
      * If enabled, all data is fetched at once and pagination is done on the client side.
      */
     localPagination?: boolean;
+
+    /**
+     * TR: Durum kalıcılık ayarları.
+     * Sayfa yenilendiğinde filtrelerin/sayfanın korunmasını sağlar.
+     *
+     * EN: State persistence settings.
+     * Ensures filters/page are preserved on page reload.
+     */
+    persistence?: {
+        /**
+         * TR: Kalıcılık aktif mi?
+         * EN: Is persistence enabled?
+         */
+        enabled: boolean;
+
+        /**
+         * TR: Depolama anahtarı. Varsayılan: store name.
+         * EN: Storage key. Default: store name.
+         */
+        key?: string;
+
+        /**
+         * TR: Hangi depolama alanı kullanılacak?
+         * EN: Which storage to use?
+         * Default: 'sessionStorage' (Sekme kapanınca silinir)
+         */
+        storage?: 'localStorage' | 'sessionStorage';
+
+        /**
+         * TR: Hangi parçalar saklanacak?
+         * EN: Which parts to persist?
+         * Default: ['filters', 'sort', 'pagination']
+         */
+        paths?: ('filters' | 'sort' | 'pagination' | 'selection')[];
+    };
 }
 
 /**
