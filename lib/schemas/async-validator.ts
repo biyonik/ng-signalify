@@ -7,7 +7,7 @@ import {signal, Signal, WritableSignal} from '@angular/core';
  * EN: Async validation result.
  * Returns string message if error exists, null otherwise.
  */
-export type AsyncValidationResult = string | null;
+export type AsyncValidationResult = string;
 
 /**
  * TR: Validasyon fonksiyonu tipi.
@@ -34,7 +34,7 @@ export type AsyncValidatorFn<T> = (value: T, signal: AbortSignal) => Promise<Asy
  */
 export class AsyncValidator<T = unknown> {
     private readonly _loading = signal(false);
-    private readonly _error = signal<string | null>(null);
+    private readonly _error = signal<string>('');
 
     private _timeoutId: any = null;
     private _abortController: AbortController | null = null;
@@ -123,7 +123,7 @@ export class AsyncValidator<T = unknown> {
             this._timeoutId = null;
         }
         this._loading.set(false);
-        this._error.set(null);
+        this._error.set('');
     }
 
     // --- Getters ---
@@ -142,7 +142,7 @@ export class AsyncValidator<T = unknown> {
      *
      * EN: Current error message.
      */
-    get error(): Signal<string | null> {
+    get error(): Signal<string> {
         return this._error.asReadonly();
     }
 }

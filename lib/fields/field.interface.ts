@@ -75,7 +75,7 @@ export interface FieldValue<T> {
    * EN: Read-only signal carrying the error message resulting from validation.
    * Returns null if the value is valid.
    */
-  error: Signal<string | null>;
+  error: Signal<string>;
 
   /**
    * TR: Kullanıcının alanla etkileşime girip girmediğini (focus/blur) belirten yazılabilir sinyal.
