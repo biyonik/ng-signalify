@@ -1,6 +1,6 @@
-// ==========================================================================
-// Tooltip Component
-// ==========================================================================
+/* ==========================================================================
+   Tooltip Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
@@ -16,19 +16,17 @@
     position: absolute;
     z-index: var(--sig-z-tooltip);
     max-width: 280px;
-    padding: var(--sig-spacing-2) var(--sig-spacing-3);
-    font-size: var(--sig-font-size-sm);
-    line-height: var(--sig-line-height-normal);
-    color: white;
-    background: var(--sig-gray-900);
+    padding: var(--sig-space-1-5) var(--sig-space-3);
+    font-size: var(--sig-text-xs);
+    line-height: var(--sig-leading-normal);
+    color: var(--sig-neutral-0);
+    background-color: var(--sig-neutral-900);
     border-radius: var(--sig-radius-md);
-    box-shadow: var(--sig-shadow-md);
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
     transition: opacity var(--sig-transition-fast),
-    visibility var(--sig-transition-fast),
-    transform var(--sig-transition-fast);
+      visibility var(--sig-transition-fast), transform var(--sig-transition-fast);
 
     &--visible {
       opacity: 1;
@@ -36,7 +34,6 @@
     }
   }
 
-  // Arrow
   &__arrow {
     position: absolute;
     width: 8px;
@@ -45,7 +42,7 @@
     transform: rotate(45deg);
   }
 
-  // Positions
+  /* Positions */
   &--top {
     .sig-tooltip__content {
       bottom: 100%;
@@ -118,12 +115,13 @@
     }
   }
 
-  // Light variant
+  /* Light variant */
   &--light {
     .sig-tooltip__content {
       color: var(--sig-text-primary);
-      background: var(--sig-surface);
+      background-color: var(--sig-bg-surface);
       border: 1px solid var(--sig-border-color);
+      box-shadow: var(--sig-shadow-md);
     }
 
     .sig-tooltip__arrow {
@@ -132,54 +130,25 @@
     }
   }
 
-  // Color variants
-  &--primary {
-    .sig-tooltip__content {
-      background: var(--sig-primary);
-    }
-  }
-
-  &--success {
-    .sig-tooltip__content {
-      background: var(--sig-success);
-    }
-  }
-
-  &--warning {
-    .sig-tooltip__content {
-      color: var(--sig-gray-900);
-      background: var(--sig-warning);
-    }
-  }
-
-  &--error {
-    .sig-tooltip__content {
-      background: var(--sig-error);
-    }
-  }
-
-  // Interactive tooltip
+  /* Interactive */
   &--interactive {
     .sig-tooltip__content {
       pointer-events: auto;
     }
   }
 
-  // No arrow
+  /* No arrow */
   &--no-arrow {
     .sig-tooltip__arrow {
       display: none;
     }
   }
-}
 
-// Dark Mode
-[data-theme="dark"] {
-  .sig-tooltip {
-    &--light {
-      .sig-tooltip__content {
-        background: var(--sig-gray-800);
-      }
+  /* Multiline */
+  &--multiline {
+    .sig-tooltip__content {
+      text-align: left;
+      white-space: normal;
     }
   }
 }

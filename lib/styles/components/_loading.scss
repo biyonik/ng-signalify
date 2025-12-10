@@ -1,6 +1,6 @@
-// ==========================================================================
-// Loading Component
-// ==========================================================================
+/* ==========================================================================
+   Loading Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
@@ -9,17 +9,17 @@
   align-items: center;
   justify-content: center;
 
-  // Spinner
+  /* Spinner */
   &__spinner {
     width: 24px;
     height: 24px;
-    border: 2px solid var(--sig-gray-200);
-    border-top-color: var(--sig-primary);
-    border-radius: 50%;
+    border: 2px solid var(--sig-neutral-200);
+    border-top-color: var(--sig-primary-600);
+    border-radius: var(--sig-radius-full);
     animation: sig-spin 0.8s linear infinite;
   }
 
-  // Sizes
+  /* Sizes */
   &--xs .sig-loading__spinner {
     width: 14px;
     height: 14px;
@@ -50,30 +50,30 @@
     border-width: 4px;
   }
 
-  // Color variants
+  /* Color variants */
   &--white .sig-loading__spinner {
     border-color: rgba(255, 255, 255, 0.3);
     border-top-color: white;
   }
 
   &--primary .sig-loading__spinner {
-    border-top-color: var(--sig-primary);
+    border-top-color: var(--sig-primary-600);
   }
 
   &--success .sig-loading__spinner {
-    border-top-color: var(--sig-success);
+    border-top-color: var(--sig-success-500);
   }
 
   &--warning .sig-loading__spinner {
-    border-top-color: var(--sig-warning);
+    border-top-color: var(--sig-warning-500);
   }
 
   &--error .sig-loading__spinner {
-    border-top-color: var(--sig-error);
+    border-top-color: var(--sig-error-500);
   }
 }
 
-// Loading Overlay
+/* Loading Overlay */
 .sig-loading-overlay {
   position: fixed;
   inset: 0;
@@ -82,13 +82,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--sig-spacing-4);
+  gap: var(--sig-space-4);
   background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(4px);
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--sig-transition-base),
-  visibility var(--sig-transition-base);
+  transition: opacity var(--sig-transition-normal),
+    visibility var(--sig-transition-normal);
 
   &--visible {
     opacity: 1;
@@ -102,45 +101,45 @@
   &__spinner {
     width: 48px;
     height: 48px;
-    border: 3px solid var(--sig-gray-200);
-    border-top-color: var(--sig-primary);
-    border-radius: 50%;
+    border: 3px solid var(--sig-neutral-200);
+    border-top-color: var(--sig-primary-600);
+    border-radius: var(--sig-radius-full);
     animation: sig-spin 0.8s linear infinite;
   }
 
   &__text {
-    font-size: var(--sig-font-size-sm);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-secondary);
   }
 }
 
-// Inline loading
+/* Inline loading */
 .sig-loading-inline {
   display: inline-flex;
   align-items: center;
-  gap: var(--sig-spacing-2);
-  font-size: var(--sig-font-size-sm);
+  gap: var(--sig-space-2);
+  font-size: var(--sig-text-sm);
   color: var(--sig-text-secondary);
 
   &__spinner {
     width: 16px;
     height: 16px;
-    border: 2px solid var(--sig-gray-200);
-    border-top-color: var(--sig-primary);
-    border-radius: 50%;
+    border: 2px solid var(--sig-neutral-200);
+    border-top-color: var(--sig-primary-600);
+    border-radius: var(--sig-radius-full);
     animation: sig-spin 0.8s linear infinite;
   }
 }
 
-// Skeleton loading
+/* Skeleton loading */
 .sig-skeleton {
-  background: var(--sig-gray-200);
+  background: var(--sig-neutral-200);
   border-radius: var(--sig-radius-md);
   animation: sig-skeleton-pulse 1.5s ease-in-out infinite;
 
   &--text {
     height: 1em;
-    margin-bottom: var(--sig-spacing-2);
+    margin-bottom: var(--sig-space-2);
 
     &:last-child {
       width: 60%;
@@ -148,13 +147,13 @@
   }
 
   &--circle {
-    border-radius: 50%;
+    border-radius: var(--sig-radius-full);
   }
 
   &--avatar {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: var(--sig-radius-full);
   }
 
   &--button {
@@ -167,17 +166,17 @@
   }
 }
 
-// Dots loading
+/* Dots loading */
 .sig-loading-dots {
   display: inline-flex;
   align-items: center;
-  gap: var(--sig-spacing-1);
+  gap: var(--sig-space-1);
 
   &__dot {
     width: 6px;
     height: 6px;
-    background: var(--sig-primary);
-    border-radius: 50%;
+    background: var(--sig-primary-600);
+    border-radius: var(--sig-radius-full);
     animation: sig-bounce 1.4s ease-in-out infinite both;
 
     &:nth-child(1) {
@@ -200,15 +199,10 @@
   }
 }
 
-// Animations
-@keyframes sig-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* Animations */
 @keyframes sig-skeleton-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -217,27 +211,12 @@
 }
 
 @keyframes sig-bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
   }
   40% {
     transform: scale(1);
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-loading {
-    &__spinner {
-      border-color: var(--sig-gray-700);
-    }
-  }
-
-  .sig-loading-overlay {
-    background: rgba(15, 23, 42, 0.9);
-  }
-
-  .sig-skeleton {
-    background: var(--sig-gray-700);
   }
 }

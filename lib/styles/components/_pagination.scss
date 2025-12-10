@@ -1,14 +1,14 @@
-// ==========================================================================
-// Pagination Component
-// ==========================================================================
+/* ==========================================================================
+   Pagination Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
 .sig-pagination {
   display: flex;
   align-items: center;
-  gap: var(--sig-spacing-1);
-  font-size: var(--sig-font-size-sm);
+  gap: var(--sig-space-1);
+  font-size: var(--sig-text-sm);
 
   &__item {
     display: flex;
@@ -16,32 +16,32 @@
     justify-content: center;
     min-width: 36px;
     height: 36px;
-    padding: 0 var(--sig-spacing-2);
+    padding: 0 var(--sig-space-2);
     color: var(--sig-text-primary);
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--sig-radius-md);
-    font-weight: var(--sig-font-weight-medium);
+    font-weight: var(--sig-font-medium);
     cursor: pointer;
     transition: background-color var(--sig-transition-fast),
-    border-color var(--sig-transition-fast),
-    color var(--sig-transition-fast);
+      border-color var(--sig-transition-fast),
+      color var(--sig-transition-fast);
 
     &:hover:not(:disabled) {
-      background: var(--sig-gray-100);
+      background: var(--sig-bg-hover);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--sig-primary);
-      outline-offset: 2px;
+      outline: none;
+      @include focus-ring;
     }
 
     &--active {
-      background: var(--sig-primary);
-      color: white;
+      background: var(--sig-neutral-900);
+      color: var(--sig-neutral-0);
 
       &:hover {
-        background: var(--sig-primary-hover);
+        background: var(--sig-neutral-800);
       }
     }
 
@@ -66,10 +66,10 @@
     cursor: default;
   }
 
-  // Prev/Next buttons
+  /* Prev/Next buttons */
   &__prev,
   &__next {
-    gap: var(--sig-spacing-1);
+    gap: var(--sig-space-1);
     color: var(--sig-text-secondary);
 
     &:hover:not(:disabled) {
@@ -77,12 +77,12 @@
     }
   }
 
-  // Sizes
+  /* Sizes */
   &--sm {
     .sig-pagination__item {
       min-width: 28px;
       height: 28px;
-      font-size: var(--sig-font-size-xs);
+      font-size: var(--sig-text-xs);
     }
 
     .sig-pagination__ellipsis {
@@ -95,7 +95,7 @@
     .sig-pagination__item {
       min-width: 44px;
       height: 44px;
-      font-size: var(--sig-font-size-base);
+      font-size: var(--sig-text-base);
     }
 
     .sig-pagination__ellipsis {
@@ -104,43 +104,44 @@
     }
   }
 
-  // Variants
+  /* Variants */
   &--outlined {
     .sig-pagination__item {
       border-color: var(--sig-border-color);
 
       &:hover:not(:disabled):not(.sig-pagination__item--active) {
-        border-color: var(--sig-border-color-hover);
+        border-color: var(--sig-neutral-300);
       }
 
       &--active {
-        border-color: var(--sig-primary);
+        border-color: var(--sig-neutral-900);
       }
     }
   }
 
   &--rounded {
     .sig-pagination__item {
-      border-radius: 50%;
+      border-radius: var(--sig-radius-full);
     }
   }
 
-  // Simple variant (just prev/next)
+  /* Simple variant (just prev/next) */
   &--simple {
     .sig-pagination__info {
-      padding: 0 var(--sig-spacing-4);
-      font-size: var(--sig-font-size-sm);
+      padding: 0 var(--sig-space-4);
+      font-size: var(--sig-text-sm);
       color: var(--sig-text-secondary);
     }
   }
 
-  // Compact variant
+  /* Compact variant */
   &--compact {
     gap: 0;
 
     .sig-pagination__item {
       border-radius: 0;
       border-right-width: 0;
+      border-color: var(--sig-border-color);
 
       &:first-child {
         border-radius: var(--sig-radius-md) 0 0 var(--sig-radius-md);
@@ -154,47 +155,38 @@
   }
 }
 
-// Pagination with page size selector
+/* Pagination with page size selector */
 .sig-pagination-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--sig-spacing-4);
+  gap: var(--sig-space-4);
   flex-wrap: wrap;
 
   &__info {
-    font-size: var(--sig-font-size-sm);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-secondary);
   }
 
   &__page-size {
     display: flex;
     align-items: center;
-    gap: var(--sig-spacing-2);
-    font-size: var(--sig-font-size-sm);
+    gap: var(--sig-space-2);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-secondary);
 
     select {
-      padding: var(--sig-spacing-1) var(--sig-spacing-2);
+      padding: var(--sig-space-1) var(--sig-space-2);
       border: 1px solid var(--sig-border-color);
       border-radius: var(--sig-radius-md);
-      font-size: var(--sig-font-size-sm);
-      background: var(--sig-surface);
+      font-size: var(--sig-text-sm);
+      background: var(--sig-bg-surface);
       cursor: pointer;
 
       &:focus {
         outline: none;
-        border-color: var(--sig-primary);
+        border-color: var(--sig-primary-500);
       }
-    }
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-pagination {
-    &__item:hover:not(:disabled) {
-      background: var(--sig-gray-700);
     }
   }
 }

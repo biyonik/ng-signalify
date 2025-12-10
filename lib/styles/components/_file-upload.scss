@@ -1,36 +1,36 @@
-// ==========================================================================
-// File Upload Component
-// ==========================================================================
+/* ==========================================================================
+   File Upload Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
 .sig-file-upload {
   width: 100%;
 
-  // Dropzone
+  /* Dropzone */
   &__dropzone {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--sig-spacing-4);
+    gap: var(--sig-space-4);
     min-height: 200px;
-    padding: var(--sig-spacing-8);
+    padding: var(--sig-space-8);
     border: 2px dashed var(--sig-border-color);
     border-radius: var(--sig-radius-lg);
-    background: var(--sig-gray-50);
+    background: var(--sig-bg-muted);
     cursor: pointer;
     transition: border-color var(--sig-transition-fast),
-    background-color var(--sig-transition-fast);
+      background-color var(--sig-transition-fast);
 
     &:hover {
-      border-color: var(--sig-primary);
-      background: var(--sig-primary-light);
+      border-color: var(--sig-primary-500);
+      background: var(--sig-primary-50);
     }
 
     &--dragging {
-      border-color: var(--sig-primary);
-      background: var(--sig-primary-light);
+      border-color: var(--sig-primary-500);
+      background: var(--sig-primary-50);
       border-style: solid;
     }
 
@@ -41,8 +41,8 @@
     }
 
     &--error {
-      border-color: var(--sig-error);
-      background: rgba(239, 68, 68, 0.05);
+      border-color: var(--sig-error-500);
+      background: var(--sig-error-50);
     }
   }
 
@@ -53,15 +53,15 @@
     width: 64px;
     height: 64px;
     color: var(--sig-text-muted);
-    background: var(--sig-surface);
-    border-radius: 50%;
+    background: var(--sig-bg-surface);
+    border-radius: var(--sig-radius-full);
     transition: color var(--sig-transition-fast),
-    background-color var(--sig-transition-fast);
+      background-color var(--sig-transition-fast);
 
     .sig-file-upload__dropzone:hover &,
     .sig-file-upload__dropzone--dragging & {
-      color: var(--sig-primary);
-      background: white;
+      color: var(--sig-primary-600);
+      background: var(--sig-bg-surface);
     }
 
     svg {
@@ -75,20 +75,20 @@
   }
 
   &__title {
-    font-size: var(--sig-font-size-base);
-    font-weight: var(--sig-font-weight-medium);
+    font-size: var(--sig-text-base);
+    font-weight: var(--sig-font-medium);
     color: var(--sig-text-primary);
-    margin-bottom: var(--sig-spacing-1);
+    margin-bottom: var(--sig-space-1);
 
     span {
-      color: var(--sig-primary);
+      color: var(--sig-primary-600);
       text-decoration: underline;
       text-underline-offset: 2px;
     }
   }
 
   &__subtitle {
-    font-size: var(--sig-font-size-sm);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-secondary);
   }
 
@@ -96,39 +96,39 @@
     display: none;
   }
 
-  // File list
+  /* File list */
   &__list {
     display: flex;
     flex-direction: column;
-    gap: var(--sig-spacing-2);
-    margin-top: var(--sig-spacing-4);
+    gap: var(--sig-space-2);
+    margin-top: var(--sig-space-4);
   }
 
   &__file {
     display: flex;
     align-items: center;
-    gap: var(--sig-spacing-3);
-    padding: var(--sig-spacing-3);
-    background: var(--sig-surface);
+    gap: var(--sig-space-3);
+    padding: var(--sig-space-3);
+    background: var(--sig-bg-surface);
     border: 1px solid var(--sig-border-color);
     border-radius: var(--sig-radius-md);
     transition: border-color var(--sig-transition-fast);
 
     &:hover {
-      border-color: var(--sig-border-color-hover);
+      border-color: var(--sig-neutral-300);
     }
 
     &--error {
-      border-color: var(--sig-error);
-      background: rgba(239, 68, 68, 0.02);
+      border-color: var(--sig-error-500);
+      background: var(--sig-error-50);
     }
 
     &--uploading {
-      border-color: var(--sig-primary);
+      border-color: var(--sig-primary-500);
     }
 
     &--success {
-      border-color: var(--sig-success);
+      border-color: var(--sig-success-500);
     }
   }
 
@@ -138,7 +138,7 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: var(--sig-gray-100);
+    background: var(--sig-bg-muted);
     border-radius: var(--sig-radius-md);
     color: var(--sig-text-secondary);
     flex-shrink: 0;
@@ -149,23 +149,23 @@
     }
 
     &--image {
-      background: rgba(139, 92, 246, 0.1);
-      color: #8b5cf6;
+      background: var(--sig-info-50);
+      color: var(--sig-info-600);
     }
 
     &--document {
-      background: rgba(59, 130, 246, 0.1);
-      color: #3b82f6;
+      background: var(--sig-primary-50);
+      color: var(--sig-primary-600);
     }
 
     &--video {
-      background: rgba(236, 72, 153, 0.1);
-      color: #ec4899;
+      background: var(--sig-error-50);
+      color: var(--sig-error-600);
     }
 
     &--audio {
-      background: rgba(34, 197, 94, 0.1);
-      color: #22c55e;
+      background: var(--sig-success-50);
+      color: var(--sig-success-600);
     }
   }
 
@@ -183,8 +183,8 @@
   }
 
   &__file-name {
-    font-size: var(--sig-font-size-sm);
-    font-weight: var(--sig-font-weight-medium);
+    font-size: var(--sig-text-sm);
+    font-weight: var(--sig-font-medium);
     color: var(--sig-text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -192,15 +192,15 @@
   }
 
   &__file-size {
-    font-size: var(--sig-font-size-xs);
+    font-size: var(--sig-text-xs);
     color: var(--sig-text-secondary);
-    margin-top: var(--sig-spacing-1);
+    margin-top: var(--sig-space-0-5);
   }
 
   &__file-error {
-    font-size: var(--sig-font-size-xs);
-    color: var(--sig-error);
-    margin-top: var(--sig-spacing-1);
+    font-size: var(--sig-text-xs);
+    color: var(--sig-error-600);
+    margin-top: var(--sig-space-0-5);
   }
 
   &__file-progress {
@@ -218,11 +218,11 @@
     flex-shrink: 0;
 
     &--success {
-      color: var(--sig-success);
+      color: var(--sig-success-600);
     }
 
     &--error {
-      color: var(--sig-error);
+      color: var(--sig-error-600);
     }
 
     svg {
@@ -244,11 +244,16 @@
     cursor: pointer;
     flex-shrink: 0;
     transition: background-color var(--sig-transition-fast),
-    color var(--sig-transition-fast);
+      color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-gray-100);
-      color: var(--sig-error);
+      background: var(--sig-bg-hover);
+      color: var(--sig-error-600);
+    }
+
+    &:focus-visible {
+      outline: none;
+      @include focus-ring;
     }
 
     svg {
@@ -257,11 +262,11 @@
     }
   }
 
-  // Compact variant
+  /* Compact variant */
   &--compact {
     .sig-file-upload__dropzone {
       min-height: auto;
-      padding: var(--sig-spacing-4);
+      padding: var(--sig-space-4);
       flex-direction: row;
     }
 
@@ -276,17 +281,17 @@
     }
   }
 
-  // Image gallery variant
+  /* Image gallery variant */
   &--gallery {
     .sig-file-upload__list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: var(--sig-spacing-3);
+      gap: var(--sig-space-3);
     }
 
     .sig-file-upload__file {
       flex-direction: column;
-      padding: var(--sig-spacing-2);
+      padding: var(--sig-space-2);
       aspect-ratio: 1;
     }
 
@@ -298,37 +303,6 @@
 
     .sig-file-upload__file-info {
       text-align: center;
-    }
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-file-upload {
-    &__dropzone {
-      background: var(--sig-gray-800);
-
-      &:hover,
-      &--dragging {
-        background: rgba(26, 109, 220, 0.1);
-      }
-    }
-
-    &__icon {
-      background: var(--sig-gray-700);
-
-      .sig-file-upload__dropzone:hover &,
-      .sig-file-upload__dropzone--dragging & {
-        background: var(--sig-gray-600);
-      }
-    }
-
-    &__file-icon {
-      background: var(--sig-gray-700);
-    }
-
-    &__file-remove:hover {
-      background: var(--sig-gray-700);
     }
   }
 }

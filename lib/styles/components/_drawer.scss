@@ -1,6 +1,6 @@
-// ==========================================================================
-// Drawer Component
-// ==========================================================================
+/* ==========================================================================
+   Drawer Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
@@ -10,33 +10,32 @@
   display: flex;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--sig-transition-base),
-  visibility var(--sig-transition-base);
+  transition: opacity var(--sig-transition-normal),
+    visibility var(--sig-transition-normal);
 
   &--open {
     opacity: 1;
     visibility: visible;
   }
 
-  // Overlay
+  /* Overlay */
   &__overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(2px);
   }
 
-  // Panel
+  /* Panel */
   &__panel {
     position: fixed;
     display: flex;
     flex-direction: column;
-    background: var(--sig-surface);
+    background: var(--sig-bg-surface);
     box-shadow: var(--sig-shadow-xl);
-    transition: transform var(--sig-transition-base);
+    transition: transform var(--sig-transition-normal);
   }
 
-  // Positions
+  /* Positions */
   &--right {
     inset: 0;
 
@@ -106,7 +105,7 @@
     }
   }
 
-  // Sizes
+  /* Sizes */
   &--sm .sig-drawer__panel {
     max-width: 320px;
   }
@@ -123,21 +122,27 @@
     max-width: 100%;
   }
 
-  // Header
+  /* Header */
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--sig-spacing-4) var(--sig-spacing-6);
+    padding: var(--sig-space-4) var(--sig-space-6);
     border-bottom: 1px solid var(--sig-border-color);
     flex-shrink: 0;
   }
 
   &__title {
-    font-size: var(--sig-font-size-lg);
-    font-weight: var(--sig-font-weight-semibold);
+    font-size: var(--sig-text-lg);
+    font-weight: var(--sig-font-semibold);
     color: var(--sig-text-primary);
     margin: 0;
+  }
+
+  &__description {
+    font-size: var(--sig-text-sm);
+    color: var(--sig-text-secondary);
+    margin-top: var(--sig-space-1);
   }
 
   &__close {
@@ -152,11 +157,16 @@
     border-radius: var(--sig-radius-md);
     cursor: pointer;
     transition: background-color var(--sig-transition-fast),
-    color var(--sig-transition-fast);
+      color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-gray-100);
+      background: var(--sig-bg-hover);
       color: var(--sig-text-primary);
+    }
+
+    &:focus-visible {
+      outline: none;
+      @include focus-ring;
     }
 
     svg {
@@ -165,48 +175,40 @@
     }
   }
 
-  // Body
+  /* Body */
   &__body {
     flex: 1;
     overflow-y: auto;
-    padding: var(--sig-spacing-6);
+    padding: var(--sig-space-6);
     color: var(--sig-text-primary);
+    @include custom-scrollbar;
   }
 
-  // Footer
+  /* Footer */
   &__footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--sig-spacing-3);
-    padding: var(--sig-spacing-4) var(--sig-spacing-6);
+    gap: var(--sig-space-3);
+    padding: var(--sig-space-4) var(--sig-space-6);
     border-top: 1px solid var(--sig-border-color);
     flex-shrink: 0;
 
     &--sticky {
       position: sticky;
       bottom: 0;
-      background: var(--sig-surface);
+      background: var(--sig-bg-surface);
+    }
+
+    &--between {
+      justify-content: space-between;
     }
   }
 
-  // No overlay variant
+  /* No overlay variant */
   &--no-overlay {
     .sig-drawer__overlay {
       display: none;
-    }
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-drawer {
-    &__overlay {
-      background: rgba(0, 0, 0, 0.7);
-    }
-
-    &__close:hover {
-      background: var(--sig-gray-700);
     }
   }
 }

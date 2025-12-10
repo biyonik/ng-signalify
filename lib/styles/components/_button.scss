@@ -1,44 +1,56 @@
 /* ==========================================================================
-   sig-button - Button Component
+   Button Component
    ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
 .sig-btn {
   @include button-base;
-  border: 1px solid transparent;
 
-  /* ============================================
+  /* ==========================================================================
      VARIANTS
-     ============================================ */
+     ========================================================================== */
 
-  /* Primary - Filled */
-  &--primary {
-    color: var(--sig-color-primary-text);
-    background-color: var(--sig-color-primary);
-    border-color: var(--sig-color-primary);
+  /* Default - Secondary style */
+  &--default {
+    color: var(--sig-text-primary);
+    background-color: var(--sig-bg-surface);
+    border: 1px solid var(--sig-border-color);
 
     &:hover:not(:disabled) {
-      background-color: var(--sig-color-primary-hover);
-      border-color: var(--sig-color-primary-hover);
+      background-color: var(--sig-bg-hover);
+      border-color: var(--sig-border-color-hover);
     }
 
     &:active:not(:disabled) {
-      background-color: var(--sig-color-primary-active);
-      border-color: var(--sig-color-primary-active);
+      background-color: var(--sig-bg-active);
     }
   }
 
-  /* Secondary - Outlined */
+  /* Primary */
+  &--primary {
+    color: var(--sig-neutral-0);
+    background-color: var(--sig-neutral-900);
+
+    &:hover:not(:disabled) {
+      background-color: var(--sig-neutral-800);
+    }
+
+    &:active:not(:disabled) {
+      background-color: var(--sig-neutral-700);
+    }
+  }
+
+  /* Secondary / Outline */
   &--secondary,
   &--outline {
     color: var(--sig-text-primary);
     background-color: var(--sig-bg-surface);
-    border-color: var(--sig-border-color);
+    border: 1px solid var(--sig-border-color);
 
     &:hover:not(:disabled) {
       background-color: var(--sig-bg-hover);
-      border-color: var(--sig-border-color-strong);
+      border-color: var(--sig-border-color-hover);
     }
 
     &:active:not(:disabled) {
@@ -46,11 +58,10 @@
     }
   }
 
-  /* Ghost - No border */
+  /* Ghost */
   &--ghost {
     color: var(--sig-text-primary);
     background-color: transparent;
-    border-color: transparent;
 
     &:hover:not(:disabled) {
       background-color: var(--sig-bg-hover);
@@ -61,34 +72,32 @@
     }
   }
 
-  /* Link style */
+  /* Link */
   &--link {
     height: auto;
     padding: 0;
-    color: var(--sig-text-link);
+    color: var(--sig-text-primary);
     background: none;
-    border: none;
+    text-decoration: underline;
+    text-underline-offset: 4px;
 
     &:hover:not(:disabled) {
-      color: var(--sig-text-link-hover);
       text-decoration: underline;
     }
   }
 
-  /* Danger */
+  /* Destructive / Danger */
+  &--destructive,
   &--danger {
     color: var(--sig-neutral-0);
-    background-color: var(--sig-error-500);
-    border-color: var(--sig-error-500);
+    background-color: var(--sig-error-600);
 
     &:hover:not(:disabled) {
-      background-color: var(--sig-error-600);
-      border-color: var(--sig-error-600);
+      background-color: var(--sig-error-700);
     }
 
     &:active:not(:disabled) {
-      background-color: var(--sig-error-700);
-      border-color: var(--sig-error-700);
+      background-color: var(--sig-error-800);
     }
 
     &:focus-visible {
@@ -96,14 +105,15 @@
     }
   }
 
-  /* Danger outline */
+  /* Danger Outline */
   &--danger-outline {
     color: var(--sig-error-600);
     background-color: transparent;
-    border-color: var(--sig-error-500);
+    border: 1px solid var(--sig-error-200);
 
     &:hover:not(:disabled) {
       background-color: var(--sig-error-50);
+      border-color: var(--sig-error-300);
     }
 
     &:active:not(:disabled) {
@@ -118,23 +128,20 @@
   /* Success */
   &--success {
     color: var(--sig-neutral-0);
-    background-color: var(--sig-success-500);
-    border-color: var(--sig-success-500);
+    background-color: var(--sig-success-600);
 
     &:hover:not(:disabled) {
-      background-color: var(--sig-success-600);
-      border-color: var(--sig-success-600);
+      background-color: var(--sig-success-700);
     }
 
     &:active:not(:disabled) {
-      background-color: var(--sig-success-700);
-      border-color: var(--sig-success-700);
+      background-color: var(--sig-success-800);
     }
   }
 
-  /* ============================================
+  /* ==========================================================================
      SIZES
-     ============================================ */
+     ========================================================================== */
 
   &--sm {
     @include button-sm;
@@ -144,16 +151,16 @@
     @include button-lg;
   }
 
-  /* ============================================
-     STATES
-     ============================================ */
+  /* ==========================================================================
+     STATES & MODIFIERS
+     ========================================================================== */
 
   /* Full width */
   &--block {
     width: 100%;
   }
 
-  /* Loading state */
+  /* Loading */
   &--loading {
     position: relative;
     color: transparent !important;
@@ -166,15 +173,16 @@
       height: 1rem;
       border: 2px solid currentColor;
       border-top-color: transparent;
-      border-radius: 50%;
+      border-radius: var(--sig-radius-full);
       animation: sig-spin 0.6s linear infinite;
     }
   }
 
   &--primary.sig-btn--loading::after,
+  &--destructive.sig-btn--loading::after,
   &--danger.sig-btn--loading::after,
   &--success.sig-btn--loading::after {
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: rgb(255 255 255 / 0.3);
     border-top-color: white;
   }
 
@@ -197,9 +205,9 @@
     border-radius: var(--sig-radius-full);
   }
 
-  /* ============================================
-     ICON WITHIN BUTTON
-     ============================================ */
+  /* ==========================================================================
+     ICON
+     ========================================================================== */
 
   &__icon {
     display: inline-flex;
@@ -208,23 +216,15 @@
     flex-shrink: 0;
 
     svg {
-      width: 1.125em;
-      height: 1.125em;
+      width: 1rem;
+      height: 1rem;
     }
-  }
-
-  &__icon--start {
-    margin-right: var(--sig-space-1);
-  }
-
-  &__icon--end {
-    margin-left: var(--sig-space-1);
   }
 }
 
-/* ============================================
+/* ==========================================================================
    BUTTON GROUP
-   ============================================ */
+   ========================================================================== */
 
 .sig-btn-group {
   display: inline-flex;

@@ -1,6 +1,6 @@
-// ==========================================================================
-// Data Grid Component
-// ==========================================================================
+/* ==========================================================================
+   Data Grid Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
@@ -8,19 +8,19 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  background: var(--sig-surface);
+  background: var(--sig-bg-surface);
   border: 1px solid var(--sig-border-color);
   border-radius: var(--sig-radius-lg);
   overflow: hidden;
 
-  // Toolbar
+  /* Toolbar */
   &__toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--sig-spacing-4);
-    padding: var(--sig-spacing-4);
-    background: var(--sig-gray-50);
+    gap: var(--sig-space-4);
+    padding: var(--sig-space-4);
+    background: var(--sig-bg-muted);
     border-bottom: 1px solid var(--sig-border-color);
   }
 
@@ -28,7 +28,7 @@
   &__toolbar-right {
     display: flex;
     align-items: center;
-    gap: var(--sig-spacing-3);
+    gap: var(--sig-space-3);
   }
 
   &__search {
@@ -37,25 +37,27 @@
 
     input {
       width: 100%;
-      padding: var(--sig-spacing-2) var(--sig-spacing-3);
-      padding-left: var(--sig-spacing-10);
+      padding: var(--sig-space-2) var(--sig-space-3);
+      padding-left: var(--sig-space-10);
       border: 1px solid var(--sig-border-color);
       border-radius: var(--sig-radius-md);
-      font-size: var(--sig-font-size-sm);
-      background: var(--sig-surface);
+      font-size: var(--sig-text-sm);
+      background: var(--sig-bg-surface);
       transition: border-color var(--sig-transition-fast),
-      box-shadow var(--sig-transition-fast);
+        box-shadow var(--sig-transition-fast);
 
       &:focus {
         outline: none;
-        border-color: var(--sig-primary);
-        box-shadow: 0 0 0 3px var(--sig-primary-light);
+        border-color: var(--sig-primary-500);
+        box-shadow: 0 0 0 var(--sig-ring-offset) var(--sig-bg-surface),
+          0 0 0 calc(var(--sig-ring-offset) + var(--sig-ring-width))
+            var(--sig-primary-500);
       }
     }
 
     &-icon {
       position: absolute;
-      left: var(--sig-spacing-3);
+      left: var(--sig-space-3);
       top: 50%;
       transform: translateY(-50%);
       color: var(--sig-text-muted);
@@ -68,28 +70,29 @@
     }
   }
 
-  // Table Container
+  /* Table Container */
   &__container {
     overflow-x: auto;
     overflow-y: hidden;
+    @include custom-scrollbar;
   }
 
-  // Table
+  /* Table */
   &__table {
     width: 100%;
     border-collapse: collapse;
-    font-size: var(--sig-font-size-sm);
+    font-size: var(--sig-text-sm);
   }
 
-  // Header
+  /* Header */
   &__header {
-    background: var(--sig-gray-50);
+    background: var(--sig-bg-muted);
   }
 
   &__header-cell {
-    padding: var(--sig-spacing-3) var(--sig-spacing-4);
+    padding: var(--sig-space-3) var(--sig-space-4);
     text-align: left;
-    font-weight: var(--sig-font-weight-semibold);
+    font-weight: var(--sig-font-semibold);
     color: var(--sig-text-secondary);
     white-space: nowrap;
     border-bottom: 1px solid var(--sig-border-color);
@@ -100,12 +103,12 @@
       transition: background-color var(--sig-transition-fast);
 
       &:hover {
-        background: var(--sig-gray-100);
+        background: var(--sig-bg-hover);
       }
     }
 
     &--sorted {
-      color: var(--sig-primary);
+      color: var(--sig-primary-600);
     }
 
     &--checkbox {
@@ -122,11 +125,11 @@
   &__sort-icon {
     display: inline-flex;
     align-items: center;
-    margin-left: var(--sig-spacing-1);
+    margin-left: var(--sig-space-1);
     color: var(--sig-text-muted);
 
     &--active {
-      color: var(--sig-primary);
+      color: var(--sig-primary-600);
     }
 
     svg {
@@ -135,23 +138,23 @@
     }
   }
 
-  // Body
+  /* Body */
   &__body {
-    background: var(--sig-surface);
+    background: var(--sig-bg-surface);
   }
 
   &__row {
     transition: background-color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-gray-50);
+      background: var(--sig-bg-hover);
     }
 
     &--selected {
-      background: var(--sig-primary-light);
+      background: var(--sig-primary-50);
 
       &:hover {
-        background: var(--sig-primary-light);
+        background: var(--sig-primary-100);
       }
     }
 
@@ -161,7 +164,7 @@
   }
 
   &__cell {
-    padding: var(--sig-spacing-3) var(--sig-spacing-4);
+    padding: var(--sig-space-3) var(--sig-space-4);
     color: var(--sig-text-primary);
     vertical-align: middle;
 
@@ -186,16 +189,16 @@
     }
   }
 
-  // Empty State
+  /* Empty State */
   &__empty {
-    padding: var(--sig-spacing-16) var(--sig-spacing-8);
+    padding: var(--sig-space-16) var(--sig-space-8);
     text-align: center;
     color: var(--sig-text-secondary);
 
     &-icon {
       display: flex;
       justify-content: center;
-      margin-bottom: var(--sig-spacing-4);
+      margin-bottom: var(--sig-space-4);
       color: var(--sig-text-muted);
 
       svg {
@@ -205,49 +208,49 @@
     }
 
     &-title {
-      font-size: var(--sig-font-size-base);
-      font-weight: var(--sig-font-weight-medium);
+      font-size: var(--sig-text-base);
+      font-weight: var(--sig-font-medium);
       color: var(--sig-text-primary);
-      margin-bottom: var(--sig-spacing-2);
+      margin-bottom: var(--sig-space-2);
     }
 
     &-description {
-      font-size: var(--sig-font-size-sm);
+      font-size: var(--sig-text-sm);
     }
   }
 
-  // Loading State
+  /* Loading State */
   &__loading {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--sig-spacing-16);
+    padding: var(--sig-space-16);
   }
 
-  // Footer
+  /* Footer */
   &__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--sig-spacing-3) var(--sig-spacing-4);
-    background: var(--sig-gray-50);
+    padding: var(--sig-space-3) var(--sig-space-4);
+    background: var(--sig-bg-muted);
     border-top: 1px solid var(--sig-border-color);
-    font-size: var(--sig-font-size-sm);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-secondary);
   }
 
   &__info {
     display: flex;
     align-items: center;
-    gap: var(--sig-spacing-2);
+    gap: var(--sig-space-2);
   }
 
   &__selected-count {
-    font-weight: var(--sig-font-weight-medium);
-    color: var(--sig-primary);
+    font-weight: var(--sig-font-medium);
+    color: var(--sig-primary-600);
   }
 
-  // Resizable columns
+  /* Resizable columns */
   &__resize-handle {
     position: absolute;
     right: 0;
@@ -260,11 +263,11 @@
 
     &:hover,
     &--active {
-      background: var(--sig-primary);
+      background: var(--sig-primary-500);
     }
   }
 
-  // Sticky columns
+  /* Sticky columns */
   &--sticky-first-column {
     .sig-data-grid__header-cell:first-child,
     .sig-data-grid__cell:first-child {
@@ -276,26 +279,26 @@
     }
   }
 
-  // Compact variant
+  /* Compact variant */
   &--compact {
     .sig-data-grid__header-cell,
     .sig-data-grid__cell {
-      padding: var(--sig-spacing-2) var(--sig-spacing-3);
+      padding: var(--sig-space-2) var(--sig-space-3);
     }
   }
 
-  // Striped variant
+  /* Striped variant */
   &--striped {
     .sig-data-grid__row:nth-child(even) {
-      background: var(--sig-gray-50);
+      background: var(--sig-bg-muted);
 
       &:hover {
-        background: var(--sig-gray-100);
+        background: var(--sig-bg-hover);
       }
     }
   }
 
-  // Bordered variant
+  /* Bordered variant */
   &--bordered {
     .sig-data-grid__header-cell,
     .sig-data-grid__cell {
@@ -304,33 +307,6 @@
       &:last-child {
         border-right: none;
       }
-    }
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-data-grid {
-    &__toolbar,
-    &__header,
-    &__footer {
-      background: var(--sig-gray-800);
-    }
-
-    &__row:hover {
-      background: var(--sig-gray-800);
-    }
-
-    &__row--selected {
-      background: rgba(26, 109, 220, 0.15);
-
-      &:hover {
-        background: rgba(26, 109, 220, 0.2);
-      }
-    }
-
-    &--striped .sig-data-grid__row:nth-child(even) {
-      background: var(--sig-gray-800);
     }
   }
 }

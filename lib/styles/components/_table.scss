@@ -1,10 +1,10 @@
 /* ==========================================================================
-   sig-table - Table Component
+   Table Component
    ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
-/* Table Container */
+/* Container */
 .sig-table-container {
   width: 100%;
   overflow-x: auto;
@@ -28,25 +28,17 @@
 
   /* Header */
   &__head {
-    background-color: var(--sig-bg-surface-secondary);
     border-bottom: 1px solid var(--sig-border-color);
-  }
-
-  &__head-row {
-    /* Header row styling if needed */
   }
 
   &__head-cell {
     padding: var(--sig-space-3) var(--sig-space-4);
     font-size: var(--sig-text-xs);
-    font-weight: var(--sig-font-semibold);
-    color: var(--sig-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
+    font-weight: var(--sig-font-medium);
+    color: var(--sig-text-muted);
     white-space: nowrap;
     vertical-align: middle;
 
-    /* Sortable header */
     &--sortable {
       cursor: pointer;
       user-select: none;
@@ -58,11 +50,10 @@
     }
 
     &--sorted {
-      color: var(--sig-color-primary);
+      color: var(--sig-text-primary);
     }
   }
 
-  /* Sort indicator */
   &__sort-icon {
     display: inline-flex;
     margin-left: var(--sig-space-1);
@@ -75,10 +66,6 @@
   }
 
   /* Body */
-  &__body {
-    /* Body styling if needed */
-  }
-
   &__row {
     border-bottom: 1px solid var(--sig-border-color);
     transition: background-color var(--sig-transition-fast);
@@ -91,23 +78,20 @@
       background-color: var(--sig-bg-hover);
     }
 
-    /* Selected row */
     &--selected {
-      background-color: var(--sig-color-primary-light);
+      background-color: var(--sig-bg-muted);
 
       &:hover {
-        background-color: var(--sig-primary-100);
+        background-color: var(--sig-bg-muted);
       }
     }
 
-    /* Clickable row */
     &--clickable {
       cursor: pointer;
     }
 
-    /* Expanded row */
     &--expanded {
-      background-color: var(--sig-bg-surface-secondary);
+      background-color: var(--sig-bg-muted);
     }
   }
 
@@ -116,19 +100,16 @@
     color: var(--sig-text-primary);
     vertical-align: middle;
 
-    /* Numeric alignment */
     &--numeric {
       text-align: right;
       font-variant-numeric: tabular-nums;
     }
 
-    /* Actions column */
     &--actions {
       text-align: right;
       white-space: nowrap;
     }
 
-    /* Checkbox column */
     &--checkbox {
       width: 3rem;
       padding-right: 0;
@@ -137,7 +118,6 @@
 
   /* Footer */
   &__foot {
-    background-color: var(--sig-bg-surface-secondary);
     border-top: 1px solid var(--sig-border-color);
   }
 
@@ -147,18 +127,16 @@
     color: var(--sig-text-primary);
   }
 
-  /* ============================================
+  /* ==========================================================================
      VARIANTS
-     ============================================ */
+     ========================================================================== */
 
-  /* Striped */
   &--striped {
     .sig-table__body .sig-table__row:nth-child(even) {
-      background-color: var(--sig-bg-surface-secondary);
+      background-color: var(--sig-bg-muted);
     }
   }
 
-  /* Bordered */
   &--bordered {
     .sig-table__head-cell,
     .sig-table__cell,
@@ -167,7 +145,6 @@
     }
   }
 
-  /* Compact */
   &--compact {
     font-size: var(--sig-text-xs);
 
@@ -178,7 +155,6 @@
     }
   }
 
-  /* Relaxed */
   &--relaxed {
     .sig-table__head-cell,
     .sig-table__cell,
@@ -187,14 +163,9 @@
     }
   }
 
-  /* Fixed layout */
   &--fixed {
     table-layout: fixed;
   }
-
-  /* ============================================
-     STATES
-     ============================================ */
 
   /* Loading */
   &--loading {
@@ -210,11 +181,11 @@
     }
   }
 
-  /* Empty state */
+  /* Empty */
   &__empty {
     padding: var(--sig-space-12) var(--sig-space-4);
     text-align: center;
-    color: var(--sig-text-tertiary);
+    color: var(--sig-text-muted);
 
     &-icon {
       display: flex;
@@ -224,13 +195,13 @@
       color: var(--sig-text-disabled);
 
       svg {
-        width: 3rem;
-        height: 3rem;
+        width: 2.5rem;
+        height: 2.5rem;
       }
     }
 
     &-title {
-      font-size: var(--sig-text-base);
+      font-size: var(--sig-text-sm);
       font-weight: var(--sig-font-medium);
       color: var(--sig-text-secondary);
       margin-bottom: var(--sig-space-1);
@@ -242,20 +213,20 @@
   }
 }
 
-/* Expanded row content */
+/* Expanded row */
 .sig-table-expanded {
   padding: var(--sig-space-4);
-  background-color: var(--sig-bg-surface-tertiary);
+  background-color: var(--sig-bg-muted);
   border-bottom: 1px solid var(--sig-border-color);
 }
 
-/* Table toolbar */
+/* Toolbar */
 .sig-table-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sig-space-4);
-  padding: var(--sig-space-4);
+  padding: var(--sig-space-3) var(--sig-space-4);
   background-color: var(--sig-bg-surface);
   border: 1px solid var(--sig-border-color);
   border-bottom: none;
@@ -273,7 +244,7 @@
   }
 }
 
-/* Table footer with pagination */
+/* Footer */
 .sig-table-footer {
   display: flex;
   align-items: center;
@@ -285,13 +256,5 @@
   border-top: none;
   border-radius: 0 0 var(--sig-radius-lg) var(--sig-radius-lg);
   font-size: var(--sig-text-sm);
-  color: var(--sig-text-secondary);
-
-  &__info {
-    /* Selected/total info */
-  }
-
-  &__pagination {
-    /* Pagination component */
-  }
+  color: var(--sig-text-muted);
 }

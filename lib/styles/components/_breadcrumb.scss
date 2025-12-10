@@ -1,6 +1,6 @@
-// ==========================================================================
-// Breadcrumb Component
-// ==========================================================================
+/* ==========================================================================
+   Breadcrumb Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
@@ -8,15 +8,15 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--sig-spacing-1);
-  font-size: var(--sig-font-size-sm);
-  line-height: var(--sig-line-height-normal);
+  gap: var(--sig-space-1);
+  font-size: var(--sig-text-sm);
+  line-height: var(--sig-leading-normal);
 
   &__list {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: var(--sig-spacing-1);
+    gap: var(--sig-space-1);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -25,28 +25,28 @@
   &__item {
     display: flex;
     align-items: center;
-    gap: var(--sig-spacing-1);
+    gap: var(--sig-space-1);
   }
 
   &__link {
     display: inline-flex;
     align-items: center;
-    gap: var(--sig-spacing-2);
+    gap: var(--sig-space-2);
     color: var(--sig-text-secondary);
     text-decoration: none;
-    padding: var(--sig-spacing-1) var(--sig-spacing-2);
+    padding: var(--sig-space-1) var(--sig-space-2);
     border-radius: var(--sig-radius-sm);
     transition: color var(--sig-transition-fast),
-    background-color var(--sig-transition-fast);
+      background-color var(--sig-transition-fast);
 
     &:hover {
-      color: var(--sig-primary);
-      background: var(--sig-primary-light);
+      color: var(--sig-text-primary);
+      background: var(--sig-bg-hover);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--sig-primary);
-      outline-offset: 2px;
+      outline: none;
+      @include focus-ring;
     }
   }
 
@@ -68,7 +68,7 @@
     align-items: center;
     justify-content: center;
     color: var(--sig-text-muted);
-    padding: 0 var(--sig-spacing-1);
+    padding: 0 var(--sig-space-1);
 
     svg {
       width: 12px;
@@ -78,13 +78,13 @@
 
   &__current {
     color: var(--sig-text-primary);
-    font-weight: var(--sig-font-weight-medium);
-    padding: var(--sig-spacing-1) var(--sig-spacing-2);
+    font-weight: var(--sig-font-medium);
+    padding: var(--sig-space-1) var(--sig-space-2);
   }
 
-  // Sizes
+  /* Sizes */
   &--sm {
-    font-size: var(--sig-font-size-xs);
+    font-size: var(--sig-text-xs);
 
     .sig-breadcrumb__icon {
       width: 14px;
@@ -93,7 +93,7 @@
   }
 
   &--lg {
-    font-size: var(--sig-font-size-base);
+    font-size: var(--sig-text-base);
 
     .sig-breadcrumb__icon {
       width: 18px;
@@ -101,7 +101,7 @@
     }
   }
 
-  // Collapsed variant
+  /* Collapsed variant */
   &__ellipsis {
     display: inline-flex;
     align-items: center;
@@ -109,30 +109,13 @@
     width: 24px;
     height: 24px;
     color: var(--sig-text-secondary);
-    background: var(--sig-gray-100);
+    background: var(--sig-bg-muted);
     border-radius: var(--sig-radius-sm);
     cursor: pointer;
     transition: background-color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-gray-200);
-    }
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-breadcrumb {
-    &__link:hover {
-      background: rgba(26, 109, 220, 0.15);
-    }
-
-    &__ellipsis {
-      background: var(--sig-gray-700);
-
-      &:hover {
-        background: var(--sig-gray-600);
-      }
+      background: var(--sig-bg-hover);
     }
   }
 }

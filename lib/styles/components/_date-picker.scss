@@ -1,6 +1,6 @@
-// ==========================================================================
-// Date Picker Component
-// ==========================================================================
+/* ==========================================================================
+   Date Picker Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
@@ -9,11 +9,11 @@
   display: inline-block;
   width: 100%;
 
-  // Input trigger
+  /* Input trigger */
   &__input {
     @include input-base;
     cursor: pointer;
-    padding-right: var(--sig-spacing-10);
+    padding-right: var(--sig-space-10);
 
     &:read-only {
       cursor: pointer;
@@ -22,7 +22,7 @@
 
   &__icon {
     position: absolute;
-    right: var(--sig-spacing-3);
+    right: var(--sig-space-3);
     top: 50%;
     transform: translateY(-50%);
     color: var(--sig-text-muted);
@@ -36,7 +36,7 @@
 
   &__clear {
     position: absolute;
-    right: var(--sig-spacing-10);
+    right: var(--sig-space-10);
     top: 50%;
     transform: translateY(-50%);
     display: flex;
@@ -47,11 +47,11 @@
     color: var(--sig-text-muted);
     background: transparent;
     border: none;
-    border-radius: 50%;
+    border-radius: var(--sig-radius-full);
     cursor: pointer;
     opacity: 0;
     transition: opacity var(--sig-transition-fast),
-    color var(--sig-transition-fast);
+      color var(--sig-transition-fast);
 
     &:hover {
       color: var(--sig-text-primary);
@@ -68,24 +68,24 @@
     opacity: 1;
   }
 
-  // Dropdown panel
+  /* Dropdown panel */
   &__panel {
     position: absolute;
-    top: calc(100% + var(--sig-spacing-2));
+    top: calc(100% + var(--sig-space-2));
     left: 0;
     z-index: var(--sig-z-dropdown);
     min-width: 300px;
-    background: var(--sig-surface);
+    background: var(--sig-bg-surface);
     border: 1px solid var(--sig-border-color);
     border-radius: var(--sig-radius-lg);
     box-shadow: var(--sig-shadow-lg);
-    padding: var(--sig-spacing-4);
+    padding: var(--sig-space-4);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-8px);
     transition: opacity var(--sig-transition-fast),
-    visibility var(--sig-transition-fast),
-    transform var(--sig-transition-fast);
+      visibility var(--sig-transition-fast),
+      transform var(--sig-transition-fast);
 
     &--open {
       opacity: 1;
@@ -95,16 +95,16 @@
 
     &--top {
       top: auto;
-      bottom: calc(100% + var(--sig-spacing-2));
+      bottom: calc(100% + var(--sig-space-2));
     }
   }
 
-  // Header navigation
+  /* Header navigation */
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--sig-spacing-4);
+    margin-bottom: var(--sig-space-4);
   }
 
   &__nav {
@@ -119,10 +119,10 @@
     color: var(--sig-text-secondary);
     cursor: pointer;
     transition: background-color var(--sig-transition-fast),
-    color var(--sig-transition-fast);
+      color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-gray-100);
+      background: var(--sig-bg-hover);
       color: var(--sig-text-primary);
     }
 
@@ -140,30 +140,30 @@
   &__title {
     display: flex;
     align-items: center;
-    gap: var(--sig-spacing-2);
+    gap: var(--sig-space-2);
   }
 
   &__month-year {
-    font-size: var(--sig-font-size-base);
-    font-weight: var(--sig-font-weight-semibold);
+    font-size: var(--sig-text-base);
+    font-weight: var(--sig-font-semibold);
     color: var(--sig-text-primary);
     background: transparent;
     border: none;
-    padding: var(--sig-spacing-1) var(--sig-spacing-2);
+    padding: var(--sig-space-1) var(--sig-space-2);
     border-radius: var(--sig-radius-sm);
     cursor: pointer;
     transition: background-color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-gray-100);
+      background: var(--sig-bg-hover);
     }
   }
 
-  // Calendar grid
+  /* Calendar grid */
   &__calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: var(--sig-spacing-1);
+    gap: var(--sig-space-1);
   }
 
   &__weekday {
@@ -171,8 +171,8 @@
     align-items: center;
     justify-content: center;
     height: 32px;
-    font-size: var(--sig-font-size-xs);
-    font-weight: var(--sig-font-weight-medium);
+    font-size: var(--sig-text-xs);
+    font-weight: var(--sig-font-medium);
     color: var(--sig-text-muted);
     text-transform: uppercase;
   }
@@ -183,31 +183,31 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    font-size: var(--sig-font-size-sm);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-primary);
     background: transparent;
     border: none;
     border-radius: var(--sig-radius-md);
     cursor: pointer;
     transition: background-color var(--sig-transition-fast),
-    color var(--sig-transition-fast);
+      color var(--sig-transition-fast);
 
     &:hover:not(:disabled) {
-      background: var(--sig-gray-100);
+      background: var(--sig-bg-hover);
     }
 
     &--today {
-      font-weight: var(--sig-font-weight-semibold);
-      color: var(--sig-primary);
+      font-weight: var(--sig-font-semibold);
+      color: var(--sig-primary-600);
     }
 
     &--selected {
-      background: var(--sig-primary);
-      color: white;
-      font-weight: var(--sig-font-weight-medium);
+      background: var(--sig-neutral-900);
+      color: var(--sig-neutral-0);
+      font-weight: var(--sig-font-medium);
 
       &:hover {
-        background: var(--sig-primary-hover);
+        background: var(--sig-neutral-800);
       }
     }
 
@@ -220,7 +220,7 @@
     }
 
     &--in-range {
-      background: var(--sig-primary-light);
+      background: var(--sig-primary-100);
       border-radius: 0;
     }
 
@@ -235,107 +235,92 @@
     }
   }
 
-  // Month/Year selector
+  /* Month/Year selector */
   &__selector {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--sig-spacing-2);
+    gap: var(--sig-space-2);
   }
 
   &__selector-item {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--sig-spacing-2) var(--sig-spacing-3);
-    font-size: var(--sig-font-size-sm);
+    padding: var(--sig-space-2) var(--sig-space-3);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-primary);
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--sig-radius-md);
     cursor: pointer;
     transition: background-color var(--sig-transition-fast),
-    border-color var(--sig-transition-fast);
+      border-color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-gray-100);
+      background: var(--sig-bg-hover);
     }
 
     &--selected {
-      background: var(--sig-primary);
-      color: white;
+      background: var(--sig-neutral-900);
+      color: var(--sig-neutral-0);
     }
 
     &--current {
-      border-color: var(--sig-primary);
+      border-color: var(--sig-primary-500);
     }
   }
 
-  // Footer
+  /* Footer */
   &__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: var(--sig-spacing-4);
-    padding-top: var(--sig-spacing-4);
+    margin-top: var(--sig-space-4);
+    padding-top: var(--sig-space-4);
     border-top: 1px solid var(--sig-border-color);
   }
 
   &__today-btn {
-    font-size: var(--sig-font-size-sm);
-    color: var(--sig-primary);
+    font-size: var(--sig-text-sm);
+    color: var(--sig-primary-600);
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: var(--sig-spacing-1) var(--sig-spacing-2);
+    padding: var(--sig-space-1) var(--sig-space-2);
     border-radius: var(--sig-radius-sm);
     transition: background-color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-primary-light);
+      background: var(--sig-primary-50);
     }
   }
 
-  // Time picker add-on
+  /* Time picker add-on */
   &__time {
     display: flex;
     align-items: center;
-    gap: var(--sig-spacing-2);
-    margin-top: var(--sig-spacing-4);
-    padding-top: var(--sig-spacing-4);
+    gap: var(--sig-space-2);
+    margin-top: var(--sig-space-4);
+    padding-top: var(--sig-space-4);
     border-top: 1px solid var(--sig-border-color);
   }
 
   &__time-input {
     width: 60px;
-    padding: var(--sig-spacing-2);
+    padding: var(--sig-space-2);
     text-align: center;
-    font-size: var(--sig-font-size-sm);
+    font-size: var(--sig-text-sm);
     border: 1px solid var(--sig-border-color);
     border-radius: var(--sig-radius-md);
 
     &:focus {
       outline: none;
-      border-color: var(--sig-primary);
+      border-color: var(--sig-primary-500);
     }
   }
 
   &__time-separator {
     color: var(--sig-text-muted);
-    font-weight: var(--sig-font-weight-medium);
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-date-picker {
-    &__nav:hover,
-    &__month-year:hover,
-    &__day:hover:not(:disabled) {
-      background: var(--sig-gray-700);
-    }
-
-    &__selector-item:hover {
-      background: var(--sig-gray-700);
-    }
+    font-weight: var(--sig-font-medium);
   }
 }

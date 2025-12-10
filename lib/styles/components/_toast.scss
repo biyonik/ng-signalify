@@ -1,5 +1,5 @@
 /* ==========================================================================
-   sig-toast - Toast/Notification Component
+   Toast/Notification Component
    ========================================================================== */
 
 @use '../abstract/mixins' as *;
@@ -57,6 +57,7 @@
 /* Toast Item */
 .sig-toast {
   pointer-events: auto;
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: var(--sig-space-3);
@@ -67,7 +68,7 @@
   border: 1px solid var(--sig-border-color);
   border-radius: var(--sig-radius-lg);
   box-shadow: var(--sig-shadow-lg);
-  @include slide-up;
+  animation: sig-slide-up var(--sig-duration-normal) var(--sig-ease-out);
 
   /* Icon */
   &__icon {
@@ -114,7 +115,7 @@
   &__action {
     font-size: var(--sig-text-sm);
     font-weight: var(--sig-font-medium);
-    color: var(--sig-text-link);
+    color: var(--sig-primary-600);
     background: none;
     border: none;
     padding: 0;
@@ -122,7 +123,7 @@
     transition: color var(--sig-transition-fast);
 
     &:hover {
-      color: var(--sig-text-link-hover);
+      color: var(--sig-primary-700);
       text-decoration: underline;
     }
   }
@@ -137,7 +138,7 @@
     height: 1.5rem;
     margin: calc(var(--sig-space-1) * -1);
     padding: 0;
-    color: var(--sig-text-tertiary);
+    color: var(--sig-text-muted);
     background: none;
     border: none;
     border-radius: var(--sig-radius-sm);
@@ -168,7 +169,7 @@
 
     &-bar {
       height: 100%;
-      background-color: var(--sig-color-primary);
+      background-color: var(--sig-primary-600);
       transition: width linear;
     }
   }

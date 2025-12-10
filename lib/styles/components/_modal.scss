@@ -1,10 +1,10 @@
 /* ==========================================================================
-   sig-modal - Modal/Dialog Component
+   Modal Component
    ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
-/* Overlay/Backdrop */
+/* Overlay */
 .sig-modal-overlay {
   position: fixed;
   inset: 0;
@@ -16,19 +16,17 @@
   background-color: rgb(0 0 0 / 0.5);
   @include fade-in;
 
-  /* Centered content */
   &--center {
     align-items: center;
   }
 
-  /* Top positioned */
   &--top {
     align-items: flex-start;
     padding-top: var(--sig-space-16);
   }
 }
 
-/* Modal container */
+/* Modal */
 .sig-modal {
   position: relative;
   display: flex;
@@ -36,19 +34,34 @@
   width: 100%;
   max-height: calc(100vh - var(--sig-space-8));
   background-color: var(--sig-bg-surface);
+  border: 1px solid var(--sig-border-color);
   border-radius: var(--sig-radius-xl);
-  box-shadow: var(--sig-shadow-xl);
+  box-shadow: var(--sig-shadow-lg);
   z-index: var(--sig-z-modal);
   @include scale-in;
 
-  /* Size variants */
-  &--xs { max-width: 20rem; }     /* 320px */
-  &--sm { max-width: 24rem; }     /* 384px */
-  &--md { max-width: 28rem; }     /* 448px */
-  &--lg { max-width: 32rem; }     /* 512px */
-  &--xl { max-width: 40rem; }     /* 640px */
-  &--2xl { max-width: 48rem; }    /* 768px */
-  &--3xl { max-width: 64rem; }    /* 1024px */
+  /* Sizes */
+  &--xs {
+    max-width: 20rem;
+  }
+  &--sm {
+    max-width: 24rem;
+  }
+  &--md {
+    max-width: 28rem;
+  }
+  &--lg {
+    max-width: 32rem;
+  }
+  &--xl {
+    max-width: 40rem;
+  }
+  &--2xl {
+    max-width: 48rem;
+  }
+  &--3xl {
+    max-width: 64rem;
+  }
   &--full {
     max-width: calc(100vw - var(--sig-space-8));
     height: calc(100vh - var(--sig-space-8));
@@ -60,8 +73,7 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--sig-space-4);
-    padding: var(--sig-space-5) var(--sig-space-6);
-    border-bottom: 1px solid var(--sig-border-color);
+    padding: var(--sig-space-4) var(--sig-space-5);
   }
 
   &__header-content {
@@ -71,7 +83,7 @@
 
   &__title {
     margin: 0;
-    font-size: var(--sig-text-lg);
+    font-size: var(--sig-text-md);
     font-weight: var(--sig-font-semibold);
     color: var(--sig-text-primary);
     line-height: var(--sig-leading-tight);
@@ -80,32 +92,28 @@
   &__description {
     margin: var(--sig-space-1) 0 0;
     font-size: var(--sig-text-sm);
-    color: var(--sig-text-secondary);
+    color: var(--sig-text-muted);
   }
 
-  /* Close button */
+  /* Close */
   &__close {
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 1.75rem;
+    height: 1.75rem;
     padding: 0;
-    color: var(--sig-text-tertiary);
+    color: var(--sig-text-muted);
     background: transparent;
     border: none;
-    border-radius: var(--sig-radius-md);
+    border-radius: var(--sig-radius-sm);
     cursor: pointer;
-    transition: all var(--sig-transition-normal);
+    transition: all var(--sig-transition-fast);
 
     &:hover {
       color: var(--sig-text-primary);
       background-color: var(--sig-bg-hover);
-    }
-
-    &:active {
-      background-color: var(--sig-bg-active);
     }
 
     &:focus-visible {
@@ -114,19 +122,18 @@
     }
 
     svg {
-      width: 1.25rem;
-      height: 1.25rem;
+      width: 1rem;
+      height: 1rem;
     }
   }
 
   /* Body */
   &__body {
     flex: 1;
-    padding: var(--sig-space-6);
+    padding: 0 var(--sig-space-5) var(--sig-space-5);
     overflow-y: auto;
     @include custom-scrollbar;
 
-    /* Remove padding when used with tabs or other full-width content */
     &--flush {
       padding: 0;
     }
@@ -137,11 +144,9 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--sig-space-3);
-    padding: var(--sig-space-4) var(--sig-space-6);
+    gap: var(--sig-space-2);
+    padding: var(--sig-space-4) var(--sig-space-5);
     border-top: 1px solid var(--sig-border-color);
-    background-color: var(--sig-bg-surface-secondary);
-    border-radius: 0 0 var(--sig-radius-xl) var(--sig-radius-xl);
 
     &--between {
       justify-content: space-between;
@@ -156,14 +161,13 @@
     }
   }
 
-  /* Alert/Confirmation variant */
+  /* Alert variant */
   &--alert {
     text-align: center;
 
     .sig-modal__header {
       flex-direction: column;
       align-items: center;
-      border-bottom: none;
       padding-bottom: 0;
     }
 
@@ -205,11 +209,10 @@
     .sig-modal__footer {
       justify-content: center;
       border-top: none;
-      background-color: transparent;
     }
   }
 
-  /* Drawer variant - slides from side */
+  /* Drawer variant */
   &--drawer {
     position: fixed;
     top: 0;
@@ -217,13 +220,13 @@
     height: 100vh;
     max-height: 100vh;
     border-radius: var(--sig-radius-xl) 0 0 var(--sig-radius-xl);
-    animation: sig-slide-left var(--sig-duration-slow) var(--sig-ease-out);
+    animation: sig-slide-left var(--sig-duration-200) var(--sig-ease-out);
 
     &.sig-modal--left {
       right: auto;
       left: 0;
       border-radius: 0 var(--sig-radius-xl) var(--sig-radius-xl) 0;
-      animation: sig-slide-right var(--sig-duration-slow) var(--sig-ease-out);
+      animation: sig-slide-right var(--sig-duration-200) var(--sig-ease-out);
     }
   }
 }
@@ -251,7 +254,7 @@
   }
 }
 
-/* Body scroll lock when modal is open */
+/* Body scroll lock */
 body.sig-modal-open {
   overflow: hidden;
 }
