@@ -12,6 +12,7 @@ import {
     AfterViewInit,
     ViewEncapsulation,
     OnInit,
+    effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -38,7 +39,6 @@ import { generateId } from '../../utils/a11y.utils';
       <textarea
         #textareaRef
         [id]="textareaId"
-        [value]="value()"
         [placeholder]="placeholder()"
         [disabled]="isDisabled()"
         [readonly]="readonly()"
@@ -119,6 +119,10 @@ export class SigTextareaComponent implements ControlValueAccessor, AfterViewInit
     textareaId = '';
     counterId = '';
 
+    // TR: Kullanıcı girişi mi yoksa external değişiklik mi olduğunu takip eder
+    // EN: Tracks whether change is from user input or external
+    private _isUserInput = false;
+
     private _disabledByForm = signal(false);
     readonly isDisabled = computed(() => this.disabled() || this._disabledByForm());
 
@@ -137,12 +141,41 @@ export class SigTextareaComponent implements ControlValueAccessor, AfterViewInit
     private _onChange: (value: string) => void = () => {};
     private _onTouched: () => void = () => {};
 
+    constructor() {
+        // TR: Signal değişikliklerini izle ve sadece external değişikliklerde DOM'u güncelle
+        // EN: Watch signal changes and update DOM only on external changes
+        effect(() => {
+            const currentValue = this.value();
+            const textarea = this.textareaRef()?.nativeElement;
+
+            // TR: Kullanıcı girişi ise DOM'u güncelleme (zaten güncel)
+            // EN: If user input, don't update DOM (already up to date)
+            if (this._isUserInput) {
+                this._isUserInput = false;
+                return;
+            }
+
+            // TR: External değişiklik - DOM'u güncelle
+            // EN: External change - update DOM
+            if (textarea && textarea.value !== currentValue) {
+                textarea.value = currentValue;
+            }
+        });
+    }
+
     ngOnInit(): void {
         this.textareaId = generateId('sig-textarea');
         this.counterId = `${this.textareaId}-counter`;
     }
 
     ngAfterViewInit(): void {
+        // TR: İlk değeri set et
+        // EN: Set initial value
+        const textarea = this.textareaRef()?.nativeElement;
+        if (textarea) {
+            textarea.value = this.value();
+        }
+
         if (this.autoResize()) {
             this.adjustHeight();
         }
@@ -158,6 +191,11 @@ export class SigTextareaComponent implements ControlValueAccessor, AfterViewInit
 
     onInput(event: Event): void {
         const target = event.target as HTMLTextAreaElement;
+
+        // TR: Kullanıcı girişi olduğunu işaretle (effect'in DOM'u override etmesini engelle)
+        // EN: Mark as user input (prevent effect from overriding DOM)
+        this._isUserInput = true;
+
         this.value.set(target.value);
         this.charCount.set(target.value.length);
         this._onChange(target.value);
