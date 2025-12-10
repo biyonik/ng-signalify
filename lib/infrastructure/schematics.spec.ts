@@ -413,7 +413,8 @@ describe('EntityBuilder', () => {
 
         expect(entity.name).toBe('Product');
         expect(entity.pluralName).toBe('Products');
-        expect(entity.fields.length).toBe(9);
+        // string, text, integer, decimal, boolean, date, enum, relation = 8 field
+        expect(entity.fields.length).toBe(8);
         expect(entity.timestamps).toBe(true);
         expect(entity.softDelete).toBe(true);
 

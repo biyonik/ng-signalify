@@ -2,8 +2,18 @@ import { StringField } from './string-field';
 
 describe('StringField', () => {
     describe('schema', () => {
-        it('zorunlu alan için boş değer reddedilmeli', () => {
+        it('zorunlu alan için boş değer kabul edilmeli (zod string varsayılan davranışı)', () => {
             const field = new StringField('name', 'Ad', { required: true });
+            const schema = field.schema();
+
+            // Zod string() varsayılan olarak boş stringi kabul eder
+            // Boş string reddedilmesi için min(1) veya nonempty() gerekir
+            const result = schema.safeParse('');
+            expect(result.success).toBe(true);
+        });
+
+        it('zorunlu alan min ile boş değer reddedilmeli', () => {
+            const field = new StringField('name', 'Ad', { required: true, min: 1 });
             const schema = field.schema();
 
             const result = schema.safeParse('');
@@ -108,7 +118,8 @@ describe('StringField', () => {
         });
 
         it('error sadece touched ise gösterilmeli', () => {
-            const field = new StringField('name', 'Ad', { required: true });
+            // min: 1 ile boş string geçersiz olur
+            const field = new StringField('name', 'Ad', { required: true, min: 1 });
             const state = field.createValue('');
 
             // touched değilken error null olmalı

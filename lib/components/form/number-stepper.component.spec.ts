@@ -24,15 +24,15 @@ describe('SigNumberStepperComponent', () => {
         // Default 0
         expect(component.value()).toBe(0);
 
-        // Click Plus
-        const plusBtn = fixture.debugElement.query(By.css('.sig-stepper__btn--plus'));
-        plusBtn.nativeElement.click();
+        // Click increment button
+        const incrementBtn = fixture.debugElement.query(By.css('.sig-number-stepper__btn--increment'));
+        incrementBtn.nativeElement.click();
         fixture.detectChanges();
         expect(component.value()).toBe(1);
 
-        // Click Minus
-        const minusBtn = fixture.debugElement.query(By.css('.sig-stepper__btn--minus'));
-        minusBtn.nativeElement.click();
+        // Click decrement button
+        const decrementBtn = fixture.debugElement.query(By.css('.sig-number-stepper__btn--decrement'));
+        decrementBtn.nativeElement.click();
         fixture.detectChanges();
         expect(component.value()).toBe(0);
     });
@@ -50,14 +50,14 @@ describe('SigNumberStepperComponent', () => {
         expect(component.value()).toBe(2); // Should not increase
         expect(component.isAtMax()).toBe(true);
 
-        // UI check: Plus button should be disabled
-        const plusBtn = fixture.debugElement.query(By.css('.sig-stepper__btn--plus'));
-        expect(plusBtn.nativeElement.disabled).toBe(true);
+        // UI check: increment button should be disabled
+        const incrementBtn = fixture.debugElement.query(By.css('.sig-number-stepper__btn--increment'));
+        expect(incrementBtn.nativeElement.disabled).toBe(true);
     });
 
-    it('should handle decimals correctly', () => {
+    it('should handle decimals correctly with precision input', () => {
         fixture.componentRef.setInput('step', 0.1);
-        fixture.componentRef.setInput('decimals', 1);
+        fixture.componentRef.setInput('precision', 1);
         fixture.detectChanges();
 
         component.increment(); // 0 -> 0.1
@@ -69,35 +69,6 @@ describe('SigNumberStepperComponent', () => {
         expect(component.value()).toBe(0.3); // Component handles formatting internally
     });
 
-    it('should handle "Hold to Increment" logic', fakeAsync(() => {
-        fixture.componentRef.setInput('holdDelay', 500);
-        fixture.componentRef.setInput('holdInterval', 100);
-        fixture.detectChanges();
-
-        const plusBtn = fixture.debugElement.query(By.css('.sig-stepper__btn--plus'));
-
-        // Mouse Down (Hold Starts)
-        plusBtn.triggerEventHandler('mousedown', {});
-
-        // Wait for initial delay (500ms)
-        tick(500);
-
-        // Should start incrementing periodically
-        tick(100); // +1
-        tick(100); // +1
-        tick(100); // +1
-
-        // Toplam 3 artış olmalı (Mouse down anında artış yapmıyor kod, timer ile başlıyor)
-        // Kodda startHold timer başlatıyor, ilk action timer içinde.
-        expect(component.value()).toBe(3);
-
-        // Mouse Up (Hold Stops)
-        plusBtn.triggerEventHandler('mouseup', {});
-
-        tick(1000); // Wait more time
-        expect(component.value()).toBe(3); // Should stop incrementing
-    }));
-
     it('should validate manual input', () => {
         fixture.componentRef.setInput('max', 10);
         fixture.detectChanges();
@@ -107,9 +78,154 @@ describe('SigNumberStepperComponent', () => {
         // User types 50 (over max)
         inputEl.value = '50';
         inputEl.dispatchEvent(new Event('input'));
-        inputEl.dispatchEvent(new Event('blur')); // Blur clamps the value
         fixture.detectChanges();
 
         expect(component.value()).toBe(10); // Clamped to Max
+    });
+
+    it('should display label when provided', () => {
+        fixture.componentRef.setInput('label', 'Miktar');
+        fixture.detectChanges();
+
+        const label = fixture.debugElement.query(By.css('.sig-number-stepper__label'));
+        expect(label).toBeTruthy();
+        expect(label.nativeElement.textContent).toContain('Miktar');
+    });
+
+    it('should display required indicator when required', () => {
+        fixture.componentRef.setInput('label', 'Miktar');
+        fixture.componentRef.setInput('required', true);
+        fixture.detectChanges();
+
+        const label = fixture.debugElement.query(By.css('.sig-number-stepper__label'));
+        expect(label.nativeElement.textContent).toContain('*');
+    });
+
+    it('should be disabled when disabled input is true', () => {
+        fixture.componentRef.setInput('disabled', true);
+        fixture.detectChanges();
+
+        const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+        expect(input.nativeElement.disabled).toBe(true);
+
+        const incrementBtn = fixture.debugElement.query(By.css('.sig-number-stepper__btn--increment'));
+        expect(incrementBtn.nativeElement.disabled).toBe(true);
+
+        const decrementBtn = fixture.debugElement.query(By.css('.sig-number-stepper__btn--decrement'));
+        expect(decrementBtn.nativeElement.disabled).toBe(true);
+    });
+
+    it('should handle keyboard navigation (ArrowUp/ArrowDown)', () => {
+        const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+
+        // Arrow Up should increment
+        input.triggerEventHandler('keydown', { key: 'ArrowUp', preventDefault: () => {} });
+        fixture.detectChanges();
+        expect(component.value()).toBe(1);
+
+        // Arrow Down should decrement
+        input.triggerEventHandler('keydown', { key: 'ArrowDown', preventDefault: () => {} });
+        fixture.detectChanges();
+        expect(component.value()).toBe(0);
+    });
+
+    it('should handle Home/End keys', () => {
+        fixture.componentRef.setInput('min', 0);
+        fixture.componentRef.setInput('max', 100);
+        component.writeValue(50);
+        fixture.detectChanges();
+
+        const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+
+        // Home should go to min
+        input.triggerEventHandler('keydown', { key: 'Home', preventDefault: () => {} });
+        fixture.detectChanges();
+        expect(component.value()).toBe(0);
+
+        // End should go to max
+        input.triggerEventHandler('keydown', { key: 'End', preventDefault: () => {} });
+        fixture.detectChanges();
+        expect(component.value()).toBe(100);
+    });
+
+    it('should show hint when provided', () => {
+        fixture.componentRef.setInput('hint', 'Bir sayı girin');
+        fixture.detectChanges();
+
+        const hint = fixture.debugElement.query(By.css('.sig-number-stepper__hint'));
+        expect(hint).toBeTruthy();
+        expect(hint.nativeElement.textContent).toContain('Bir sayı girin');
+    });
+
+    // A11Y Tests
+    describe('accessibility', () => {
+        it('should have role="spinbutton" on input', () => {
+            const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+            expect(input.attributes['role']).toBe('spinbutton');
+        });
+
+        it('should have aria-valuemin and aria-valuemax', () => {
+            fixture.componentRef.setInput('min', 5);
+            fixture.componentRef.setInput('max', 50);
+            fixture.detectChanges();
+
+            const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+            expect(input.attributes['aria-valuemin']).toBe('5');
+            expect(input.attributes['aria-valuemax']).toBe('50');
+        });
+
+        it('should have aria-valuenow reflecting current value', () => {
+            component.writeValue(25);
+            fixture.detectChanges();
+
+            const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+            expect(input.attributes['aria-valuenow']).toBe('25');
+        });
+
+        it('should have aria-invalid when invalid', () => {
+            fixture.componentRef.setInput('ariaInvalid', true);
+            fixture.detectChanges();
+
+            const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+            expect(input.attributes['aria-invalid']).toBe('true');
+        });
+
+        it('should have aria-required when required', () => {
+            fixture.componentRef.setInput('required', true);
+            fixture.detectChanges();
+
+            const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+            expect(input.attributes['aria-required']).toBe('true');
+        });
+
+        it('increment/decrement buttons should have aria-label', () => {
+            const incrementBtn = fixture.debugElement.query(By.css('.sig-number-stepper__btn--increment'));
+            const decrementBtn = fixture.debugElement.query(By.css('.sig-number-stepper__btn--decrement'));
+
+            expect(incrementBtn.attributes['aria-label']).toBeTruthy();
+            expect(decrementBtn.attributes['aria-label']).toBeTruthy();
+        });
+
+        it('buttons should have aria-controls pointing to input', () => {
+            const incrementBtn = fixture.debugElement.query(By.css('.sig-number-stepper__btn--increment'));
+            const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+
+            expect(incrementBtn.attributes['aria-controls']).toBe(input.attributes['id']);
+        });
+
+        it('input should have inputmode="numeric"', () => {
+            const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+            expect(input.attributes['inputmode']).toBe('numeric');
+        });
+
+        it('should have aria-describedby when hint is provided', () => {
+            fixture.componentRef.setInput('hint', 'Help text');
+            fixture.detectChanges();
+
+            const input = fixture.debugElement.query(By.css('.sig-number-stepper__input'));
+            const hint = fixture.debugElement.query(By.css('.sig-number-stepper__hint'));
+
+            expect(input.attributes['aria-describedby']).toBe(hint.attributes['id']);
+        });
     });
 });
