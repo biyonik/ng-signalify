@@ -66,7 +66,7 @@ export interface FieldValue<T> {
    * EN: Writable signal holding the instant value of the field.
    * Can be updated via the UI or programmatically.
    */
-  value: WritableSignal<T | null>;
+  value: WritableSignal<T>;
 
   /**
    * TR: Doğrulama sonucu oluşan hata mesajını taşıyan salt okunur sinyal.

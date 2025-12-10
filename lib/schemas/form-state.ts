@@ -139,13 +139,13 @@ export interface EnhancedFormOptions<T> {
  */
 export interface EnhancedFieldValue<T> extends FieldValue<T> {
     asyncValidating: Signal<boolean>;
-    asyncError: Signal<string | null>;
+    asyncError: Signal<string>;
     dirty: Signal<boolean>;
     visible: Signal<boolean>;
     enabled: Signal<boolean>;
     readonly: boolean;
     fullyValid: Signal<boolean>;
-    combinedError: Signal<string | null>;
+    combinedError: Signal<string>;
 }
 
 /**
@@ -311,7 +311,7 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
         // TR: Asenkron Validasyon Kurulumu
         // EN: Async Validation Setup
         let asyncValidating = signal(false);
-        let asyncError = signal<string | null>(null);
+        let asyncError = signal<string>('');
 
         if (config?.asyncValidate) {
             const asyncValidator = createAsyncValidator(
@@ -320,7 +320,7 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
             );
             asyncValidators.set(field.name, asyncValidator);
             asyncValidating = asyncValidator.validating as WritableSignal<boolean>;
-            asyncError = asyncValidator.error as WritableSignal<string | null>;
+            asyncError = asyncValidator.error as WritableSignal<string>;
 
             // TR: Değer değişince asenkron validasyonu tetikle (Effect)
             // EN: Trigger async validation on value change (Effect)
