@@ -1,5 +1,5 @@
 /* ==========================================================================
-   sig-alert - Alert/Banner Component
+   Alert Component
    ========================================================================== */
 
 @use '../abstract/mixins' as *;
@@ -8,21 +8,78 @@
   position: relative;
   display: flex;
   gap: var(--sig-space-3);
-  padding: var(--sig-space-4);
+  padding: var(--sig-space-3) var(--sig-space-4);
   border-radius: var(--sig-radius-lg);
   border: 1px solid transparent;
   font-size: var(--sig-text-sm);
   line-height: var(--sig-leading-normal);
 
-  /* Icon */
+  /* ==========================================================================
+     VARIANTS
+     ========================================================================== */
+
+  &--default,
+  &--neutral {
+    background-color: var(--sig-bg-muted);
+    border-color: var(--sig-border-color);
+    color: var(--sig-text-primary);
+
+    .sig-alert__icon {
+      color: var(--sig-text-muted);
+    }
+  }
+
+  &--info {
+    background-color: var(--sig-info-50);
+    border-color: var(--sig-info-200);
+    color: var(--sig-info-800);
+
+    .sig-alert__icon {
+      color: var(--sig-info-600);
+    }
+  }
+
+  &--success {
+    background-color: var(--sig-success-50);
+    border-color: var(--sig-success-200);
+    color: var(--sig-success-800);
+
+    .sig-alert__icon {
+      color: var(--sig-success-600);
+    }
+  }
+
+  &--warning {
+    background-color: var(--sig-warning-50);
+    border-color: var(--sig-warning-200);
+    color: var(--sig-warning-800);
+
+    .sig-alert__icon {
+      color: var(--sig-warning-600);
+    }
+  }
+
+  &--error,
+  &--danger,
+  &--destructive {
+    background-color: var(--sig-error-50);
+    border-color: var(--sig-error-200);
+    color: var(--sig-error-800);
+
+    .sig-alert__icon {
+      color: var(--sig-error-600);
+    }
+  }
+
+  /* ==========================================================================
+     ELEMENTS
+     ========================================================================== */
+
   &__icon {
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-top: 1px;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.125rem;
 
     svg {
       width: 100%;
@@ -30,23 +87,20 @@
     }
   }
 
-  /* Content */
   &__content {
     flex: 1;
     min-width: 0;
   }
 
   &__title {
-    font-weight: var(--sig-font-semibold);
+    font-weight: var(--sig-font-medium);
     margin-bottom: var(--sig-space-1);
   }
 
   &__description {
-    color: inherit;
     opacity: 0.9;
   }
 
-  /* Actions */
   &__actions {
     display: flex;
     align-items: center;
@@ -54,107 +108,75 @@
     margin-top: var(--sig-space-3);
   }
 
-  /* Close button */
   &__close {
     position: absolute;
-    top: var(--sig-space-3);
-    right: var(--sig-space-3);
+    top: var(--sig-space-2);
+    right: var(--sig-space-2);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 1.5rem;
     height: 1.5rem;
     padding: 0;
-    color: inherit;
-    opacity: 0.6;
+    color: currentColor;
+    opacity: 0.5;
     background: none;
     border: none;
     border-radius: var(--sig-radius-sm);
     cursor: pointer;
-    transition: all var(--sig-transition-normal);
+    transition: all var(--sig-transition-fast);
 
     &:hover {
       opacity: 1;
-      background-color: rgb(0 0 0 / 0.1);
+      background-color: rgb(0 0 0 / 0.05);
+    }
+
+    svg {
+      width: 0.875rem;
+      height: 0.875rem;
     }
   }
 
-  /* ============================================
-     VARIANTS
-     ============================================ */
-
-  &--info {
-    background-color: var(--sig-info-50);
-    border-color: var(--sig-info-100);
-    color: var(--sig-info-600);
-
-    .sig-alert__icon {
-      color: var(--sig-info-500);
-    }
-  }
-
-  &--success {
-    background-color: var(--sig-success-50);
-    border-color: var(--sig-success-100);
-    color: var(--sig-success-700);
-
-    .sig-alert__icon {
-      color: var(--sig-success-500);
-    }
-  }
-
-  &--warning {
-    background-color: var(--sig-warning-50);
-    border-color: var(--sig-warning-100);
-    color: var(--sig-warning-700);
-
-    .sig-alert__icon {
-      color: var(--sig-warning-500);
-    }
-  }
-
-  &--error,
-  &--danger {
-    background-color: var(--sig-error-50);
-    border-color: var(--sig-error-100);
-    color: var(--sig-error-700);
-
-    .sig-alert__icon {
-      color: var(--sig-error-500);
-    }
-  }
-
-  /* Neutral */
-  &--neutral {
-    background-color: var(--sig-neutral-100);
-    border-color: var(--sig-neutral-200);
-    color: var(--sig-text-primary);
-
-    .sig-alert__icon {
-      color: var(--sig-text-secondary);
-    }
-  }
-
-  /* ============================================
+  /* ==========================================================================
      STYLES
-     ============================================ */
+     ========================================================================== */
 
-  /* Bordered variant - stronger border */
   &--bordered {
     border-left-width: 4px;
+
+    &.sig-alert--info {
+      border-left-color: var(--sig-info-500);
+    }
+
+    &.sig-alert--success {
+      border-left-color: var(--sig-success-500);
+    }
+
+    &.sig-alert--warning {
+      border-left-color: var(--sig-warning-500);
+    }
+
+    &.sig-alert--error,
+    &.sig-alert--danger,
+    &.sig-alert--destructive {
+      border-left-color: var(--sig-error-500);
+    }
   }
 
-  /* Filled variant - solid background */
   &--filled {
+    .sig-alert__icon {
+      color: inherit;
+    }
+
     &.sig-alert--info {
-      background-color: var(--sig-info-500);
-      border-color: var(--sig-info-500);
+      background-color: var(--sig-info-600);
+      border-color: var(--sig-info-600);
       color: white;
     }
 
     &.sig-alert--success {
-      background-color: var(--sig-success-500);
-      border-color: var(--sig-success-500);
+      background-color: var(--sig-success-600);
+      border-color: var(--sig-success-600);
       color: white;
     }
 
@@ -165,25 +187,20 @@
     }
 
     &.sig-alert--error,
-    &.sig-alert--danger {
-      background-color: var(--sig-error-500);
-      border-color: var(--sig-error-500);
+    &.sig-alert--danger,
+    &.sig-alert--destructive {
+      background-color: var(--sig-error-600);
+      border-color: var(--sig-error-600);
       color: white;
-    }
-
-    .sig-alert__icon {
-      color: inherit;
     }
   }
 
-  /* Compact size */
   &--compact {
     padding: var(--sig-space-2) var(--sig-space-3);
     gap: var(--sig-space-2);
 
     .sig-alert__icon {
-      width: 1rem;
-      height: 1rem;
+      margin-top: 0;
     }
   }
 }

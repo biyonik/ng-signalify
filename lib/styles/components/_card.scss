@@ -1,5 +1,5 @@
 /* ==========================================================================
-   sig-card - Card Component
+   Card Component
    ========================================================================== */
 
 @use '../abstract/mixins' as *;
@@ -8,36 +8,32 @@
   @include card;
   overflow: hidden;
 
-  /* ============================================
+  /* ==========================================================================
      VARIANTS
-     ============================================ */
+     ========================================================================== */
 
-  /* Elevated - with shadow, no border */
   &--elevated {
     border-color: transparent;
-    box-shadow: var(--sig-shadow-md);
+    box-shadow: var(--sig-shadow-sm);
   }
 
-  /* Outlined - border only, no shadow */
   &--outlined {
     box-shadow: none;
   }
 
-  /* Flat - no border, no shadow */
   &--flat {
     border-color: transparent;
     box-shadow: none;
-    background-color: var(--sig-bg-surface-tertiary);
+    background-color: var(--sig-bg-muted);
   }
 
-  /* Interactive - hover effects */
   &--interactive {
     cursor: pointer;
-    transition: all var(--sig-transition-normal);
+    transition: all var(--sig-transition-fast);
 
     &:hover {
-      border-color: var(--sig-border-color-strong);
-      box-shadow: var(--sig-shadow-md);
+      border-color: var(--sig-border-color-hover);
+      box-shadow: var(--sig-shadow-sm);
     }
 
     &:active {
@@ -45,27 +41,28 @@
     }
   }
 
-  /* Selected state */
   &--selected {
     border-color: var(--sig-color-primary);
     box-shadow: 0 0 0 1px var(--sig-color-primary);
   }
 
-  /* ============================================
+  /* ==========================================================================
      SECTIONS
-     ============================================ */
+     ========================================================================== */
 
-  /* Header */
   &__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--sig-space-4);
-    padding: var(--sig-space-4) var(--sig-space-5);
-    border-bottom: 1px solid var(--sig-border-color);
+    padding: var(--sig-space-4) var(--sig-space-4);
 
     &--flush {
       border-bottom: none;
+    }
+
+    &--bordered {
+      border-bottom: 1px solid var(--sig-border-color);
     }
   }
 
@@ -76,16 +73,17 @@
 
   &__title {
     margin: 0;
-    font-size: var(--sig-text-md);
+    font-size: var(--sig-text-sm);
     font-weight: var(--sig-font-semibold);
     color: var(--sig-text-primary);
     line-height: var(--sig-leading-tight);
   }
 
+  &__description,
   &__subtitle {
-    margin: var(--sig-space-0-5) 0 0;
+    margin: var(--sig-space-1) 0 0;
     font-size: var(--sig-text-sm);
-    color: var(--sig-text-secondary);
+    color: var(--sig-text-muted);
   }
 
   &__actions {
@@ -95,9 +93,8 @@
     flex-shrink: 0;
   }
 
-  /* Body */
   &__body {
-    padding: var(--sig-space-5);
+    padding: var(--sig-space-4);
     color: var(--sig-text-primary);
 
     &--flush {
@@ -105,22 +102,24 @@
     }
 
     &--compact {
-      padding: var(--sig-space-4);
+      padding: var(--sig-space-3);
     }
   }
 
-  /* Footer */
+  /* No top padding when header exists */
+  &__header + &__body {
+    padding-top: 0;
+  }
+
   &__footer {
     display: flex;
     align-items: center;
-    gap: var(--sig-space-3);
-    padding: var(--sig-space-4) var(--sig-space-5);
+    gap: var(--sig-space-2);
+    padding: var(--sig-space-4);
     border-top: 1px solid var(--sig-border-color);
-    background-color: var(--sig-bg-surface-secondary);
 
     &--flush {
       border-top: none;
-      background-color: transparent;
     }
 
     &--end {
@@ -136,7 +135,6 @@
     }
   }
 
-  /* Media (image/video) */
   &__media {
     position: relative;
     overflow: hidden;
@@ -150,15 +148,16 @@
     }
 
     &--top {
-      border-radius: var(--sig-radius-lg) var(--sig-radius-lg) 0 0;
+      border-radius: calc(var(--sig-radius-lg) - 1px)
+        calc(var(--sig-radius-lg) - 1px) 0 0;
     }
 
     &--bottom {
-      border-radius: 0 0 var(--sig-radius-lg) var(--sig-radius-lg);
+      border-radius: 0 0 calc(var(--sig-radius-lg) - 1px)
+        calc(var(--sig-radius-lg) - 1px);
     }
   }
 
-  /* Divider */
   &__divider {
     height: 1px;
     background-color: var(--sig-border-color);
@@ -166,19 +165,19 @@
     border: none;
   }
 
-  /* ============================================
-     SIZE VARIANTS
-     ============================================ */
+  /* ==========================================================================
+     SIZES
+     ========================================================================== */
 
   &--sm {
     .sig-card__header,
     .sig-card__body,
     .sig-card__footer {
-      padding: var(--sig-space-3) var(--sig-space-4);
+      padding: var(--sig-space-3);
     }
 
     .sig-card__title {
-      font-size: var(--sig-text-base);
+      font-size: var(--sig-text-sm);
     }
   }
 
@@ -190,14 +189,14 @@
     }
 
     .sig-card__title {
-      font-size: var(--sig-text-lg);
+      font-size: var(--sig-text-md);
     }
   }
 }
 
-/* ============================================
+/* ==========================================================================
    CARD GROUP / GRID
-   ============================================ */
+   ========================================================================== */
 
 .sig-card-group {
   display: grid;
@@ -246,7 +245,8 @@
     width: 200px;
 
     &--top {
-      border-radius: var(--sig-radius-lg) 0 0 var(--sig-radius-lg);
+      border-radius: calc(var(--sig-radius-lg) - 1px) 0 0
+        calc(var(--sig-radius-lg) - 1px);
     }
 
     img {
@@ -267,7 +267,8 @@
       width: 100%;
 
       &--top {
-        border-radius: var(--sig-radius-lg) var(--sig-radius-lg) 0 0;
+        border-radius: calc(var(--sig-radius-lg) - 1px)
+          calc(var(--sig-radius-lg) - 1px) 0 0;
       }
     }
   }

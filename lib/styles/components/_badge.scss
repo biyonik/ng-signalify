@@ -1,5 +1,5 @@
 /* ==========================================================================
-   sig-badge - Badge/Tag Component
+   Badge Component
    ========================================================================== */
 
 @use '../abstract/mixins' as *;
@@ -17,73 +17,81 @@
   border: 1px solid transparent;
   transition: all var(--sig-transition-fast);
 
-  /* ============================================
+  /* ==========================================================================
      VARIANTS
-     ============================================ */
+     ========================================================================== */
+
+  &--default,
+  &--secondary {
+    background-color: var(--sig-bg-muted);
+    color: var(--sig-text-secondary);
+  }
 
   &--primary {
-    background-color: var(--sig-primary-50);
-    color: var(--sig-primary-600);
-    border-color: var(--sig-primary-100);
+    background-color: var(--sig-primary-100);
+    color: var(--sig-primary-700);
   }
 
   &--success {
-    background-color: var(--sig-success-50);
+    background-color: var(--sig-success-100);
     color: var(--sig-success-700);
-    border-color: var(--sig-success-100);
   }
 
   &--warning {
-    background-color: var(--sig-warning-50);
+    background-color: var(--sig-warning-100);
     color: var(--sig-warning-700);
-    border-color: var(--sig-warning-100);
   }
 
   &--error,
-  &--danger {
-    background-color: var(--sig-error-50);
+  &--danger,
+  &--destructive {
+    background-color: var(--sig-error-100);
     color: var(--sig-error-700);
-    border-color: var(--sig-error-100);
   }
 
   &--info {
-    background-color: var(--sig-info-50);
-    color: var(--sig-info-600);
-    border-color: var(--sig-info-100);
+    background-color: var(--sig-info-100);
+    color: var(--sig-info-700);
   }
 
   &--neutral {
     background-color: var(--sig-neutral-100);
     color: var(--sig-text-secondary);
-    border-color: var(--sig-neutral-200);
   }
 
-  /* ============================================
+  /* ==========================================================================
      STYLES
-     ============================================ */
+     ========================================================================== */
 
-  /* Outline style */
   &--outline {
     background-color: transparent;
+    border-width: 1px;
+
+    &.sig-badge--default,
+    &.sig-badge--secondary {
+      border-color: var(--sig-border-color);
+      color: var(--sig-text-secondary);
+    }
 
     &.sig-badge--primary {
-      border-color: var(--sig-primary-500);
+      border-color: var(--sig-primary-200);
       color: var(--sig-primary-600);
     }
 
     &.sig-badge--success {
-      border-color: var(--sig-success-500);
+      border-color: var(--sig-success-200);
       color: var(--sig-success-600);
     }
 
     &.sig-badge--warning {
-      border-color: var(--sig-warning-500);
+      border-color: var(--sig-warning-200);
       color: var(--sig-warning-600);
     }
 
     &.sig-badge--error,
-    &.sig-badge--danger {
-      border-color: var(--sig-error-500);
+    &.sig-badge--danger,
+    &.sig-badge--destructive {
+      border-color: var(--sig-error-200);
       color: var(--sig-error-600);
     }
 
@@ -93,52 +101,23 @@
     }
   }
 
-  /* Solid/Filled style */
-  &--solid {
-    &.sig-badge--primary {
-      background-color: var(--sig-primary-500);
-      color: white;
-    }
-
-    &.sig-badge--success {
-      background-color: var(--sig-success-500);
-      color: white;
-    }
-
-    &.sig-badge--warning {
-      background-color: var(--sig-warning-500);
-      color: white;
-    }
-
-    &.sig-badge--error,
-    &.sig-badge--danger {
-      background-color: var(--sig-error-500);
-      color: white;
-    }
-
-    &.sig-badge--neutral {
-      background-color: var(--sig-neutral-500);
-      color: white;
-    }
-  }
-
-  /* ============================================
+  /* ==========================================================================
      SIZES
-     ============================================ */
+     ========================================================================== */
 
   &--sm {
     padding: 0 var(--sig-space-1-5);
-    font-size: 0.6875rem; /* 11px */
+    font-size: 0.6875rem;
   }
 
   &--lg {
-    padding: var(--sig-space-1) var(--sig-space-3);
+    padding: var(--sig-space-1) var(--sig-space-2-5);
     font-size: var(--sig-text-sm);
   }
 
-  /* ============================================
+  /* ==========================================================================
      SHAPES
-     ============================================ */
+     ========================================================================== */
 
   &--rounded {
     border-radius: var(--sig-radius-md);
@@ -148,9 +127,9 @@
     border-radius: var(--sig-radius-sm);
   }
 
-  /* ============================================
+  /* ==========================================================================
      DOT INDICATOR
-     ============================================ */
+     ========================================================================== */
 
   &--dot {
     position: relative;
@@ -169,23 +148,26 @@
     }
   }
 
-  /* ============================================
+  /* ==========================================================================
      INTERACTIVE
-     ============================================ */
+     ========================================================================== */
 
   &--interactive {
     cursor: pointer;
 
     &:hover {
-      filter: brightness(0.95);
+      opacity: 0.9;
     }
 
     &:active {
-      filter: brightness(0.9);
+      opacity: 0.8;
     }
   }
 
-  /* Remove button */
+  /* ==========================================================================
+     ELEMENTS
+     ========================================================================== */
+
   &__remove {
     display: flex;
     align-items: center;
@@ -214,7 +196,6 @@
     }
   }
 
-  /* Icon */
   &__icon {
     display: flex;
     align-items: center;
@@ -228,7 +209,10 @@
   }
 }
 
-/* Badge Group */
+/* ==========================================================================
+   BADGE GROUP
+   ========================================================================== */
+
 .sig-badge-group {
   display: flex;
   flex-wrap: wrap;

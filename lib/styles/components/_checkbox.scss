@@ -1,5 +1,5 @@
 /* ==========================================================================
-   sig-checkbox - Checkbox Component
+   Checkbox Component
    ========================================================================== */
 
 @use '../abstract/mixins' as *;
@@ -11,34 +11,27 @@
   cursor: pointer;
   user-select: none;
 
-  /* Hidden native input */
   &__input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    pointer-events: none;
+    @include visually-hidden;
   }
 
-  /* Custom checkbox */
   &__box {
     position: relative;
     flex-shrink: 0;
-    width: 1.125rem;
-    height: 1.125rem;
-    margin-top: 1px;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.125rem;
     background-color: var(--sig-bg-surface);
     border: 1px solid var(--sig-border-color);
     border-radius: var(--sig-radius-sm);
-    transition: all var(--sig-transition-normal);
+    transition: all var(--sig-transition-fast);
     @include flex-center;
 
-    /* Checkmark icon */
     &::after {
       content: '';
       position: absolute;
-      width: 0.375rem;
-      height: 0.625rem;
+      width: 0.25rem;
+      height: 0.5rem;
       border: solid transparent;
       border-width: 0 2px 2px 0;
       transform: rotate(45deg) scale(0);
@@ -46,21 +39,20 @@
     }
   }
 
-  /* Hover state */
+  /* Hover */
   &:hover:not(&--disabled) &__box {
-    border-color: var(--sig-border-color-strong);
+    border-color: var(--sig-border-color-hover);
   }
 
-  /* Focus state */
+  /* Focus */
   &__input:focus-visible + &__box {
-    border-color: var(--sig-border-color-focus);
     box-shadow: var(--sig-focus-ring);
   }
 
-  /* Checked state */
+  /* Checked */
   &__input:checked + &__box {
-    background-color: var(--sig-color-primary);
-    border-color: var(--sig-color-primary);
+    background-color: var(--sig-neutral-900);
+    border-color: var(--sig-neutral-900);
 
     &::after {
       border-color: white;
@@ -68,15 +60,10 @@
     }
   }
 
-  &:hover:not(&--disabled) &__input:checked + &__box {
-    background-color: var(--sig-color-primary-hover);
-    border-color: var(--sig-color-primary-hover);
-  }
-
-  /* Indeterminate state */
+  /* Indeterminate */
   &__input:indeterminate + &__box {
-    background-color: var(--sig-color-primary);
-    border-color: var(--sig-color-primary);
+    background-color: var(--sig-neutral-900);
+    border-color: var(--sig-neutral-900);
 
     &::after {
       width: 0.5rem;
@@ -87,26 +74,13 @@
     }
   }
 
-  /* Disabled state */
+  /* Disabled */
   &--disabled {
     cursor: not-allowed;
-
-    .sig-checkbox__box {
-      background-color: var(--sig-bg-disabled);
-      border-color: var(--sig-border-color);
-    }
-
-    .sig-checkbox__input:checked + .sig-checkbox__box {
-      background-color: var(--sig-neutral-300);
-      border-color: var(--sig-neutral-300);
-    }
-
-    .sig-checkbox__label {
-      color: var(--sig-text-disabled);
-    }
+    opacity: 0.5;
   }
 
-  /* Error state */
+  /* Error */
   &--error &__box {
     border-color: var(--sig-border-color-error);
   }
@@ -117,15 +91,14 @@
 
   /* Label */
   &__label {
-    font-size: var(--sig-text-base);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-primary);
     line-height: var(--sig-leading-normal);
   }
 
-  /* Description */
   &__description {
     font-size: var(--sig-text-sm);
-    color: var(--sig-text-secondary);
+    color: var(--sig-text-muted);
     margin-top: var(--sig-space-0-5);
   }
 
@@ -134,17 +107,17 @@
     gap: var(--sig-space-1-5);
 
     .sig-checkbox__box {
-      width: 1rem;
-      height: 1rem;
+      width: 0.875rem;
+      height: 0.875rem;
 
       &::after {
-        width: 0.3125rem;
-        height: 0.5rem;
+        width: 0.1875rem;
+        height: 0.375rem;
       }
     }
 
     .sig-checkbox__label {
-      font-size: var(--sig-text-sm);
+      font-size: var(--sig-text-xs);
     }
   }
 
@@ -154,15 +127,16 @@
     .sig-checkbox__box {
       width: 1.25rem;
       height: 1.25rem;
+      margin-top: 0;
 
       &::after {
-        width: 0.4375rem;
-        height: 0.75rem;
+        width: 0.3125rem;
+        height: 0.625rem;
       }
     }
 
     .sig-checkbox__label {
-      font-size: var(--sig-text-md);
+      font-size: var(--sig-text-base);
     }
   }
 }
