@@ -9,6 +9,12 @@ import {
     model,
     ViewEncapsulation,
     OnInit,
+    ViewChild,
+    ElementRef,
+    AfterViewInit,
+    effect,
+    Injector,
+    inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -39,9 +45,9 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
             }
 
             <input
+                #inputElement
                 [id]="inputId"
                 [type]="actualType()"
-                [value]="value() ?? ''"
                 [placeholder]="placeholder()"
                 [disabled]="disabled()"
                 [readonly]="readonly()"
@@ -94,7 +100,12 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
         </div>
     `,
 })
-export class SigInputComponent implements ControlValueAccessor, OnInit {
+export class SigInputComponent implements ControlValueAccessor, OnInit, AfterViewInit {
+    private readonly injector = inject(Injector);
+
+    // ViewChild for direct DOM access
+    @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
+
     // Mevcut input'lar
     readonly type = input<InputType>('text');
     readonly value = model<string | number | null>(null);
@@ -128,6 +139,10 @@ export class SigInputComponent implements ControlValueAccessor, OnInit {
     // YENİ: Unique ID for input
     inputId = '';
 
+    // TR: Kullanıcı girişi mi yoksa external değişiklik mi olduğunu takip eder
+    // EN: Tracks whether change is from user input or external
+    private _isUserInput = false;
+
     readonly actualType = computed(() => {
         if (this.type() === 'password' && this.showPassword()) {
             return 'text';
@@ -146,8 +161,49 @@ export class SigInputComponent implements ControlValueAccessor, OnInit {
         this.inputId = generateId('sig-input');
     }
 
+    ngAfterViewInit(): void {
+        // TR: İlk değeri set et
+        // EN: Set initial value
+        this.syncInputValue(this.value());
+
+        // TR: Signal değişikliklerini izle ve sadece external değişikliklerde DOM'u güncelle
+        // EN: Watch signal changes and update DOM only on external changes
+        effect(() => {
+            const currentValue = this.value();
+
+            // TR: Kullanıcı girişi ise DOM'u güncelleme (zaten güncel)
+            // EN: If user input, don't update DOM (already up to date)
+            if (this._isUserInput) {
+                this._isUserInput = false;
+                return;
+            }
+
+            // TR: External değişiklik - DOM'u güncelle
+            // EN: External change - update DOM
+            this.syncInputValue(currentValue);
+        }, { injector: this.injector, allowSignalWrites: true });
+    }
+
+    /**
+     * TR: Input elementinin değerini senkronize eder
+     * EN: Syncs the input element value
+     */
+    private syncInputValue(value: string | number | null): void {
+        if (this.inputElement?.nativeElement) {
+            const displayValue = value ?? '';
+            if (this.inputElement.nativeElement.value !== String(displayValue)) {
+                this.inputElement.nativeElement.value = String(displayValue);
+            }
+        }
+    }
+
     onInput(event: Event): void {
         const target = event.target as HTMLInputElement;
+
+        // TR: Kullanıcı girişi olduğunu işaretle (effect'in DOM'u override etmesini engelle)
+        // EN: Mark as user input (prevent effect from overriding DOM)
+        this._isUserInput = true;
+
         if (target.value === '') {
             this.value.set(null);
             this._onChange(null);
@@ -178,6 +234,9 @@ export class SigInputComponent implements ControlValueAccessor, OnInit {
     onClear(): void {
         this.value.set(null);
         this._onChange(null);
+        // TR: Input elementini de temizle
+        // EN: Clear the input element too
+        this.syncInputValue(null);
     }
 
     togglePassword(): void {
