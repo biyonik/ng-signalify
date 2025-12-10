@@ -1,10 +1,11 @@
 # ng-signalify
 
 > Angular 17+ için modern, signal-tabanlı form yönetimi, state management ve UI component kütüphanesi.
+> Modern, signal-based form management, state management, and UI component library for Angular 17+.
 
-**Versiyon:** 1.0.0  
-**Angular:** 17+  
-**Gereksinimler:** Zod, Signals API
+**Versiyon / Version:** 1.0.0-rc.1
+**Angular:** 17+ | 18+ | 19+
+**Gereksinimler / Requirements:** Zod, Angular Signals API
 
 ---
 
@@ -523,52 +524,71 @@ volumeField.present(75); // '75%'
 
 ## Schemas (Form & Filter)
 
-### FormSchema
+### createEnhancedForm
 
-Field'lardan form schema oluşturur.
+Field dizisinden gelişmiş form state oluşturur.
+Creates enhanced form state from field array.
 
 ```typescript
-import { FormSchema, createForm } from 'ng-signalify/schemas';
+import { createEnhancedForm } from 'ng-signalify/schemas';
 import { StringField, IntegerField, EnumField } from 'ng-signalify/fields';
 
-// 1. Field'ları tanımla
-const userFields = {
-  name: new StringField('name', 'Ad Soyad', { required: true, max: 100 }),
-  email: new StringField('email', 'E-posta', { required: true, email: true }),
-  age: new IntegerField('age', 'Yaş', { min: 18, max: 100 }),
-  status: new EnumField('status', 'Durum', [
-    { id: 'active', label: 'Aktif' },
-    { id: 'inactive', label: 'Pasif' },
-  ]),
-};
+// 1. Field'ları dizi olarak tanımla / Define fields as array
+const userFields = [
+  new StringField('name', 'Ad Soyad', { required: true, max: 100 }),
+  new StringField('email', 'E-posta', { required: true, email: true }),
+  new IntegerField('age', 'Yaş', { min: 18, max: 100 }),
+  new EnumField('status', 'Durum', {
+    required: true,
+    options: [
+      { id: 'active', label: 'Aktif' },
+      { id: 'inactive', label: 'Pasif' },
+    ]
+  }),
+];
 
-// 2. Schema oluştur
-const UserSchema = FormSchema(userFields);
+// 2. Tip tanımı (opsiyonel ama önerilir) / Type definition (optional but recommended)
+interface UserForm {
+  name: string;
+  email: string;
+  age: number;
+  status: string;
+}
 
-// 3. Form oluştur
-const form = createForm(UserSchema);
+// 3. Form oluştur (başlangıç değerleri ile) / Create form (with initial values)
+const form = createEnhancedForm<UserForm>(userFields, {
+  name: '',
+  email: '',
+  age: 18,
+  status: 'active'
+});
 
-// 4. Form kullanımı
-// Değer okuma
-form.fields.name.value();        // Signal<string>
-form.fields.email.error();       // Signal<string | null>
-form.fields.age.touched();       // Signal<boolean>
+// 4. Form kullanımı / Form usage
+// Değer okuma / Reading values
+form.fields.name.value();           // Signal<string>
+form.fields.email.error();          // Signal<string | null>
+form.fields.age.touched();          // Signal<boolean>
+form.fields.name.combinedError();   // Signal<string> - sync + async errors
+form.fields.email.asyncValidating(); // Signal<boolean>
 
-// Değer yazma
+// Değer yazma / Writing values
 form.fields.name.value.set('Ahmet Yılmaz');
 form.fields.email.touch();
 
-// Toplu işlemler
-form.signals.valid();            // Signal<boolean> - Tüm form geçerli mi?
-form.signals.dirty();            // Signal<boolean> - Değişiklik var mı?
-form.signals.errors();           // Signal<Record<string, string | null>>
+// Toplu sinyaller / Aggregate signals
+form.valid();                    // Signal<boolean> - Tüm form geçerli mi?
+form.dirty();                    // Signal<boolean> - Değişiklik var mı?
+form.errors();                   // Signal<Partial<Record<keyof T, string>>>
+form.validating();               // Signal<boolean> - Async validasyon devam ediyor mu?
 
-// Validasyon
-await form.validateAll();        // Tüm field'ları doğrula
-form.fields.email.validate();    // Tek field doğrula
+// Validasyon / Validation
+const isValid = await form.validateAll();  // Tüm field'ları doğrula (async dahil)
+form.touchAll();                           // Tüm field'ları touched yap
 
-// Değerleri al
-form.getValues();                // { name: 'Ahmet', email: '...', ... }
+// Değerleri al / Get values
+form.values();                   // Signal<T> - Tüm değerler
+form.getValues();                // T - Anlık değerler (non-reactive)
+form.getDirtyValues();           // Partial<T> - Sadece değişen değerler
 
 // Reset
 form.reset();                    // Başlangıç değerlerine dön
@@ -616,38 +636,44 @@ filter.fromQueryParams(params);
 
 ---
 
-## Enhanced Form (Gelişmiş Form)
+## Enhanced Form (Gelişmiş Form / Advanced Form)
 
 ### Async Validation
 
 Asenkron doğrulama (API kontrolü vb.)
+Asynchronous validation (API checks, etc.)
 
 ```typescript
-import { createAsyncValidator } from 'ng-signalify/schemas';
+import { createEnhancedForm, AsyncValidator } from 'ng-signalify/schemas';
 
-// E-posta benzersizlik kontrolü
-const emailValidator = createAsyncValidator(
-  async (value: string) => {
-    const response = await api.get(`/users/check-email?email=${value}`);
-    return response.data.exists ? 'Bu e-posta zaten kullanımda' : null;
+// E-posta benzersizlik kontrolü / Email uniqueness check
+const emailValidator = new AsyncValidator<string>(
+  async (value: string, signal: AbortSignal) => {
+    const response = await fetch(`/api/users/check-email?email=${value}`, { signal });
+    const data = await response.json();
+    return data.exists ? 'Bu e-posta zaten kullanımda' : '';
   },
-  { debounceMs: 500 }  // 500ms bekle
+  500  // debounceTime: 500ms bekle / wait 500ms
 );
 
-// Form'da kullanım
-const form = createEnhancedForm(fields, {}, {
+// Form'da kullanım / Usage in form
+const form = createEnhancedForm<UserForm>(fields, initialValues, {
   fieldConfigs: {
     email: {
       asyncValidate: emailValidator,
-      asyncDebounceMs: 500,
     },
   },
 });
 
 // Async validation state
-form.fields.email.asyncValidating();  // Signal<boolean>
-form.fields.email.asyncError();       // Signal<string | null>
-form.fields.email.fullyValid();       // Signal<boolean> - sync + async
+form.fields.email.asyncValidating();  // Signal<boolean> - Validasyon devam ediyor mu?
+form.fields.email.asyncError();       // Signal<string> - Async hata mesajı
+form.fields.email.fullyValid();       // Signal<boolean> - sync + async geçerli mi?
+form.fields.email.combinedError();    // Signal<string> - sync veya async hata
+
+// validateAll() artık async validasyonları da bekliyor!
+// validateAll() now waits for async validations!
+const isValid = await form.validateAll();  // Promise<boolean>
 ```
 
 ### Field Dependencies
@@ -916,10 +942,12 @@ const partialBlob = await exporter.toExcel(users, {
 ### EntityStore
 
 CRUD işlemleri için signal-tabanlı state management.
+Signal-based state management for CRUD operations.
 
 ```typescript
 import { Injectable } from '@angular/core';
-import { EntityStore, PaginatedResponse, FetchParams } from 'ng-signalify/store';
+import { EntityStore, PaginatedResponse, FetchParams, EntityId } from 'ng-signalify/store';
+import { createHttpClient } from 'ng-signalify/api';
 
 interface User {
   id: number;
@@ -939,67 +967,89 @@ interface UpdateUserDto {
   status?: 'active' | 'inactive';
 }
 
+// HTTP Client oluştur / Create HTTP Client
+const http = createHttpClient({
+  baseUrl: 'https://api.example.com',
+  timeout: 30000,
+});
+
 @Injectable({ providedIn: 'root' })
 export class UserStore extends EntityStore<User, CreateUserDto, UpdateUserDto> {
-  constructor(private http: HttpClient) {
+  constructor() {
     super({
       name: 'users',
+      selectId: (user) => user.id,   // ID seçici / ID selector
       defaultPageSize: 20,
-      cacheTTL: 5 * 60 * 1000,  // 5 dakika cache
-      optimistic: true,         // Optimistic updates
+      cacheTTL: 5 * 60 * 1000,       // 5 dakika cache / 5 minutes cache
+      optimistic: true,              // Optimistic updates aktif
     });
   }
 
-  // Abstract metodları implement et
+  // Abstract metodları implement et / Implement abstract methods
   protected async fetchAll(params: FetchParams): Promise<PaginatedResponse<User>> {
-    return this.http.get<PaginatedResponse<User>>('/api/users', { params }).toPromise();
+    const response = await http.get<PaginatedResponse<User>>('/api/users', { params });
+    return response.data;
   }
 
-  protected async fetchOne(id: number): Promise<User> {
-    return this.http.get<User>(`/api/users/${id}`).toPromise();
+  protected async fetchOne(id: EntityId): Promise<User> {
+    const response = await http.get<User>(`/api/users/${id}`);
+    return response.data;
   }
 
   protected async createOne(data: CreateUserDto): Promise<User> {
-    return this.http.post<User>('/api/users', data).toPromise();
+    const response = await http.post<User>('/api/users', { body: data });
+    return response.data;
   }
 
-  protected async updateOne(id: number, data: UpdateUserDto): Promise<User> {
-    return this.http.patch<User>(`/api/users/${id}`, data).toPromise();
+  protected async updateOne(id: EntityId, data: UpdateUserDto): Promise<User> {
+    const response = await http.patch<User>(`/api/users/${id}`, { body: data });
+    return response.data;
   }
 
-  protected async deleteOne(id: number): Promise<void> {
-    await this.http.delete(`/api/users/${id}`).toPromise();
+  protected async deleteOne(id: EntityId): Promise<void> {
+    await http.delete(`/api/users/${id}`);
   }
 }
 ```
 
-### Store Kullanımı
+### Store Kullanımı / Store Usage
 
 ```typescript
+import { Component, inject } from '@angular/core';
+
 @Component({
   template: `
-    <div *ngIf="store.signals.isLoading()">Yükleniyor...</div>
-    
+    <!-- Modern Angular syntax (@if, @for) -->
+    @if (store.signals.isLoading()) {
+      <div class="loading">Yükleniyor... / Loading...</div>
+    }
+
+    @if (store.signals.error()) {
+      <div class="error">{{ store.signals.error() }}</div>
+    }
+
     <table>
-      <tr *ngFor="let user of store.signals.all()">
-        <td>{{ user.name }}</td>
-        <td>{{ user.email }}</td>
-        <td>
-          <button (click)="edit(user)">Düzenle</button>
-          <button (click)="delete(user.id)">Sil</button>
-        </td>
-      </tr>
+      @for (user of store.signals.all(); track user.id) {
+        <tr>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <button (click)="edit(user)">Düzenle</button>
+            <button (click)="deleteUser(user.id)">Sil</button>
+          </td>
+        </tr>
+      }
     </table>
-    
-    <pagination
+
+    <sig-pagination
       [page]="store.pagination.page()"
-      [total]="store.pagination.total()"
+      [totalPages]="store.pagination.totalPages()"
       (pageChange)="store.goToPage($event)"
     />
   `
 })
 export class UserListComponent {
-  store = inject(UserStore);
+  readonly store = inject(UserStore);
 
   ngOnInit() {
     this.store.loadAll();
@@ -1013,7 +1063,7 @@ export class UserListComponent {
     await this.store.update(user.id, { name: 'Güncel Ad' });
   }
 
-  async delete(id: number) {
+  async deleteUser(id: number) {
     await this.store.delete(id);
   }
 }
@@ -1472,63 +1522,84 @@ Yükleme göstergeleri.
 
 ### HttpClient
 
-Type-safe HTTP istemcisi.
+Type-safe HTTP istemcisi. Native fetch API üzerine kurulu modern wrapper.
+Type-safe HTTP client. Modern wrapper built on native fetch API.
 
 ```typescript
-import { createHttpClient } from 'ng-signalify/api';
+import { createHttpClient, HttpClient } from 'ng-signalify/api';
 
+// API istemcisi oluştur / Create API client
 const api = createHttpClient({
   baseUrl: 'https://api.example.com',
+  serverBaseUrl: 'http://internal-api:3000',  // SSR için / For SSR
   timeout: 30000,
   defaultHeaders: {
     'Content-Type': 'application/json',
     'X-App-Version': '1.0.0',
   },
-  
+
   // Request interceptor
-  onRequest: async (config) => {
+  onRequest: async (config, context) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers = { ...config.headers, Authorization: `Bearer ${token}` };
     }
+    console.log(`[${context.method}] ${context.path}`);
     return config;
   },
-  
+
   // Response interceptor
   onResponse: async (response) => {
     console.log('Response:', response.status);
     return response;
   },
-  
+
   // Error handler
   onError: (error) => {
     if (error.status === 401) {
       // Logout & redirect
-      authService.logout();
+      console.log('Unauthorized - redirecting to login');
     }
   },
 });
 
-// GET
-const users = await api.get<User[]>('/users');
-const user = await api.get<User>('/users/1');
+// GET - ApiResponse<T> döner / Returns ApiResponse<T>
+const usersResponse = await api.get<User[]>('/users');
+const users = usersResponse.data;  // User[]
 
-// POST
-const newUser = await api.post<User>('/users', { name: 'Ahmet', email: 'a@b.com' });
+const userResponse = await api.get<User>('/users/1');
+const user = userResponse.data;    // User
+
+// POST - body parametresi RequestConfig içinde
+const newUserResponse = await api.post<User>('/users', {
+  body: { name: 'Ahmet', email: 'a@b.com' }
+});
+const newUser = newUserResponse.data;
 
 // PUT
-const updated = await api.put<User>('/users/1', { name: 'Mehmet' });
+const updatedResponse = await api.put<User>('/users/1', {
+  body: { name: 'Mehmet' }
+});
 
 // PATCH
-const patched = await api.patch<User>('/users/1', { status: 'active' });
+const patchedResponse = await api.patch<User>('/users/1', {
+  body: { status: 'active' }
+});
 
 // DELETE
 await api.delete('/users/1');
 
 // Query params
-const filtered = await api.get<User[]>('/users', {
+const filteredResponse = await api.get<User[]>('/users', {
   params: { status: 'active', page: 1, limit: 20 },
 });
+
+// AbortController ile iptal / Cancel with AbortController
+const controller = new AbortController();
+const response = await api.get<User[]>('/users', {
+  signal: controller.signal
+});
+// controller.abort() ile iptal edilebilir / Can be cancelled with controller.abort()
 
 // Auth helpers
 api.setAuthToken('jwt-token');
@@ -2020,16 +2091,13 @@ const drag = createDragState();
 
 ### Real-time (WebSocket)
 
-WebSocket bağlantı yönetimi.
+WebSocket bağlantı yönetimi. Memory leak koruması ve otomatik reconnect desteği.
+WebSocket connection management. Memory leak protection and auto-reconnect support.
 
 ```typescript
-import { 
-  createRealtimeConnection, 
-  createPresence, 
-  createChannel 
-} from 'ng-signalify/advanced';
+import { createRealtimeConnection } from 'ng-signalify/advanced';
 
-// Bağlantı oluştur
+// Bağlantı oluştur / Create connection
 const ws = createRealtimeConnection({
   url: 'wss://api.example.com/ws',
   reconnect: true,
@@ -2040,10 +2108,11 @@ const ws = createRealtimeConnection({
   heartbeatInterval: 30000,
   heartbeatMessage: 'ping',
   connectionTimeout: 10000,
-  
-  onOpen: () => console.log('Bağlandı'),
-  onClose: (event) => console.log('Kapandı:', event.code),
-  onError: (error) => console.error('Hata:', error),
+  maxQueueSize: 1000,  // Memory leak koruması - kuyruk limiti / Memory leak protection - queue limit
+
+  onOpen: () => console.log('Bağlandı / Connected'),
+  onClose: (event) => console.log('Kapandı / Closed:', event.code),
+  onError: (error) => console.error('Hata / Error:', error),
 });
 
 // Bağlan

@@ -217,8 +217,8 @@ export class UserFormComponent {
 
 ```typescript
 import { Injectable, computed } from '@angular/core';
-import { EntityStore, PaginatedResponse, EntityId } from 'ng-signalify/store';
-import { HttpClient } from 'ng-signalify/api';
+import { EntityStore, PaginatedResponse, EntityId, FetchParams } from 'ng-signalify/store';
+import { createHttpClient, HttpClient } from 'ng-signalify/api';
 
 interface Product {
   id: string;
@@ -228,9 +228,15 @@ interface Product {
   category: string;
 }
 
+// HTTP Client örneği oluştur / Create HTTP Client instance
+const http = createHttpClient({
+  baseUrl: 'https://api.example.com',
+  timeout: 30000,
+});
+
 @Injectable({ providedIn: 'root' })
 export class ProductStore extends EntityStore<Product> {
-  constructor(private http: HttpClient) {
+  constructor() {
     super({
       name: 'products',
       selectId: (p) => p.id,
@@ -241,24 +247,28 @@ export class ProductStore extends EntityStore<Product> {
   }
 
   // Abstract metodları implemente et / Implement abstract methods
-  protected async fetchAll(params): Promise<PaginatedResponse<Product>> {
-    return this.http.get('/api/products', { params });
+  protected async fetchAll(params: FetchParams): Promise<PaginatedResponse<Product>> {
+    const response = await http.get<PaginatedResponse<Product>>('/api/products', { params });
+    return response.data;
   }
 
   protected async fetchOne(id: EntityId): Promise<Product> {
-    return this.http.get(`/api/products/${id}`);
+    const response = await http.get<Product>(`/api/products/${id}`);
+    return response.data;
   }
 
   protected async createOne(data: Partial<Product>): Promise<Product> {
-    return this.http.post('/api/products', data);
+    const response = await http.post<Product>('/api/products', { body: data });
+    return response.data;
   }
 
   protected async updateOne(id: EntityId, data: Partial<Product>): Promise<Product> {
-    return this.http.put(`/api/products/${id}`, data);
+    const response = await http.put<Product>(`/api/products/${id}`, { body: data });
+    return response.data;
   }
 
   protected async deleteOne(id: EntityId): Promise<void> {
-    await this.http.delete(`/api/products/${id}`);
+    await http.delete(`/api/products/${id}`);
   }
 
   // Custom selectors / Özel seçiciler
@@ -277,7 +287,7 @@ export class ProductStore extends EntityStore<Product> {
     });
 
     try {
-      await this.http.post(`/api/products/${productId}/decrease-stock`, { amount });
+      await http.post(`/api/products/${productId}/decrease-stock`, { body: { amount } });
     } catch (error) {
       rollback();
       throw error;
