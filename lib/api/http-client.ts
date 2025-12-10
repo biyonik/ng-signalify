@@ -58,6 +58,18 @@ export interface ApiError {
 }
 
 /**
+ * TR: İstek bağlamı (Context).
+ * İstek metodu ve yolu gibi temel bilgileri içerir.
+ *
+ * EN: Request context.
+ * Contains basic information like request method and path.
+ */
+export interface RequestContext {
+    method: HttpMethod;
+    path: string;
+}
+
+/**
  * TR: HTTP İstemcisi yapılandırması.
  * Temel URL, SSR URL'i ve yaşam döngüsü kancalarını (Interceptors) tanımlar.
  *
@@ -99,7 +111,7 @@ export interface HttpClientConfig {
      *
      * EN: Executes before the request is sent (For adding tokens, etc.).
      */
-    onRequest?: (config: RequestConfig) => RequestConfig | Promise<RequestConfig>;
+    onRequest?: (config: RequestConfig | Promise<RequestConfig>, context: RequestContext) => RequestConfig | Promise<RequestConfig>;
 
     /**
      * TR: Yanıt geldikten sonra çalışır (Loglama veya veri işleme için).
@@ -210,10 +222,13 @@ export class HttpClient {
         path: string,
         config: RequestConfig = {}
     ): Promise<ApiResponse<T>> {
+
+        const context: RequestContext = { method, path };
+
         // Apply request interceptor
         let finalConfig = config;
         if (this.config.onRequest) {
-            finalConfig = await this.config.onRequest(config);
+            finalConfig = await this.config.onRequest(config, context);
         }
 
         // TR: URL ve Query parametrelerini hazırla (SSR desteği ile)
