@@ -88,24 +88,71 @@ export interface EnhancedFormState<T extends Record<keyof T, unknown>> {
     dependencies: DependencyResolver;
 }
 
-function deepEqual(a: unknown, b: unknown): boolean {
+/**
+ * TR: Derin eşitlik kontrolü yapar.
+ * Circular reference koruması ile Stack Overflow'u önler.
+ *
+ * EN: Performs deep equality check.
+ * Prevents Stack Overflow with circular reference protection.
+ */
+function deepEqual(a: unknown, b: unknown, visited = new WeakMap<object, Set<object>>()): boolean {
+    // TR: Primitif değerler için hızlı kontrol
+    // EN: Quick check for primitive values
     if (a === b) return true;
     if (a == null || b == null) return a === b;
     if (typeof a !== typeof b) return false;
-    if (a instanceof Date && b instanceof Date) return a.getTime() === b.getTime();
-    if (Array.isArray(a) && Array.isArray(b)) {
-        if (a.length !== b.length) return false;
-        return a.every((item, index) => deepEqual(item, b[index]));
+
+    // TR: Date nesneleri için özel kontrol
+    // EN: Special check for Date objects
+    if (a instanceof Date && b instanceof Date) {
+        return a.getTime() === b.getTime();
     }
+
+    // TR: Sadece object türleri için circular reference kontrolü
+    // EN: Circular reference check only for object types
     if (typeof a === 'object' && typeof b === 'object') {
-        const keysA = Object.keys(a as object);
-        const keysB = Object.keys(b as object);
+        const objA = a as object;
+        const objB = b as object;
+
+        // TR: Circular reference kontrolü
+        // EN: Circular reference check
+        if (visited.has(objA)) {
+            const visitedSet = visited.get(objA)!;
+            if (visitedSet.has(objB)) {
+                // TR: Bu çift daha önce karşılaştırıldı, sonsuz döngüyü önle
+                // EN: This pair was compared before, prevent infinite loop
+                return true;
+            }
+            visitedSet.add(objB);
+        } else {
+            visited.set(objA, new Set([objB]));
+        }
+
+        // TR: Array kontrolü
+        // EN: Array check
+        if (Array.isArray(a) && Array.isArray(b)) {
+            if (a.length !== b.length) return false;
+            return a.every((item, index) => deepEqual(item, b[index], visited));
+        }
+
+        // TR: Array olmayan objeler için karşılaştırma
+        // EN: Comparison for non-array objects
+        if (Array.isArray(a) !== Array.isArray(b)) return false;
+
+        const keysA = Object.keys(objA);
+        const keysB = Object.keys(objB);
         if (keysA.length !== keysB.length) return false;
+
         return keysA.every(key =>
-            Object.prototype.hasOwnProperty.call(b, key) &&
-            deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key])
+            Object.prototype.hasOwnProperty.call(objB, key) &&
+            deepEqual(
+                (objA as Record<string, unknown>)[key],
+                (objB as Record<string, unknown>)[key],
+                visited
+            )
         );
     }
+
     return false;
 }
 
@@ -365,47 +412,49 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
     const validateAll = async (): Promise<boolean> => {
         touchAll();
 
-        const valueSnapshots = new Map<string, unknown>();
-        for (const [name] of asyncValidators) {
-            const fv = formFields[name as keyof T];
-            if (fv) {
-                valueSnapshots.set(name, fv.value());
+        // TR: Senkron validasyonları kontrol et
+        // EN: Check synchronous validations
+        const syncResult = zodSchema.safeParse(values());
+        if (!syncResult.success) {
+            return false;
+        }
+
+        // TR: Async validasyonları paralel olarak çalıştır ve BEKLE
+        // EN: Run async validations in parallel and WAIT for them
+        if (asyncValidators.size > 0) {
+            const asyncPromises: Promise<string>[] = [];
+            const validatorNames: string[] = [];
+
+            for (const [name, validator] of asyncValidators) {
+                const fv = formFields[name as keyof T];
+                if (fv) {
+                    const currentValue = fv.value();
+                    // TR: validateAsync kullanarak Promise dönen metodu çağır
+                    // EN: Call Promise-returning method using validateAsync
+                    asyncPromises.push(validator.validateAsync(currentValue));
+                    validatorNames.push(name);
+                }
+            }
+
+            // TR: Tüm async validasyonların bitmesini bekle
+            // EN: Wait for all async validations to complete
+            const results = await Promise.all(asyncPromises);
+
+            // TR: Herhangi bir async hata varsa false dön
+            // EN: Return false if any async error exists
+            const hasAsyncError = results.some(error => error !== '' && error !== null);
+            if (hasAsyncError) {
+                return false;
             }
         }
 
-        // TR: AsyncValidator.validate şu an void dönüyor (Promise değil).
-        // Ancak validatörü tetiklemek için çağırıyoruz.
-        // Tam senkronizasyon için AsyncValidator sınıfına 'validateAsync' gibi
-        // Promise dönen bir metod eklenmesi gerekebilir.
-        // Şimdilik tetikleyip validasyonun bitmesini (loading false olana kadar) beklemek en doğrusu olurdu
-        // ama basitlik için sadece tetikliyoruz.
-        // EN: AsyncValidator.validate currently returns void (not Promise).
-        // Triggering it anyway. Ideally AsyncValidator needs a Promise-returning method.
-        for (const [name, validator] of asyncValidators) {
-            const snapshotValue = valueSnapshots.get(name);
-            if (snapshotValue !== undefined) {
-                validator.validate(snapshotValue);
-            }
+        // TR: Cross-field validasyonları kontrol et
+        // EN: Check cross-field validations
+        if (crossErrors().length > 0) {
+            return false;
         }
 
-        // TR: Async işlemler için küçük bir gecikme/bekleme eklenebilir
-        // Veya validating signal'i izlenebilir.
-        // Şimdilik validation'ların tetiklendiğini varsayıyoruz.
-
-        let valuesChanged = false;
-        for (const [name] of asyncValidators) {
-            const fv = formFields[name as keyof T];
-            if (fv && !deepEqual(fv.value(), valueSnapshots.get(name))) {
-                valuesChanged = true;
-                break;
-            }
-        }
-
-        if (valuesChanged) {
-            return validateAll();
-        }
-
-        return valid();
+        return true;
     };
 
     const markDirty = (name: keyof T) => {

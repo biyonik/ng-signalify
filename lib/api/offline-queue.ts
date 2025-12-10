@@ -398,10 +398,22 @@ export class OfflineQueue {
             // EN: Error Handling - Retry or delete
             const nextRetries = request.retries + 1;
 
-            // TR: Kritik hata kontrolü (400, 403, 404 gibi kalıcı hatalar retry edilmemeli)
-            // EN: Critical error check (Persistent errors like 400, 403, 404 should not be retried)
-            const isFatalError = error instanceof Response &&
-                (error.status === 400 || error.status === 403 || error.status === 404);
+            // TR: Kritik hata kontrolü
+            // 4xx hatalar (408 Request Timeout hariç) kalıcı hatalardır ve retry edilmemeli.
+            // 408 ağ kaynaklı olabilir, retry edilebilir.
+            // 5xx hatalar sunucu kaynaklı olup retry edilebilir.
+            //
+            // EN: Critical error check
+            // 4xx errors (except 408 Request Timeout) are permanent and should not be retried.
+            // 408 can be network-related, retryable.
+            // 5xx errors are server-side and can be retried.
+            let isFatalError = false;
+            if (error instanceof Response) {
+                const status = error.status;
+                // TR: 4xx hatalar (400-499) fatal, ancak 408 (Request Timeout) hariç
+                // EN: 4xx errors (400-499) are fatal, except 408 (Request Timeout)
+                isFatalError = status >= 400 && status < 500 && status !== 408;
+            }
 
             if (nextRetries >= this.config.maxRetries || isFatalError) {
                 // TR: Maksimum deneme veya kritik hata - Kuyruktan at (Dead Letter)
