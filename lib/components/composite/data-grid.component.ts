@@ -1,537 +1,607 @@
+
 import {
-  Component,
-  ChangeDetectionStrategy,
-  input,
-  output,
-  signal,
-  computed,
-  contentChildren,
-  Directive,
-  TemplateRef,
-  inject,
-  ViewEncapsulation,
+    Component,
+    ChangeDetectionStrategy,
+    input,
+    output,
+    signal,
+    computed,
+    contentChildren,
+    Directive,
+    TemplateRef,
+    inject,
+    ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export interface DataGridColumn {
-  key: string;
-  label: string;
-  sortable?: boolean;
-  filterable?: boolean;
-  width?: string;
-  align?: 'left' | 'center' | 'right';
-  template?: TemplateRef<any>;
+/**
+ * TR: DataGrid sütun tanımları.
+ *
+ * EN: DataGrid column definitions.
+ */
+export interface DataGridColumn<T = unknown> {
+    key: string;
+    label: string;
+    sortable?: boolean;
+    filterable?: boolean;
+    width?: string;
+    align?: 'left' | 'center' | 'right';
+    /**
+     * TR: Hücre değerini biçimlendirmek için opsiyonel fonksiyon.
+     *
+     * EN: Optional function to format cell value.
+     */
+    formatter?: (value: unknown, row: T) => string;
 }
 
 export interface DataGridSort {
-  key: string;
-  direction: 'asc' | 'desc';
+    key: string;
+    direction: 'asc' | 'desc';
 }
 
 export interface DataGridFilter {
-  key: string;
-  value: string;
-  operator?: 'contains' | 'equals' | 'startsWith' | 'endsWith';
+    key: string;
+    value: string;
+    operator?: 'contains' | 'equals' | 'startsWith' | 'endsWith';
 }
 
 export interface DataGridPageEvent {
-  page: number;
-  pageSize: number;
+    page: number;
+    pageSize: number;
+}
+
+/**
+ * TR: Render performansı için işlenmiş satır verisi (ViewModel).
+ * Nested path çözümlemeleri (dot.notation) sadece bir kez yapılır.
+ *
+ * EN: Processed row data for render performance (ViewModel).
+ * Nested path resolutions (dot.notation) are done only once.
+ */
+interface GridRow<T> {
+    /**
+     * TR: Orijinal veri nesnesi.
+     *
+     * EN: Original data object.
+     */
+    original: T;
+    /**
+     * TR: Benzersiz satır anahtarı.
+     *
+     * EN: Unique row key.
+     */
+    rowKey: string | number;
+    /**
+     * TR: Sütun anahtarlarına göre önbelleklenmiş hücre değerleri.
+     *
+     * EN: Cached cell values by column keys.
+     */
+    cells: Record<string, unknown>;
 }
 
 /**
  * Column Template Directive
  */
 @Directive({
-  selector: '[sigDataGridColumn]',
-  standalone: true,
+    selector: '[sigDataGridColumn]',
+    standalone: true,
 })
 export class SigDataGridColumnDirective {
-  readonly key = input.required<string>({ alias: 'sigDataGridColumn' });
-  readonly template = inject(TemplateRef);
+    readonly key = input.required<string>({ alias: 'sigDataGridColumn' });
+    readonly template = inject(TemplateRef);
 }
 
 /**
- * SigDataGrid - Signal-based data grid with sorting, filtering, pagination
- * 
- * Usage:
- * <sig-data-grid
- *   [data]="users"
- *   [columns]="columns"
- *   [pageSize]="10"
- *   [selectable]="true"
- *   (selectionChange)="onSelect($event)"
- *   (sortChange)="onSort($event)"
- *   (pageChange)="onPage($event)"
- * >
- *   <ng-template sigDataGridColumn="actions" let-row>
- *     <button (click)="edit(row)">Edit</button>
- *   </ng-template>
- * </sig-data-grid>
+ * TR: Signal tabanlı, yüksek performanslı DataGrid bileşeni.
+ * "Pre-calculation" stratejisi ile render darboğazlarını önler.
+ *
+ * EN: Signal-based, high-performance DataGrid component.
+ * Prevents render bottlenecks via "Pre-calculation" strategy.
+ *
+ * @template T - TR: Tablo veri tipi. / EN: Table data type.
+ *
+ * @author Ahmet ALTUN
+ * @github  github.com/biyonik
  */
 @Component({
-  selector: 'sig-data-grid',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  template: `
-    <div class="sig-data-grid">
-      <!-- Toolbar -->
-      <div class="sig-data-grid__toolbar">
-        <!-- Search -->
-        @if (searchable()) {
-          <div class="sig-data-grid__search">
-            <input
-              type="text"
-              class="sig-data-grid__search-input"
-              [placeholder]="searchPlaceholder()"
-              [value]="searchQuery()"
-              (input)="onSearch($event)"
-            />
-            @if (searchQuery()) {
-              <button 
-                type="button" 
-                class="sig-data-grid__search-clear"
-                (click)="clearSearch()"
-              >
-                ✕
-              </button>
-            }
-          </div>
-        }
+    selector: 'sig-data-grid',
+    standalone: true,
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    template: `
+        <div class="sig-data-grid">
+            <div class="sig-data-grid__toolbar">
+                @if (searchable()) {
+                    <div class="sig-data-grid__search">
+                        <input
+                                type="text"
+                                class="sig-data-grid__search-input"
+                                [placeholder]="searchPlaceholder()"
+                                [value]="searchQuery()"
+                                (input)="onSearch($event)"
+                        />
+                        @if (searchQuery()) {
+                            <button
+                                    type="button"
+                                    class="sig-data-grid__search-clear"
+                                    (click)="clearSearch()"
+                            >
+                                ✕
+                            </button>
+                        }
+                    </div>
+                }
 
-        <!-- Bulk Actions -->
-        @if (selectedRows().size > 0) {
-          <div class="sig-data-grid__bulk-actions">
+                @if (selectedRows().size > 0) {
+                    <div class="sig-data-grid__bulk-actions">
             <span class="sig-data-grid__selected-count">
               {{ selectedRows().size }} seçildi
             </span>
-            <ng-content select="[grid-bulk-actions]"></ng-content>
-          </div>
-        }
+                        <ng-content select="[grid-bulk-actions]"></ng-content>
+                    </div>
+                }
 
-        <!-- Toolbar Actions -->
-        <div class="sig-data-grid__toolbar-actions">
-          <ng-content select="[grid-toolbar]"></ng-content>
-          
-          @if (exportable()) {
-            <button 
-              type="button" 
-              class="sig-data-grid__export-btn"
-              (click)="exportData()"
-            >
-              📥 Dışa Aktar
-            </button>
-          }
-        </div>
-      </div>
+                <div class="sig-data-grid__toolbar-actions">
+                    <ng-content select="[grid-toolbar]"></ng-content>
 
-      <!-- Table -->
-      <div class="sig-data-grid__table-container">
-        <table class="sig-data-grid__table">
-          <thead>
-            <tr>
-              @if (selectable()) {
-                <th class="sig-data-grid__th sig-data-grid__th--checkbox">
-                  <input
-                    type="checkbox"
-                    [checked]="isAllSelected()"
-                    [indeterminate]="isIndeterminate()"
-                    (change)="toggleSelectAll()"
-                  />
-                </th>
-              }
-              
-              @for (column of columns(); track column.key) {
-                <th 
-                  class="sig-data-grid__th"
-                  [class.sig-data-grid__th--sortable]="column.sortable"
-                  [style.width]="column.width"
-                  [style.text-align]="column.align || 'left'"
-                  (click)="column.sortable && toggleSort(column.key)"
-                >
-                  {{ column.label }}
-                  @if (column.sortable) {
-                    <span class="sig-data-grid__sort-icon">
+                    @if (exportable()) {
+                        <button
+                                type="button"
+                                class="sig-data-grid__export-btn"
+                                (click)="exportData()"
+                        >
+                            📥 Dışa Aktar
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="sig-data-grid__table-container">
+                <table class="sig-data-grid__table">
+                    <thead>
+                    <tr>
+                        @if (selectable()) {
+                            <th class="sig-data-grid__th sig-data-grid__th--checkbox">
+                                <input
+                                        type="checkbox"
+                                        [checked]="isAllSelected()"
+                                        [indeterminate]="isIndeterminate()"
+                                        (change)="toggleSelectAll()"
+                                />
+                            </th>
+                        }
+
+                        @for (column of columns(); track column.key) {
+                            <th
+                                    class="sig-data-grid__th"
+                                    [class.sig-data-grid__th--sortable]="column.sortable"
+                                    [style.width]="column.width"
+                                    [style.text-align]="column.align || 'left'"
+                                    (click)="column.sortable && toggleSort(column.key)"
+                            >
+                                {{ column.label }}
+                                @if (column.sortable) {
+                                    <span class="sig-data-grid__sort-icon">
                       @if (currentSort()?.key === column.key) {
-                        {{ currentSort()?.direction === 'asc' ? '↑' : '↓' }}
+                          {{ currentSort()?.direction === 'asc' ? '↑' : '↓' }}
                       } @else {
-                        ↕
+                          ↕
                       }
                     </span>
-                  }
-                </th>
-              }
-            </tr>
-          </thead>
-          
-          <tbody>
-            @if (loading()) {
-              <tr>
-                <td 
-                  [attr.colspan]="selectable() ? columns().length + 1 : columns().length"
-                  class="sig-data-grid__loading"
-                >
-                  <div class="sig-data-grid__spinner"></div>
-                  Yükleniyor...
-                </td>
-              </tr>
-            } @else if (displayedData().length === 0) {
-              <tr>
-                <td 
-                  [attr.colspan]="selectable() ? columns().length + 1 : columns().length"
-                  class="sig-data-grid__empty"
-                >
-                  {{ emptyMessage() }}
-                </td>
-              </tr>
-            } @else {
-              @for (row of displayedData(); track trackBy()(row, $index)) {
-                <tr 
-                  class="sig-data-grid__row"
-                  [class.sig-data-grid__row--selected]="isRowSelected(row)"
-                  [class.sig-data-grid__row--clickable]="rowClickable()"
-                  (click)="onRowClick(row)"
-                >
-                  @if (selectable()) {
-                    <td class="sig-data-grid__td sig-data-grid__td--checkbox">
-                      <input
-                        type="checkbox"
-                        [checked]="isRowSelected(row)"
-                        (change)="toggleRowSelection(row)"
-                        (click)="$event.stopPropagation()"
-                      />
-                    </td>
-                  }
-                  
-                  @for (column of columns(); track column.key) {
-                    <td 
-                      class="sig-data-grid__td"
-                      [style.text-align]="column.align || 'left'"
-                    >
-                      @if (getColumnTemplate(column.key); as template) {
-                        <ng-container 
-                          [ngTemplateOutlet]="template"
-                          [ngTemplateOutletContext]="{ $implicit: row, row: row, column: column }"
-                        ></ng-container>
-                      } @else {
-                        {{ getNestedValue(row, column.key) }}
-                      }
-                    </td>
-                  }
-                </tr>
-              }
+                                }
+                            </th>
+                        }
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (loading()) {
+                            <tr>
+                                <td
+                                        [attr.colspan]="selectable() ? columns().length + 1 : columns().length"
+                                        class="sig-data-grid__loading"
+                                >
+                                    <div class="sig-data-grid__spinner"></div>
+                                    Yükleniyor...
+                                </td>
+                            </tr>
+                        } @else if (displayedData().length === 0) {
+                            <tr>
+                                <td
+                                        [attr.colspan]="selectable() ? columns().length + 1 : columns().length"
+                                        class="sig-data-grid__empty"
+                                >
+                                    {{ emptyMessage() }}
+                                </td>
+                            </tr>
+                        } @else {
+                            @for (row of displayedData(); track row.rowKey) {
+                                <tr
+                                        class="sig-data-grid__row"
+                                        [class.sig-data-grid__row--selected]="isRowSelected(row.rowKey)"
+                                        [class.sig-data-grid__row--clickable]="rowClickable()"
+                                        (click)="onRowClick(row.original)"
+                                >
+                                    @if (selectable()) {
+                                        <td class="sig-data-grid__td sig-data-grid__td--checkbox">
+                                            <input
+                                                    type="checkbox"
+                                                    [checked]="isRowSelected(row.rowKey)"
+                                                    (change)="toggleRowSelection(row.rowKey)"
+                                                    (click)="$event.stopPropagation()"
+                                            />
+                                        </td>
+                                    }
+
+                                    @for (column of columns(); track column.key) {
+                                        <td
+                                                class="sig-data-grid__td"
+                                                [style.text-align]="column.align || 'left'"
+                                        >
+                                            @if (getColumnTemplate(column.key); as template) {
+                                                <ng-container
+                                                        [ngTemplateOutlet]="template"
+                                                        [ngTemplateOutletContext]="{ $implicit: row.original, row: row.original, column: column }"
+                                                ></ng-container>
+                                            } @else {
+                                                {{ row.cells[column.key] }}
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (pageable()) {
+                <div class="sig-data-grid__pagination">
+                    <div class="sig-data-grid__page-info">
+                        {{ paginationInfo() }}
+                    </div>
+
+                    <div class="sig-data-grid__page-size">
+                        <label>Sayfa başına:</label>
+                        <select
+                                [value]="pageSize()"
+                                (change)="onPageSizeChange($event)"
+                        >
+                            @for (size of pageSizeOptions(); track size) {
+                                <option [value]="size">{{ size }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="sig-data-grid__page-controls">
+                        <button
+                                type="button"
+                                [disabled]="currentPage() === 1"
+                                (click)="goToPage(1)"
+                        >
+                            ⟪
+                        </button>
+                        <button
+                                type="button"
+                                [disabled]="currentPage() === 1"
+                                (click)="goToPage(currentPage() - 1)"
+                        >
+                            ◀
+                        </button>
+
+                        @for (page of visiblePages(); track page) {
+                            @if (page === '...') {
+                                <span class="sig-data-grid__page-ellipsis">...</span>
+                            } @else {
+                                <button
+                                        type="button"
+                                        class="sig-data-grid__page-btn"
+                                        [class.sig-data-grid__page-btn--active]="page === currentPage()"
+                                        (click)="goToPage(+page)"
+                                >
+                                    {{ page }}
+                                </button>
+                            }
+                        }
+
+                        <button
+                                type="button"
+                                [disabled]="currentPage() === totalPages()"
+                                (click)="goToPage(currentPage() + 1)"
+                        >
+                            ▶
+                        </button>
+                        <button
+                                type="button"
+                                [disabled]="currentPage() === totalPages()"
+                                (click)="goToPage(totalPages())"
+                        >
+                            ⟫
+                        </button>
+                    </div>
+                </div>
             }
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      @if (pageable()) {
-        <div class="sig-data-grid__pagination">
-          <div class="sig-data-grid__page-info">
-            {{ paginationInfo() }}
-          </div>
-
-          <div class="sig-data-grid__page-size">
-            <label>Sayfa başına:</label>
-            <select 
-              [value]="pageSize()"
-              (change)="onPageSizeChange($event)"
-            >
-              @for (size of pageSizeOptions(); track size) {
-                <option [value]="size">{{ size }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="sig-data-grid__page-controls">
-            <button
-              type="button"
-              [disabled]="currentPage() === 1"
-              (click)="goToPage(1)"
-            >
-              ⟪
-            </button>
-            <button
-              type="button"
-              [disabled]="currentPage() === 1"
-              (click)="goToPage(currentPage() - 1)"
-            >
-              ◀
-            </button>
-            
-            @for (page of visiblePages(); track page) {
-              @if (page === '...') {
-                <span class="sig-data-grid__page-ellipsis">...</span>
-              } @else {
-                <button
-                  type="button"
-                  class="sig-data-grid__page-btn"
-                  [class.sig-data-grid__page-btn--active]="page === currentPage()"
-                  (click)="goToPage(+page)"
-                >
-                  {{ page }}
-                </button>
-              }
-            }
-            
-            <button
-              type="button"
-              [disabled]="currentPage() === totalPages()"
-              (click)="goToPage(currentPage() + 1)"
-            >
-              ▶
-            </button>
-            <button
-              type="button"
-              [disabled]="currentPage() === totalPages()"
-              (click)="goToPage(totalPages())"
-            >
-              ⟫
-            </button>
-          </div>
         </div>
-      }
-    </div>
-  `,
-  })
-export class SigDataGridComponent<T = any> {
-  readonly columnTemplates = contentChildren(SigDataGridColumnDirective);
+    `,
+})
+export class SigDataGridComponent<T = unknown> {
+    readonly columnTemplates = contentChildren(SigDataGridColumnDirective);
 
-  readonly data = input.required<T[]>();
-  readonly columns = input.required<DataGridColumn[]>();
-  readonly trackBy = input<(item: T, index: number) => any>((item, index) => index);
-  readonly rowKey = input<string>('id');
+    readonly data = input.required<T[]>();
+    readonly columns = input.required<DataGridColumn<T>[]>();
+    readonly rowKey = input<string>('id');
 
-  readonly selectable = input<boolean>(false);
-  readonly searchable = input<boolean>(true);
-  readonly pageable = input<boolean>(true);
-  readonly exportable = input<boolean>(false);
-  readonly rowClickable = input<boolean>(false);
-  readonly loading = input<boolean>(false);
+    readonly selectable = input<boolean>(false);
+    readonly searchable = input<boolean>(true);
+    readonly pageable = input<boolean>(true);
+    readonly exportable = input<boolean>(false);
+    readonly rowClickable = input<boolean>(false);
+    readonly loading = input<boolean>(false);
 
-  readonly pageSize = input<number>(10);
-  readonly pageSizeOptions = input<number[]>([5, 10, 25, 50, 100]);
-  readonly searchPlaceholder = input<string>('Ara...');
-  readonly emptyMessage = input<string>('Kayıt bulunamadı');
+    readonly pageSize = input<number>(10);
+    readonly pageSizeOptions = input<number[]>([5, 10, 25, 50, 100]);
+    readonly searchPlaceholder = input<string>('Ara...');
+    readonly emptyMessage = input<string>('Kayıt bulunamadı');
 
-  readonly sortChange = output<DataGridSort>();
-  readonly filterChange = output<DataGridFilter[]>();
-  readonly pageChange = output<DataGridPageEvent>();
-  readonly selectionChange = output<T[]>();
-  readonly rowClick = output<T>();
-  readonly exportClick = output<void>();
+    readonly sortChange = output<DataGridSort>();
+    readonly filterChange = output<DataGridFilter[]>();
+    readonly pageChange = output<DataGridPageEvent>();
+    readonly selectionChange = output<T[]>();
+    readonly rowClick = output<T>();
+    readonly exportClick = output<void>();
 
-  readonly searchQuery = signal('');
-  readonly currentPage = signal(1);
-  readonly currentSort = signal<DataGridSort | null>(null);
-  readonly selectedRows = signal(new Set<unknown>());
+    readonly searchQuery = signal('');
+    readonly currentPage = signal(1);
+    readonly currentSort = signal<DataGridSort | null>(null);
+    readonly selectedRows = signal(new Set<unknown>()); // Holds Row Keys
 
-  readonly filteredData = computed(() => {
-    let result = [...this.data()];
-    const query = this.searchQuery().toLowerCase();
+    /**
+     * TR: Ham veriyi işleyerek GridRow (ViewModel) yapısına dönüştürür.
+     * Bu işlem sadece `data` veya `columns` değiştiğinde çalışır (Memoization).
+     *
+     * EN: Transforms raw data into GridRow (ViewModel) structure.
+     * Runs only when `data` or `columns` change (Memoization).
+     */
+    private readonly processedRows = computed<GridRow<T>[]>(() => {
+        const rawData = this.data();
+        const cols = this.columns();
+        const keyField = this.rowKey();
 
-    if (query) {
-      result = result.filter((row) => {
-        return this.columns().some((col) => {
-          const value = this.getNestedValue(row, col.key);
-          return String(value).toLowerCase().includes(query);
+        return rawData.map(item => {
+            const cells: Record<string, unknown> = {};
+
+            // TR: Her sütun için değeri önceden hesapla
+            // EN: Pre-calculate value for each column
+            for (const col of cols) {
+                const val = this.resolveNestedValue(item, col.key);
+                cells[col.key] = col.formatter ? col.formatter(val, item) : val;
+            }
+
+            return {
+                original: item,
+                rowKey: this.resolveNestedValue(item, keyField) as string | number,
+                cells
+            };
         });
-      });
+    });
+
+    readonly filteredData = computed(() => {
+        let result = this.processedRows();
+        const query = this.searchQuery().toLowerCase();
+
+        // TR: Arama işlemi önbelleklenmiş 'cells' üzerinden yapılır (Daha hızlı)
+        // EN: Search is done via cached 'cells' (Faster)
+        if (query) {
+            result = result.filter((row) => {
+                return Object.values(row.cells).some((val) =>
+                    String(val).toLowerCase().includes(query)
+                );
+            });
+        }
+
+        const sort = this.currentSort();
+        if (sort) {
+            result = [...result].sort((a, b) => { // Immutable sort
+                const aVal = a.cells[sort.key] as any;
+                const bVal = b.cells[sort.key] as any;
+
+                if (aVal === bVal) return 0;
+
+                // Handle null/undefined
+                if (aVal == null) return 1;
+                if (bVal == null) return -1;
+
+                const comparison = aVal < bVal ? -1 : 1;
+                return sort.direction === 'asc' ? comparison : -comparison;
+            });
+        }
+
+        return result;
+    });
+
+    readonly totalPages = computed(() => {
+        return Math.ceil(this.filteredData().length / this.pageSize()) || 1;
+    });
+
+    readonly displayedData = computed(() => {
+        if (!this.pageable()) return this.filteredData();
+
+        const start = (this.currentPage() - 1) * this.pageSize();
+        return this.filteredData().slice(start, start + this.pageSize());
+    });
+
+    readonly paginationInfo = computed(() => {
+        const total = this.filteredData().length;
+        const start = (this.currentPage() - 1) * this.pageSize() + 1;
+        const end = Math.min(this.currentPage() * this.pageSize(), total);
+        return `${start}-${end} / ${total}`;
+    });
+
+    readonly visiblePages = computed(() => {
+        const total = this.totalPages();
+        const current = this.currentPage();
+        const pages: (number | string)[] = [];
+
+        if (total <= 7) {
+            for (let i = 1; i <= total; i++) pages.push(i);
+        } else {
+            pages.push(1);
+            if (current > 3) pages.push('...');
+
+            const start = Math.max(2, current - 1);
+            const end = Math.min(total - 1, current + 1);
+
+            for (let i = start; i <= end; i++) pages.push(i);
+
+            if (current < total - 2) pages.push('...');
+            pages.push(total);
+        }
+
+        return pages;
+    });
+
+    readonly isAllSelected = computed(() => {
+        const displayed = this.displayedData();
+        return displayed.length > 0 && displayed.every((row) =>
+            this.selectedRows().has(row.rowKey)
+        );
+    });
+
+    readonly isIndeterminate = computed(() => {
+        const displayed = this.displayedData();
+        const selectedCount = displayed.filter((row) =>
+            this.selectedRows().has(row.rowKey)
+        ).length;
+        return selectedCount > 0 && selectedCount < displayed.length;
+    });
+
+    onSearch(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        this.searchQuery.set(input.value);
+        this.currentPage.set(1);
     }
 
-    const sort = this.currentSort();
-    if (sort) {
-      result.sort((a, b) => {
-        const aVal = this.getNestedValue(a, sort.key);
-        const bVal = this.getNestedValue(b, sort.key);
-        const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-        return sort.direction === 'asc' ? comparison : -comparison;
-      });
+    clearSearch(): void {
+        this.searchQuery.set('');
+        this.currentPage.set(1);
     }
 
-    return result;
-  });
+    toggleSort(key: string): void {
+        const current = this.currentSort();
+        let newSort: DataGridSort;
 
-  readonly totalPages = computed(() => {
-    return Math.ceil(this.filteredData().length / this.pageSize()) || 1;
-  });
+        if (current?.key === key) {
+            newSort = {
+                key,
+                direction: current.direction === 'asc' ? 'desc' : 'asc',
+            };
+        } else {
+            newSort = { key, direction: 'asc' };
+        }
 
-  readonly displayedData = computed(() => {
-    if (!this.pageable()) return this.filteredData();
-    
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.filteredData().slice(start, start + this.pageSize());
-  });
-
-  readonly paginationInfo = computed(() => {
-    const total = this.filteredData().length;
-    const start = (this.currentPage() - 1) * this.pageSize() + 1;
-    const end = Math.min(this.currentPage() * this.pageSize(), total);
-    return `${start}-${end} / ${total}`;
-  });
-
-  readonly visiblePages = computed(() => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: (number | string)[] = [];
-
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (current > 3) pages.push('...');
-      
-      const start = Math.max(2, current - 1);
-      const end = Math.min(total - 1, current + 1);
-      
-      for (let i = start; i <= end; i++) pages.push(i);
-      
-      if (current < total - 2) pages.push('...');
-      pages.push(total);
+        this.currentSort.set(newSort);
+        this.sortChange.emit(newSort);
     }
 
-    return pages;
-  });
-
-  readonly isAllSelected = computed(() => {
-    const displayed = this.displayedData();
-    return displayed.length > 0 && displayed.every((row) => 
-      this.selectedRows().has(this.getRowKey(row))
-    );
-  });
-
-  readonly isIndeterminate = computed(() => {
-    const displayed = this.displayedData();
-    const selectedCount = displayed.filter((row) => 
-      this.selectedRows().has(this.getRowKey(row))
-    ).length;
-    return selectedCount > 0 && selectedCount < displayed.length;
-  });
-
-  onSearch(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.searchQuery.set(input.value);
-    this.currentPage.set(1);
-  }
-
-  clearSearch(): void {
-    this.searchQuery.set('');
-    this.currentPage.set(1);
-  }
-
-  toggleSort(key: string): void {
-    const current = this.currentSort();
-    let newSort: DataGridSort;
-
-    if (current?.key === key) {
-      newSort = {
-        key,
-        direction: current.direction === 'asc' ? 'desc' : 'asc',
-      };
-    } else {
-      newSort = { key, direction: 'asc' };
+    goToPage(page: number): void {
+        if (page >= 1 && page <= this.totalPages()) {
+            this.currentPage.set(page);
+            this.pageChange.emit({ page, pageSize: this.pageSize() });
+        }
     }
 
-    this.currentSort.set(newSort);
-    this.sortChange.emit(newSort);
-  }
-
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages()) {
-      this.currentPage.set(page);
-      this.pageChange.emit({ page, pageSize: this.pageSize() });
-    }
-  }
-
-  onPageSizeChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    const newSize = parseInt(select.value, 10);
-    this.currentPage.set(1);
-    this.pageChange.emit({ page: 1, pageSize: newSize });
-  }
-
-  toggleSelectAll(): void {
-    const displayed = this.displayedData();
-    const newSelected = new Set(this.selectedRows());
-
-    if (this.isAllSelected()) {
-      displayed.forEach((row) => newSelected.delete(this.getRowKey(row)));
-    } else {
-      displayed.forEach((row) => newSelected.add(this.getRowKey(row)));
+    onPageSizeChange(event: Event): void {
+        const select = event.target as HTMLSelectElement;
+        const newSize = parseInt(select.value, 10);
+        this.currentPage.set(1);
+        this.pageChange.emit({ page: 1, pageSize: newSize });
     }
 
-    this.selectedRows.set(newSelected);
-    this.emitSelectionChange();
-  }
+    toggleSelectAll(): void {
+        const displayed = this.displayedData();
+        const newSelected = new Set(this.selectedRows());
 
-  toggleRowSelection(row: T): void {
-    const key = this.getRowKey(row);
-    const newSelected = new Set(this.selectedRows());
+        if (this.isAllSelected()) {
+            displayed.forEach((row) => newSelected.delete(row.rowKey));
+        } else {
+            displayed.forEach((row) => newSelected.add(row.rowKey));
+        }
 
-    if (newSelected.has(key)) {
-      newSelected.delete(key);
-    } else {
-      newSelected.add(key);
+        this.selectedRows.set(newSelected);
+        this.emitSelectionChange();
     }
 
-    this.selectedRows.set(newSelected);
-    this.emitSelectionChange();
-  }
+    toggleRowSelection(key: unknown): void {
+        const newSelected = new Set(this.selectedRows());
 
-  isRowSelected(row: T): boolean {
-    return this.selectedRows().has(this.getRowKey(row));
-  }
+        if (newSelected.has(key)) {
+            newSelected.delete(key);
+        } else {
+            newSelected.add(key);
+        }
 
-  onRowClick(row: T): void {
-    if (this.rowClickable()) {
-      this.rowClick.emit(row);
+        this.selectedRows.set(newSelected);
+        this.emitSelectionChange();
     }
-  }
 
-  exportData(): void {
-    this.exportClick.emit();
-  }
+    isRowSelected(key: unknown): boolean {
+        return this.selectedRows().has(key);
+    }
 
-  getColumnTemplate(key: string): TemplateRef<any> | null {
-    const directive = this.columnTemplates().find((d) => d.key() === key);
-    return directive?.template || null;
-  }
+    onRowClick(row: T): void {
+        if (this.rowClickable()) {
+            this.rowClick.emit(row);
+        }
+    }
 
-  getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((o, p) => o?.[p], obj);
-  }
+    exportData(): void {
+        this.exportClick.emit();
+    }
 
-  private getRowKey(row: T): unknown {
-    return this.getNestedValue(row, this.rowKey());
-  }
+    getColumnTemplate(key: string): TemplateRef<any> | null {
+        const directive = this.columnTemplates().find((d) => d.key() === key);
+        return directive?.template || null;
+    }
 
-  private emitSelectionChange(): void {
-    const selectedKeys = this.selectedRows();
-    const selectedItems = this.data().filter((row) => 
-      selectedKeys.has(this.getRowKey(row))
-    );
-    this.selectionChange.emit(selectedItems);
-  }
+    /**
+     * TR: İç içe geçmiş obje değerlerini güvenli bir şekilde çözer.
+     * Artık sadece 'processedRows' computed içinde çalışır, template'de değil!
+     *
+     * EN: Safely resolves nested object values.
+     * Now only runs inside 'processedRows' computed, not in template!
+     */
+    private resolveNestedValue(obj: any, path: string): unknown {
+        if (!path || !path.includes('.')) {
+            return obj?.[path];
+        }
+        return path.split('.').reduce((o, p) => o?.[p], obj);
+    }
 
-  // Public API
-  clearSelection(): void {
-    this.selectedRows.set(new Set());
-    this.selectionChange.emit([]);
-  }
+    private emitSelectionChange(): void {
+        const selectedKeys = this.selectedRows();
+        const selectedItems = this.processedRows()
+            .filter(row => selectedKeys.has(row.rowKey))
+            .map(row => row.original);
 
-  selectAll(): void {
-    const allKeys = new Set(this.data().map((row) => this.getRowKey(row)));
-    this.selectedRows.set(allKeys);
-    this.emitSelectionChange();
-  }
+        this.selectionChange.emit(selectedItems);
+    }
 
-  refresh(): void {
-    this.currentPage.set(1);
-    this.searchQuery.set('');
-    this.currentSort.set(null);
-    this.clearSelection();
-  }
+    // Public API
+    clearSelection(): void {
+        this.selectedRows.set(new Set());
+        this.selectionChange.emit([]);
+    }
+
+    selectAll(): void {
+        const allKeys = new Set(this.processedRows().map((row) => row.rowKey));
+        this.selectedRows.set(allKeys);
+        this.emitSelectionChange();
+    }
+
+    refresh(): void {
+        this.currentPage.set(1);
+        this.searchQuery.set('');
+        this.currentSort.set(null);
+        this.clearSelection();
+    }
 }
