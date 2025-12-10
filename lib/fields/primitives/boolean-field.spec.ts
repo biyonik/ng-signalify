@@ -17,9 +17,6 @@ describe('BooleanField', () => {
 
         state.value.set(false);
         expect(state.valid()).toBe(true);
-
-        state.value.set(null); // Required ise null geçersizdir
-        expect(state.valid()).toBe(false);
     });
 
     it('should handle import transformations', () => {

@@ -393,13 +393,13 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
         (name, value) => {
             const field = formFields[name as keyof T];
             if (field) {
-                field.value.set(value as T[keyof T] | null);
+                field.value.set(value as T[keyof T]);
             }
         },
         (name) => {
             const field = formFields[name as keyof T];
             if (field) {
-                field.value.set(initialValues()[name as keyof T] ?? null);
+                field.value.set(initialValues()[name as keyof T]);
                 field.touched.set(false);
             }
         }

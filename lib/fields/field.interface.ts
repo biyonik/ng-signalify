@@ -157,7 +157,7 @@ export interface IField<T = unknown> {
    * @param initial - TR: Başlangıç değeri (opsiyonel). / EN: Initial value (optional).
    * @returns TR: Yönetilebilir alan değeri nesnesi. / EN: Manageable field value object.
    */
-  createValue(initial?: T | null): FieldValue<T>;
+  createValue(initial?: T): FieldValue<T>;
 
   /**
    * TR: Ham veriyi kullanıcı arayüzünde gösterilmek üzere formatlar.

@@ -77,8 +77,8 @@ export abstract class BaseField<T> implements IField<T> {
    * @param initial - TR: Başlangıç değeri (varsayılan: null). / EN: Initial value (default: null).
    * @returns TR: Değer, hata ve durum sinyallerini içeren nesne. / EN: Object containing value, error, and status signals.
    */
-    createValue(initial: T | null = null): FieldValue<T> {
-        const value = signal<T | null>(initial);
+    createValue(initial?: T): FieldValue<T> {
+        const value = signal<T>(initial as T);
         const touched = signal(false);
 
         // 1. Validasyon sonucunu hesaplayan saf (pure) sinyal

@@ -28,7 +28,7 @@ describe('TextAreaField', () => {
     });
 
     it('should handle null/empty', () => {
-        const state = field.createValue(null);
+        const state = field.createValue();
         expect(state.valid()).toBe(false); // Required
     });
 
