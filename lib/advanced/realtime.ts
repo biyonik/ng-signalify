@@ -97,6 +97,17 @@ export interface WebSocketConfig {
    */
   protocols?: string | string[];
 
+  /**
+   * TR: Mesaj kuyruğu için maksimum boyut.
+   * Kuyruk dolunca en eski mesajlar atılır (FIFO).
+   * Varsayılan: 1000
+   *
+   * EN: Maximum size for message queue.
+   * Oldest messages are dropped when queue is full (FIFO).
+   * Default: 1000
+   */
+  maxQueueSize?: number;
+
   onOpen?: () => void;
   onClose?: (event: CloseEvent) => void;
   onError?: (error: Event) => void;
@@ -164,6 +175,7 @@ export class RealtimeConnection {
       heartbeatMessage: config.heartbeatMessage ?? 'ping',
       connectionTimeout: config.connectionTimeout ?? 10000,
       protocols: config.protocols ?? [],
+      maxQueueSize: config.maxQueueSize ?? 1000,
       onOpen: config.onOpen ?? (() => {}),
       onClose: config.onClose ?? (() => {}),
       onError: config.onError ?? (() => {}),
@@ -238,9 +250,11 @@ export class RealtimeConnection {
   /**
    * TR: Sunucuya mesaj gönderir.
    * Bağlantı yoksa mesajı kuyruğa (Queue) ekler, bağlantı sağlandığında otomatik gönderir.
+   * Kuyruk doluysa en eski mesajlar atılır (FIFO - Memory Leak koruması).
    *
    * EN: Sends message to server.
    * If not connected, adds message to Queue, sends automatically when connected.
+   * If queue is full, oldest messages are dropped (FIFO - Memory Leak protection).
    *
    * @param data - TR: Gönderilecek veri (String veya Object). / EN: Data to send (String or Object).
    * @returns TR: Gönderildi mi? (Queue'ya eklendiyse false). / EN: Sent? (False if queued).
@@ -251,6 +265,17 @@ export class RealtimeConnection {
     if (this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(message);
       return true;
+    }
+
+    // TR: Kuyruk doluysa en eski mesajı at (Memory Leak koruması)
+    // EN: Drop oldest message if queue is full (Memory Leak protection)
+    if (this.messageQueue.length >= this.config.maxQueueSize) {
+      const droppedCount = this.messageQueue.length - this.config.maxQueueSize + 1;
+      this.messageQueue.splice(0, droppedCount);
+      console.warn(
+        `[ng-signalify] Message queue full (max: ${this.config.maxQueueSize}). ` +
+        `Dropped ${droppedCount} oldest message(s).`
+      );
     }
 
     // TR: Mesajı daha sonra göndermek için kuyruğa al

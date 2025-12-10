@@ -109,6 +109,63 @@ export class AsyncValidator<T = unknown> {
     }
 
     /**
+     * TR: Değeri doğrular ve sonucu Promise olarak döner.
+     * Debounce'u BY-PASS eder, anında validasyon yapar.
+     * Form submit sırasında validateAll() tarafından kullanılır.
+     *
+     * EN: Validates the value and returns result as Promise.
+     * BY-PASSES debounce, validates immediately.
+     * Used by validateAll() during form submission.
+     *
+     * @returns TR: Hata mesajı veya boş string. / EN: Error message or empty string.
+     */
+    async validateAsync(value: T): Promise<string> {
+        // 1. Bekleyen zamanlayıcıyı iptal et
+        if (this._timeoutId) {
+            clearTimeout(this._timeoutId);
+            this._timeoutId = null;
+        }
+
+        // 2. Devam eden isteği iptal et
+        if (this._abortController) {
+            this._abortController.abort();
+        }
+
+        // 3. Değer boşsa hata yok
+        if (value === null || value === undefined || value === '') {
+            this._error.set('');
+            this._loading.set(false);
+            return '';
+        }
+
+        // 4. Yeni kontrolcü oluştur ve hemen çalıştır (debounce yok!)
+        this._loading.set(true);
+        this._abortController = new AbortController();
+        const signal = this._abortController.signal;
+
+        try {
+            const result = await this.validatorFn(value, signal);
+
+            if (!signal.aborted) {
+                this._error.set(result);
+                this._loading.set(false);
+            }
+
+            return result;
+        } catch (error: any) {
+            if (error.name !== 'AbortError' && !signal.aborted) {
+                console.error('Async validation error:', error);
+                this._loading.set(false);
+            }
+            return '';
+        } finally {
+            if (this._abortController?.signal === signal) {
+                this._abortController = null;
+            }
+        }
+    }
+
+    /**
      * TR: Validasyon durumunu sıfırlar.
      *
      * EN: Resets validation state.
