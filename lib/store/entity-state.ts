@@ -472,6 +472,7 @@ export interface FetchParams {
     pageSize?: number;
     sort?: SortConfig;
     filters?: FilterParams;
+    signal?: AbortSignal
 }
 
 /**

@@ -42,6 +42,15 @@ export abstract class EntityStore<
     UpdateDto = Partial<T>
 > {
     /**
+     * TR: Aktif yükleme isteğini iptal etmek için kullanılan kontrolcü.
+     * Race-condition (Yarış durumu) önlemek için her yeni istekte yenilenir.
+     *
+     * EN: Controller used to cancel the active loading request.
+     * Refreshed on every new request to prevent race-conditions.
+     */
+    private _loadController: AbortController | null = null;
+
+    /**
      * TR: Depo yapılandırma ayarları (Salt okunur).
      *
      * EN: Store configuration settings (Readonly).
@@ -228,26 +237,40 @@ export abstract class EntityStore<
 
     /**
      * TR: Filtre, sıralama ve sayfalama parametrelerine göre verileri yükler.
-     * API çağrısı başarılı olursa state güncellenir, başarısız olursa hata set edilir.
+     * ÖNCEKİ İSTEĞİ İPTAL EDER (Auto-Cancellation).
      *
      * EN: Loads data based on filter, sort, and pagination parameters.
-     * If API call is successful, updates state; otherwise, sets error.
+     * CANCELS PREVIOUS REQUEST (Auto-Cancellation).
      */
     async loadAll(params?: Partial<FetchParams>): Promise<void> {
+        // TR: 1. Önceki istek devam ediyorsa iptal et!
+        // EN: 1. If previous request is pending, cancel it!
+        if (this._loadController) {
+            this._loadController.abort();
+        }
+
+        // TR: 2. Yeni bir kontrolcü oluştur
+        // EN: 2. Create a new controller
+        this._loadController = new AbortController();
+        const signal = this._loadController.signal;
+
         this.setLoading('loading');
         this.clearError();
 
         try {
-            // TR: Mevcut parametrelerle yeni parametreleri birleştir
-            // EN: Merge current parameters with new parameters
             const fetchParams: FetchParams = {
                 page: params?.page ?? this.pagination.page(),
                 pageSize: params?.pageSize ?? this.pagination.pageSize(),
                 sort: params?.sort ?? this._state().sort ?? undefined,
                 filters: params?.filters ?? this._state().filters,
+                signal,
             };
 
             const response = await this.fetchAll(fetchParams);
+
+            // TR: Eğer bu istek iptal edildiyse state'i güncelleme (Safety Check)
+            // EN: If this request was aborted, do not update state (Safety Check)
+            if (signal.aborted) return;
 
             this._state.update((s) => ({
                 ...adapter.setAll(s, response.data, this.config.selectId),
@@ -255,12 +278,23 @@ export abstract class EntityStore<
                 lastFetch: Date.now(),
             }));
 
-            // TR: Sayfalama bilgisini güncelle
-            // EN: Update pagination info
             this.pagination.setTotal(response.total);
             this.pagination.setPage(response.page);
-        } catch (e) {
+        } catch (e: any) { // 'any' is needed for DOMException check
+            // TR: Hata "AbortError" ise (İptal edildiyse) yoksay
+            // EN: If error is "AbortError" (Cancelled), ignore it
+            if (e.name === 'AbortError' || signal.aborted) {
+                // Log: "Request cancelled - new one incoming"
+                return;
+            }
+
             this.setError(e);
+        } finally {
+            // TR: Kontrolcü temizliği
+            // EN: Cleanup controller
+            if (this._loadController?.signal === signal) {
+                this._loadController = null;
+            }
         }
     }
 
