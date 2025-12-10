@@ -1,4 +1,20 @@
 import {computed, effect, Signal, signal} from '@angular/core';
+import {openDB, DBSchema, IDBPDatabase} from 'idb';
+
+/**
+ * TR: IndexedDB veritabanı şeması.
+ * Kuyruk isteklerini ve indekslerini tanımlar.
+ *
+ * EN: IndexedDB database schema.
+ * Defines queue requests and indexes.
+ */
+interface OfflineDB extends DBSchema {
+    requests: {
+        key: string;
+        value: QueuedRequest;
+        indexes: { 'by-priority': number };
+    };
+}
 
 /**
  * TR: Kuyruğa alınan isteğin veri yapısı.
@@ -50,10 +66,10 @@ export type QueueStatus = 'idle' | 'processing' | 'paused' | 'offline';
 
 /**
  * TR: Çevrimdışı kuyruk yapılandırması.
- * Depolama anahtarı, yeniden deneme politikaları ve işleme stratejilerini (FIFO/Priority) belirler.
+ * Veritabanı adı, güvenlik politikaları (Token Provider) ve yeniden deneme ayarlarını içerir.
  *
  * EN: Offline queue configuration.
- * Determines storage key, retry policies, and processing strategies (FIFO/Priority).
+ * Includes database name, security policies (Token Provider), and retry settings.
  *
  * @author Ahmet ALTUN
  * @github  github.com/biyonik
@@ -62,11 +78,11 @@ export type QueueStatus = 'idle' | 'processing' | 'paused' | 'offline';
  */
 export interface OfflineQueueConfig {
     /**
-     * TR: LocalStorage anahtarı. Varsayılan: 'offline_queue'.
+     * TR: IndexedDB veritabanı adı. Varsayılan: 'ng-signalify-db'.
      *
-     * EN: LocalStorage key. Default: 'offline_queue'.
+     * EN: IndexedDB database name. Default: 'ng-signalify-db'.
      */
-    storageKey?: string;
+    dbName?: string;
 
     /**
      * TR: İstek başına maksimum yeniden deneme sayısı.
@@ -76,20 +92,20 @@ export interface OfflineQueueConfig {
     maxRetries?: number;
 
     /**
-     * TR: İlk giren ilk çıkar (FIFO) mantığı kullanılsın mı?
-     * False ise `priority` değerine göre sıralama yapılır.
-     *
-     * EN: Whether to use First-In-First-Out (FIFO) logic.
-     * If false, sorting is done based on `priority` value.
-     */
-    fifo?: boolean;
-
-    /**
      * TR: İnternet bağlantısı geldiğinde otomatik işleme başlasın mı?
      *
      * EN: Whether to start processing automatically when internet connection is restored.
      */
     autoProcess?: boolean;
+
+    /**
+     * TR: İstek işlenmeden hemen önce güncel token'ı sağlayan fonksiyon.
+     * Güvenlik için token veritabanında saklanmaz, buradan dinamik alınır.
+     *
+     * EN: Function providing the current token just before request processing.
+     * For security, token is not stored in DB, retrieved dynamically from here.
+     */
+    tokenProvider?: () => string | Promise<string>;
 
     /**
      * TR: Başarılı işlem sonrası tetiklenen callback.
@@ -115,10 +131,10 @@ export interface OfflineQueueConfig {
 
 /**
  * TR: Kuyruk istatistikleri.
- * UI tarafında senkronizasyon durumu göstermek için kullanılır (Örn: "3 istek kuyrukta").
+ * UI tarafında senkronizasyon durumu göstermek için kullanılır.
  *
  * EN: Queue statistics.
- * Used to show synchronization status on the UI side (E.g., "3 requests in queue").
+ * Used to show synchronization status on the UI side.
  */
 export interface QueueStats {
     pending: number;
@@ -128,15 +144,13 @@ export interface QueueStats {
 }
 
 /**
- * TR: Çevrimdışı İstek Kuyruğu Yöneticisi.
- * İnternet bağlantısı olmadığında istekleri yakalar, LocalStorage'da saklar ve
- * bağlantı sağlandığında (Backoff stratejisiyle) sunucuya iletir.
- * "Store-and-Forward" mimarisini uygular.
+ * TR: Çevrimdışı İstek Kuyruğu Yöneticisi (IndexedDB Destekli).
+ * İnternet bağlantısı olmadığında istekleri yakalar, IndexedDB'de güvenli bir şekilde saklar.
+ * "Store-and-Forward" mimarisini uygular ve token güvenliğini sağlar.
  *
- * EN: Offline Request Queue Manager.
- * Captures requests when there is no internet connection, stores them in LocalStorage,
- * and forwards them to the server (with Backoff strategy) when connection is restored.
- * Implements "Store-and-Forward" architecture.
+ * EN: Offline Request Queue Manager (IndexedDB Supported).
+ * Captures requests when offline, securely stores them in IndexedDB.
+ * Implements "Store-and-Forward" architecture and ensures token security.
  *
  * @author Ahmet ALTUN
  * @github  github.com/biyonik
@@ -156,15 +170,16 @@ export class OfflineQueue {
     private config: Required<OfflineQueueConfig>;
     private isOnline = signal(typeof navigator !== 'undefined' ? navigator.onLine : true);
     private processingIds = new Set<string>();
+    private dbPromise: Promise<IDBPDatabase<OfflineDB>>;
 
     /**
      * TR: OfflineQueue sınıfını başlatır.
-     * Tarayıcı online/offline olaylarını dinler ve otomatik senkronizasyonu yönetir.
+     * Tarayıcı online/offline olaylarını dinler ve IndexedDB bağlantısını kurar.
      *
      * EN: Initializes the OfflineQueue class.
-     * Listens to browser online/offline events and manages automatic synchronization.
+     * Listens to browser online/offline events and establishes IndexedDB connection.
      *
-     * @param executor - TR: İsteği gerçekten sunucuya ileten fonksiyon (fetch, axios vb.). / EN: Function that actually forwards the request to the server (fetch, axios, etc.).
+     * @param executor - TR: İsteği gerçekten sunucuya ileten fonksiyon. / EN: Function that actually forwards the request to the server.
      * @param config - TR: Kuyruk ayarları. / EN: Queue settings.
      */
     constructor(
@@ -172,19 +187,26 @@ export class OfflineQueue {
         config: OfflineQueueConfig = {}
     ) {
         this.config = {
-            storageKey: config.storageKey ?? 'offline_queue',
+            dbName: config.dbName ?? 'ng-signalify-db',
             maxRetries: config.maxRetries ?? 3,
-            fifo: config.fifo ?? true,
             autoProcess: config.autoProcess ?? true,
-            onSuccess: config.onSuccess ?? (() => {
-            }),
-            onFailure: config.onFailure ?? (() => {
-            }),
-            onStatusChange: config.onStatusChange ?? (() => {
-            }),
+            tokenProvider: config.tokenProvider ?? (() => ''),
+            onSuccess: config.onSuccess ?? (() => {}),
+            onFailure: config.onFailure ?? (() => {}),
+            onStatusChange: config.onStatusChange ?? (() => {}),
         };
 
-        // Load persisted queue
+        // TR: Veritabanını başlat (Schema Upgrade dahil)
+        // EN: Initialize database (Including Schema Upgrade)
+        this.dbPromise = openDB<OfflineDB>(this.config.dbName, 1, {
+            upgrade(db) {
+                const store = db.createObjectStore('requests', { keyPath: 'id' });
+                store.createIndex('by-priority', 'priority');
+            },
+        });
+
+        // TR: Kayıtlı kuyruğu yükle
+        // EN: Load persisted queue
         this.loadFromStorage();
 
         // Listen for online/offline events
@@ -195,9 +217,9 @@ export class OfflineQueue {
 
         // TR: Online durumuna göre kuyruk durumunu güncelle (Effect)
         // EN: Update queue status based on online state (Effect)
-
-
         effect(() => {
+            // TR: Microtask kullanarak change detection döngüsünü kırma
+            // EN: Breaking change detection loop using Microtask
             queueMicrotask(() => {
                 if (!this.isOnline()) {
                     this.setStatus('offline');
@@ -211,47 +233,48 @@ export class OfflineQueue {
         });
     }
 
-
     /**
-     * TR: İsteği kuyruğa ekler ve kalıcı hafızaya yazar.
-     * Öncelik ayarlarına göre kuyruğu yeniden sıralar.
+     * TR: İsteği kuyruğa ekler ve IndexedDB'ye yazar.
+     * GÜVENLİK: Authorization header'ını veritabanına yazmadan önce temizler.
      *
-     * EN: Adds the request to the queue and writes to persistent storage.
-     * Resorts the queue based on priority settings.
+     * EN: Adds the request to the queue and writes to IndexedDB.
+     * SECURITY: Cleans the Authorization header before writing to the database.
      *
      * @param request - TR: Kuyruklanacak istek verisi. / EN: Request data to be queued.
      * @returns TR: Oluşturulan istek ID'si. / EN: Generated request ID.
      */
-    enqueue(request: Omit<QueuedRequest, 'id' | 'createdAt' | 'retries'>): string {
+    async enqueue(request: Omit<QueuedRequest, 'id' | 'createdAt' | 'retries'>): Promise<string> {
         const id = this.generateId();
+
+        // TR: Güvenlik için Auth header'ı temizle
+        // EN: Clean Auth header for security
+        const safeHeaders = { ...request.headers };
+        if (safeHeaders['Authorization']) {
+            delete safeHeaders['Authorization'];
+        }
 
         const queuedRequest: QueuedRequest = {
             ...request,
+            headers: safeHeaders,
             id,
             createdAt: Date.now(),
             retries: 0,
             priority: request.priority ?? 0,
         };
 
+        // TR: Veritabanına asenkron yaz
+        // EN: Write asynchronously to database
+        const db = await this.dbPromise;
+        await db.put('requests', queuedRequest);
+
+        // TR: UI state'i güncelle
+        // EN: Update UI state
         this.queue.update((q) => {
             const newQueue = [...q, queuedRequest];
-
-            // TR: FIFO değilse önceliğe göre sırala (Yüksek öncelik üstte)
-            // EN: Sort by priority if not FIFO (Higher priority on top)
-            if (!this.config.fifo) {
-                newQueue.sort((a, b) => {
-                    if (a.priority !== b.priority) {
-                        return b.priority - a.priority;
-                    }
-                    return a.createdAt - b.createdAt;
-                });
-            }
-
-            return newQueue;
+            return newQueue.sort((a, b) => b.priority - a.priority);
         });
 
         this.updateStats();
-        this.saveToStorage();
 
         // Auto process if online
         if (this.isOnline() && this.config.autoProcess && this.status() === 'idle') {
@@ -262,28 +285,29 @@ export class OfflineQueue {
     }
 
     /**
-     * TR: İsteği kuyruktan çıkarır.
+     * TR: İsteği kuyruktan ve veritabanından çıkarır.
      *
-     * EN: Removes the request from the queue.
+     * EN: Removes the request from the queue and database.
      */
-    dequeue(id: string): boolean {
-        const found = this.queue().some((r) => r.id === id);
+    async dequeue(id: string): Promise<boolean> {
+        const db = await this.dbPromise;
+        const exists = (await db.get('requests', id)) !== undefined;
 
-        if (found) {
+        if (exists) {
+            await db.delete('requests', id);
             this.queue.update((q) => q.filter((r) => r.id !== id));
             this.updateStats();
-            this.saveToStorage();
         }
 
-        return found;
+        return exists;
     }
 
     /**
      * TR: Kuyruktaki istekleri işlemeye başlar (Boşaltma / Drain).
-     * Sırayla (Sequential) işler, bağlantı koparsa durur.
+     * IndexedDB'den önceliğe göre veri çeker ve işler.
      *
      * EN: Starts processing requests in the queue (Drain).
-     * Processes sequentially, stops if connection is lost.
+     * Fetches data from IndexedDB by priority and processes it.
      */
     async process(): Promise<void> {
         if (this.status() === 'processing' || this.status() === 'paused') {
@@ -295,70 +319,107 @@ export class OfflineQueue {
             return;
         }
 
-        const pending = this.queue().filter((r) => !this.processingIds.has(r.id));
+        this.setStatus('processing');
 
-        if (pending.length === 0) {
+        const db = await this.dbPromise;
+
+        // TR: İşlem tutarlılığı için Transaction başlat
+        // EN: Start Transaction for process consistency
+        const tx = db.transaction('requests', 'readwrite');
+        const index = tx.store.index('by-priority');
+
+        // TR: Tüm bekleyen işleri al ve önceliğe göre sırala (IndexedDB varsayılan artan sıralar)
+        // EN: Get all pending jobs and sort by priority (IndexedDB defaults to ascending)
+        let pendingRequests = await index.getAll();
+        pendingRequests = pendingRequests.reverse();
+
+        if (pendingRequests.length === 0) {
             this.setStatus('idle');
             return;
         }
 
-        this.setStatus('processing');
-
-        for (const request of pending) {
+        for (const request of pendingRequests) {
             // TR: Döngü sırasında bağlantı koparsa dur
             // EN: Stop if connection is lost during loop
             if (this.status() === 'paused' || !this.isOnline()) {
                 break;
             }
 
-            await this.processRequest(request);
+            // TR: Zaten işleniyorsa atla
+            // EN: Skip if already processing
+            if (this.processingIds.has(request.id)) {
+                continue;
+            }
+
+            await this.processRequest(request, db);
         }
 
-        // Check if more requests to process
-        const remaining = this.queue().filter((r) => !this.processingIds.has(r.id));
-
-        if (remaining.length > 0 && this.isOnline() && this.status() !== 'paused') {
-            await this.process(); // Recursive drain
-        } else {
-            this.setStatus('idle');
-        }
+        this.setStatus('idle');
     }
 
     /**
      * TR: Tek bir isteği işlemeye çalışır.
-     * Başarılı olursa kuyruktan siler, başarısız olursa 'retries' sayısını artırır.
-     * Max deneme sayısına ulaşan istekler kuyruktan atılır (Dead Letter).
+     * Token Provider'dan taze token alır ve isteğe enjekte eder.
      *
      * EN: Attempts to process a single request.
-     * Deletes from queue if successful, increments 'retries' count if failed.
-     * Requests reaching max retry count are dropped (Dead Letter).
+     * Gets fresh token from Token Provider and injects into request.
      */
-    private async processRequest(request: QueuedRequest): Promise<void> {
+    private async processRequest(request: QueuedRequest, db: IDBPDatabase<OfflineDB>): Promise<void> {
         this.processingIds.add(request.id);
         this.updateStats();
 
         try {
-            const response = await this.executor(request);
+            // TR: Güvenlik Adımı: Güncel token'ı al
+            // EN: Security Step: Get fresh token
+            const token = await Promise.resolve(this.config.tokenProvider());
 
-            // Success - remove from queue
-            this.dequeue(request.id);
+            // TR: İsteği zenginleştir (Token Injection)
+            // EN: Enrich request (Token Injection)
+            const enrichedRequest = {
+                ...request,
+                headers: {
+                    ...request.headers,
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                }
+            };
+
+            const response = await this.executor(enrichedRequest);
+
+            // TR: Başarılı - DB'den ve State'den sil
+            // EN: Success - Remove from DB and State
+            await db.delete('requests', request.id);
+            this.queue.update(q => q.filter(r => r.id !== request.id));
+
             this.stats.update((s) => ({...s, completed: s.completed + 1}));
             this.config.onSuccess(request, response);
-        } catch (error) {
-            // Failure - retry or remove
-            const updatedRequest = {...request, retries: request.retries + 1};
 
-            if (updatedRequest.retries >= this.config.maxRetries) {
-                // Max retries reached - remove from queue
-                this.dequeue(request.id);
+        } catch (error) {
+            // TR: Hata Yönetimi - Yeniden dene veya sil
+            // EN: Error Handling - Retry or delete
+            const nextRetries = request.retries + 1;
+
+            // TR: Kritik hata kontrolü (400, 403, 404 gibi kalıcı hatalar retry edilmemeli)
+            // EN: Critical error check (Persistent errors like 400, 403, 404 should not be retried)
+            const isFatalError = error instanceof Response &&
+                (error.status === 400 || error.status === 403 || error.status === 404);
+
+            if (nextRetries >= this.config.maxRetries || isFatalError) {
+                // TR: Maksimum deneme veya kritik hata - Kuyruktan at (Dead Letter)
+                // EN: Max retries or critical error - Drop from queue (Dead Letter)
+                await db.delete('requests', request.id);
+                this.queue.update(q => q.filter(r => r.id !== request.id));
+
                 this.stats.update((s) => ({...s, failed: s.failed + 1}));
                 this.config.onFailure(request, error);
             } else {
-                // Update retry count
-                this.queue.update((q) =>
-                    q.map((r) => (r.id === request.id ? updatedRequest : r))
-                );
-                this.saveToStorage();
+                // TR: Retry sayısını güncelle ve DB'ye yaz
+                // EN: Update retry count and write to DB
+                const updatedRequest = { ...request, retries: nextRetries };
+                await db.put('requests', updatedRequest);
+
+                // TR: UI State güncelle (Sadece değişen kaydı)
+                // EN: Update UI State (Only the changed record)
+                this.queue.update(q => q.map(r => r.id === request.id ? updatedRequest : r));
             }
         } finally {
             this.processingIds.delete(request.id);
@@ -390,15 +451,17 @@ export class OfflineQueue {
     }
 
     /**
-     * TR: Kuyruğu tamamen temizler (Storage dahil).
+     * TR: Kuyruğu tamamen temizler (DB ve Memory).
      *
-     * EN: Clears the queue completely (Including Storage).
+     * EN: Clears the queue completely (DB and Memory).
      */
-    clear(): void {
+    async clear(): Promise<void> {
+        const db = await this.dbPromise;
+        await db.clear('requests');
+
         this.queue.set([]);
         this.processingIds.clear();
         this.updateStats();
-        this.saveToStorage();
     }
 
     // ... Getters ...
@@ -456,28 +519,23 @@ export class OfflineQueue {
         return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
 
-    private loadFromStorage(): void {
-        if (typeof localStorage === 'undefined') return;
+    /**
+     * TR: Başlangıçta veritabanından mevcut kayıtları yükler.
+     *
+     * EN: Loads existing records from database on startup.
+     */
+    private async loadFromStorage(): Promise<void> {
+        if (typeof indexedDB === 'undefined') return;
 
         try {
-            const raw = localStorage.getItem(this.config.storageKey);
-            if (raw) {
-                const data = JSON.parse(raw) as QueuedRequest[];
-                this.queue.set(data);
-                this.updateStats();
-            }
+            const db = await this.dbPromise;
+            const all = await db.getAll('requests');
+            // TR: Önceliğe göre sıralı yükle
+            // EN: Load sorted by priority
+            this.queue.set(all.sort((a, b) => b.priority - a.priority));
+            this.updateStats();
         } catch (e) {
-            console.warn('Failed to load offline queue from storage:', e);
-        }
-    }
-
-    private saveToStorage(): void {
-        if (typeof localStorage === 'undefined') return;
-
-        try {
-            localStorage.setItem(this.config.storageKey, JSON.stringify(this.queue()));
-        } catch (e) {
-            console.warn('Failed to save offline queue to storage:', e);
+            console.warn('Failed to load offline queue from IDB:', e);
         }
     }
 }
@@ -485,11 +543,9 @@ export class OfflineQueue {
 /**
  * TR: Standart `fetch` fonksiyonunu sarmalayarak (Wrapper) çevrimdışı yeteneği kazandırır.
  * İnternet yoksa veya istek başarısız olursa (Network Error), isteği otomatik olarak kuyruğa atar.
- * Bu durumda "202 Accepted" (İşleme alındı) durum kodlu yapay bir yanıt döner.
  *
  * EN: Wraps the standard `fetch` function to provide offline capability.
  * If offline or request fails (Network Error), automatically queues the request.
- * In this case, returns a synthetic response with status code "202 Accepted".
  *
  * @param queue - TR: Kullanılacak kuyruk örneği. / EN: Queue instance to use.
  * @param options - TR: Hangi metodların kuyruklanacağı ayarı. / EN: Setting for which methods to queue.
@@ -518,7 +574,7 @@ export function createOfflineFetch(
         } catch (error) {
             if (shouldQueue && isOfflineError(error)) {
                 // Queue the request
-                queue.enqueue({
+                await queue.enqueue({
                     method,
                     url,
                     body: init?.body ? JSON.parse(init.body as string) : undefined,
