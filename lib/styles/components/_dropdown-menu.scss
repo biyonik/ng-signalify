@@ -1,6 +1,6 @@
-// ==========================================================================
-// Dropdown Menu Component
-// ==========================================================================
+/* ==========================================================================
+   Dropdown Menu Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
@@ -8,29 +8,27 @@
   position: relative;
   display: inline-block;
 
-  // Trigger
   &__trigger {
     cursor: pointer;
   }
 
-  // Menu
   &__menu {
     position: absolute;
     z-index: var(--sig-z-dropdown);
     min-width: 180px;
     max-height: 320px;
     overflow-y: auto;
-    background: var(--sig-surface);
+    background-color: var(--sig-bg-surface);
     border: 1px solid var(--sig-border-color);
-    border-radius: var(--sig-radius-lg);
-    box-shadow: var(--sig-shadow-lg);
-    padding: var(--sig-spacing-2);
+    border-radius: var(--sig-radius-md);
+    box-shadow: var(--sig-shadow-md);
+    padding: var(--sig-space-1);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-8px);
+    transform: translateY(-4px);
     transition: opacity var(--sig-transition-fast),
-    visibility var(--sig-transition-fast),
-    transform var(--sig-transition-fast);
+      visibility var(--sig-transition-fast), transform var(--sig-transition-fast);
+    @include custom-scrollbar;
 
     &--open {
       opacity: 1;
@@ -38,74 +36,81 @@
       transform: translateY(0);
     }
 
-    // Positions
+    /* Positions */
     &--bottom-start {
-      top: calc(100% + var(--sig-spacing-2));
+      top: calc(100% + var(--sig-space-1));
       left: 0;
     }
 
     &--bottom-end {
-      top: calc(100% + var(--sig-spacing-2));
+      top: calc(100% + var(--sig-space-1));
       right: 0;
     }
 
     &--top-start {
-      bottom: calc(100% + var(--sig-spacing-2));
+      bottom: calc(100% + var(--sig-space-1));
       left: 0;
     }
 
     &--top-end {
-      bottom: calc(100% + var(--sig-spacing-2));
+      bottom: calc(100% + var(--sig-space-1));
       right: 0;
     }
 
-    &--left {
-      right: calc(100% + var(--sig-spacing-2));
+    &--left-start {
+      right: calc(100% + var(--sig-space-1));
       top: 0;
     }
 
-    &--right {
-      left: calc(100% + var(--sig-spacing-2));
+    &--left-end {
+      right: calc(100% + var(--sig-space-1));
+      bottom: 0;
+    }
+
+    &--right-start {
+      left: calc(100% + var(--sig-space-1));
       top: 0;
+    }
+
+    &--right-end {
+      left: calc(100% + var(--sig-space-1));
+      bottom: 0;
     }
   }
 
-  // Menu Items
   &__item {
     display: flex;
     align-items: center;
-    gap: var(--sig-spacing-3);
+    gap: var(--sig-space-2);
     width: 100%;
-    padding: var(--sig-spacing-2) var(--sig-spacing-3);
-    font-size: var(--sig-font-size-sm);
+    padding: var(--sig-space-2) var(--sig-space-2-5);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-primary);
     background: transparent;
     border: none;
-    border-radius: var(--sig-radius-md);
+    border-radius: var(--sig-radius-sm);
     cursor: pointer;
     text-align: left;
-    transition: background-color var(--sig-transition-fast),
-    color var(--sig-transition-fast);
+    transition: background-color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-gray-100);
+      background-color: var(--sig-bg-hover);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--sig-primary);
-      outline-offset: -2px;
+      outline: none;
+      background-color: var(--sig-bg-hover);
     }
 
     &--active {
-      background: var(--sig-primary-light);
-      color: var(--sig-primary);
+      background-color: var(--sig-bg-hover);
     }
 
     &--danger {
-      color: var(--sig-error);
+      color: var(--sig-error-600);
 
       &:hover {
-        background: rgba(239, 68, 68, 0.1);
+        background-color: var(--sig-error-50);
       }
     }
 
@@ -120,105 +125,62 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
-    color: var(--sig-text-secondary);
+    width: 1rem;
+    height: 1rem;
+    color: var(--sig-text-muted);
+    flex-shrink: 0;
 
     svg {
       width: 100%;
       height: 100%;
     }
 
-    .sig-dropdown__item--active & {
-      color: var(--sig-primary);
-    }
-
     .sig-dropdown__item--danger & {
-      color: var(--sig-error);
+      color: var(--sig-error-600);
     }
   }
 
   &__item-text {
     flex: 1;
+    min-width: 0;
   }
 
   &__item-shortcut {
-    font-size: var(--sig-font-size-xs);
+    font-size: var(--sig-text-xs);
     color: var(--sig-text-muted);
-    font-family: var(--sig-font-mono);
+    font-family: var(--sig-font-family-mono);
+    margin-left: auto;
+    padding-left: var(--sig-space-4);
   }
 
-  &__item-chevron {
+  &__item-badge {
+    margin-left: auto;
+    padding-left: var(--sig-space-2);
+  }
+
+  &__divider {
+    height: 1px;
+    background-color: var(--sig-border-color);
+    margin: var(--sig-space-1) 0;
+  }
+
+  &__label {
+    display: block;
+    padding: var(--sig-space-2) var(--sig-space-2-5);
+    font-size: var(--sig-text-xs);
+    font-weight: var(--sig-font-medium);
+    color: var(--sig-text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--sig-tracking-wide);
+  }
+
+  &__submenu-icon {
+    margin-left: auto;
     color: var(--sig-text-muted);
 
     svg {
-      width: 14px;
-      height: 14px;
-    }
-  }
-
-  // Divider
-  &__divider {
-    height: 1px;
-    background: var(--sig-border-color);
-    margin: var(--sig-spacing-2) 0;
-  }
-
-  // Label / Group header
-  &__label {
-    display: block;
-    padding: var(--sig-spacing-2) var(--sig-spacing-3);
-    font-size: var(--sig-font-size-xs);
-    font-weight: var(--sig-font-weight-semibold);
-    color: var(--sig-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  // Checkbox / Radio items
-  &__checkbox,
-  &__radio {
-    .sig-dropdown__item-icon {
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--sig-border-color);
-      border-radius: var(--sig-radius-sm);
-      background: var(--sig-surface);
-      transition: all var(--sig-transition-fast);
-    }
-
-    &--checked .sig-dropdown__item-icon {
-      background: var(--sig-primary);
-      border-color: var(--sig-primary);
-      color: white;
-    }
-  }
-
-  &__radio .sig-dropdown__item-icon {
-    border-radius: 50%;
-  }
-
-  // Submenu
-  &__submenu {
-    position: relative;
-
-    > .sig-dropdown__menu {
-      left: 100%;
-      top: 0;
-      margin-left: var(--sig-spacing-1);
-    }
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-dropdown {
-    &__item:hover {
-      background: var(--sig-gray-700);
-    }
-
-    &__item--active {
-      background: rgba(26, 109, 220, 0.15);
+      width: 0.875rem;
+      height: 0.875rem;
     }
   }
 }

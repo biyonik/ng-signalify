@@ -1,6 +1,6 @@
-// ==========================================================================
-// Stepper Component
-// ==========================================================================
+/* ==========================================================================
+   Stepper Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
@@ -8,12 +8,12 @@
   display: flex;
   width: 100%;
 
-  // Horizontal (default)
+  /* Horizontal (default) */
   &--horizontal {
     flex-direction: row;
   }
 
-  // Vertical
+  /* Vertical */
   &--vertical {
     flex-direction: column;
   }
@@ -33,7 +33,7 @@
     align-items: flex-start;
   }
 
-  // Step indicator
+  /* Step indicator */
   &__indicator {
     position: relative;
     display: flex;
@@ -41,14 +41,14 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: var(--sig-gray-100);
-    border: 2px solid var(--sig-gray-300);
-    border-radius: 50%;
-    font-size: var(--sig-font-size-sm);
-    font-weight: var(--sig-font-weight-semibold);
+    background: var(--sig-bg-muted);
+    border: 2px solid var(--sig-neutral-300);
+    border-radius: var(--sig-radius-full);
+    font-size: var(--sig-text-sm);
+    font-weight: var(--sig-font-semibold);
     color: var(--sig-text-secondary);
     flex-shrink: 0;
-    transition: all var(--sig-transition-base);
+    transition: all var(--sig-transition-normal);
     z-index: 1;
 
     svg {
@@ -57,37 +57,37 @@
     }
   }
 
-  // States
+  /* States */
   &--active {
     .sig-step__indicator {
-      background: var(--sig-primary);
-      border-color: var(--sig-primary);
+      background: var(--sig-primary-600);
+      border-color: var(--sig-primary-600);
       color: white;
     }
 
     .sig-step__title {
-      color: var(--sig-primary);
-      font-weight: var(--sig-font-weight-semibold);
+      color: var(--sig-primary-600);
+      font-weight: var(--sig-font-semibold);
     }
   }
 
   &--completed {
     .sig-step__indicator {
-      background: var(--sig-primary);
-      border-color: var(--sig-primary);
+      background: var(--sig-primary-600);
+      border-color: var(--sig-primary-600);
       color: white;
     }
   }
 
   &--error {
     .sig-step__indicator {
-      background: rgba(239, 68, 68, 0.1);
-      border-color: var(--sig-error);
-      color: var(--sig-error);
+      background: var(--sig-error-50);
+      border-color: var(--sig-error-500);
+      color: var(--sig-error-600);
     }
 
     .sig-step__title {
-      color: var(--sig-error);
+      color: var(--sig-error-600);
     }
   }
 
@@ -96,39 +96,39 @@
     pointer-events: none;
   }
 
-  // Clickable step
+  /* Clickable step */
   &--clickable {
     cursor: pointer;
 
     &:hover:not(.sig-step--disabled) {
       .sig-step__indicator {
-        border-color: var(--sig-primary);
+        border-color: var(--sig-primary-500);
       }
     }
   }
 
-  // Content
+  /* Content */
   &__content {
     .sig-stepper--horizontal & {
       text-align: center;
-      margin-top: var(--sig-spacing-3);
+      margin-top: var(--sig-space-3);
     }
 
     .sig-stepper--vertical & {
-      margin-left: var(--sig-spacing-4);
-      padding-bottom: var(--sig-spacing-8);
+      margin-left: var(--sig-space-4);
+      padding-bottom: var(--sig-space-8);
     }
   }
 
   &__title {
-    font-size: var(--sig-font-size-sm);
-    font-weight: var(--sig-font-weight-medium);
+    font-size: var(--sig-text-sm);
+    font-weight: var(--sig-font-medium);
     color: var(--sig-text-primary);
-    margin-bottom: var(--sig-spacing-1);
+    margin-bottom: var(--sig-space-1);
   }
 
   &__description {
-    font-size: var(--sig-font-size-xs);
+    font-size: var(--sig-text-xs);
     color: var(--sig-text-secondary);
     max-width: 160px;
 
@@ -137,13 +137,13 @@
     }
   }
 
-  // Connector line
+  /* Connector line */
   &__connector {
     flex: 1;
     height: 2px;
-    background: var(--sig-gray-300);
-    margin: 0 var(--sig-spacing-2);
-    transition: background-color var(--sig-transition-base);
+    background: var(--sig-neutral-300);
+    margin: 0 var(--sig-space-2);
+    transition: background-color var(--sig-transition-normal);
 
     .sig-stepper--horizontal & {
       align-self: center;
@@ -162,7 +162,7 @@
 
   &--completed + .sig-step .sig-step__connector,
   &--completed .sig-step__connector {
-    background: var(--sig-primary);
+    background: var(--sig-primary-600);
   }
 
   &:last-child .sig-step__connector {
@@ -170,17 +170,17 @@
   }
 }
 
-// Vertical step wrapper for connector positioning
+/* Vertical step wrapper for connector positioning */
 .sig-stepper--vertical .sig-step {
   position: relative;
 }
 
-// Sizes
+/* Sizes */
 .sig-stepper--sm {
   .sig-step__indicator {
     width: 32px;
     height: 32px;
-    font-size: var(--sig-font-size-xs);
+    font-size: var(--sig-text-xs);
 
     svg {
       width: 14px;
@@ -189,7 +189,7 @@
   }
 
   .sig-step__title {
-    font-size: var(--sig-font-size-xs);
+    font-size: var(--sig-text-xs);
   }
 
   .sig-step__description {
@@ -211,7 +211,7 @@
   .sig-step__indicator {
     width: 48px;
     height: 48px;
-    font-size: var(--sig-font-size-base);
+    font-size: var(--sig-text-base);
 
     svg {
       width: 22px;
@@ -220,7 +220,7 @@
   }
 
   .sig-step__title {
-    font-size: var(--sig-font-size-base);
+    font-size: var(--sig-text-base);
   }
 
   &.sig-stepper--horizontal .sig-step__connector {
@@ -234,36 +234,22 @@
   }
 }
 
-// Alternative style - dots
+/* Alternative style - dots */
 .sig-stepper--dots {
   .sig-step__indicator {
     width: 12px;
     height: 12px;
     font-size: 0;
     border-width: 0;
-    background: var(--sig-gray-300);
+    background: var(--sig-neutral-300);
   }
 
   .sig-step--active .sig-step__indicator,
   .sig-step--completed .sig-step__indicator {
-    background: var(--sig-primary);
+    background: var(--sig-primary-600);
   }
 
   &.sig-stepper--horizontal .sig-step__connector {
     margin-top: -12px;
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-step {
-    &__indicator {
-      background: var(--sig-gray-800);
-      border-color: var(--sig-gray-600);
-    }
-
-    &__connector {
-      background: var(--sig-gray-600);
-    }
   }
 }

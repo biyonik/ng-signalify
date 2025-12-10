@@ -1,6 +1,6 @@
-// ==========================================================================
-// Avatar Component
-// ==========================================================================
+/* ==========================================================================
+   Avatar Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
@@ -10,14 +10,14 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--sig-gray-200);
+  border-radius: var(--sig-radius-full);
+  background: var(--sig-neutral-200);
   color: var(--sig-text-secondary);
-  font-weight: var(--sig-font-weight-medium);
+  font-weight: var(--sig-font-medium);
   overflow: hidden;
   user-select: none;
 
-  // Sizes
+  /* Sizes */
   &--xs {
     width: 24px;
     height: 24px;
@@ -27,47 +27,47 @@
   &--sm {
     width: 32px;
     height: 32px;
-    font-size: var(--sig-font-size-xs);
+    font-size: var(--sig-text-xs);
   }
 
   &--md {
     width: 40px;
     height: 40px;
-    font-size: var(--sig-font-size-sm);
+    font-size: var(--sig-text-sm);
   }
 
   &--lg {
     width: 48px;
     height: 48px;
-    font-size: var(--sig-font-size-base);
+    font-size: var(--sig-text-base);
   }
 
   &--xl {
     width: 64px;
     height: 64px;
-    font-size: var(--sig-font-size-lg);
+    font-size: var(--sig-text-lg);
   }
 
   &--2xl {
     width: 96px;
     height: 96px;
-    font-size: var(--sig-font-size-2xl);
+    font-size: var(--sig-text-2xl);
   }
 
-  // Image
+  /* Image */
   &__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  // Initials
+  /* Initials */
   &__initials {
     text-transform: uppercase;
     letter-spacing: 0.025em;
   }
 
-  // Icon placeholder
+  /* Icon placeholder */
   &__icon {
     display: flex;
     align-items: center;
@@ -79,7 +79,7 @@
     }
   }
 
-  // Status indicator
+  /* Status indicator */
   &__status {
     position: absolute;
     bottom: 0;
@@ -88,70 +88,70 @@
     height: 25%;
     min-width: 8px;
     min-height: 8px;
-    border-radius: 50%;
-    border: 2px solid var(--sig-surface);
-    background: var(--sig-gray-400);
+    border-radius: var(--sig-radius-full);
+    border: 2px solid var(--sig-bg-surface);
+    background: var(--sig-neutral-400);
 
     &--online {
-      background: var(--sig-success);
+      background: var(--sig-success-500);
     }
 
     &--offline {
-      background: var(--sig-gray-400);
+      background: var(--sig-neutral-400);
     }
 
     &--busy {
-      background: var(--sig-error);
+      background: var(--sig-error-500);
     }
 
     &--away {
-      background: var(--sig-warning);
+      background: var(--sig-warning-500);
     }
   }
 
-  // Variants
+  /* Variants */
   &--square {
     border-radius: var(--sig-radius-md);
   }
 
   &--bordered {
-    border: 2px solid var(--sig-surface);
+    border: 2px solid var(--sig-bg-surface);
     box-shadow: 0 0 0 1px var(--sig-border-color);
   }
 
-  // Color variants
+  /* Color variants */
   &--primary {
-    background: var(--sig-primary-light);
-    color: var(--sig-primary);
+    background: var(--sig-primary-100);
+    color: var(--sig-primary-700);
   }
 
   &--success {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--sig-success);
+    background: var(--sig-success-100);
+    color: var(--sig-success-700);
   }
 
   &--warning {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--sig-warning);
+    background: var(--sig-warning-100);
+    color: var(--sig-warning-700);
   }
 
   &--error {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--sig-error);
+    background: var(--sig-error-100);
+    color: var(--sig-error-700);
   }
 }
 
-// Avatar Group
+/* Avatar Group */
 .sig-avatar-group {
   display: inline-flex;
   flex-direction: row-reverse;
   justify-content: flex-end;
 
   .sig-avatar {
-    border: 2px solid var(--sig-surface);
+    border: 2px solid var(--sig-bg-surface);
     margin-left: -8px;
     transition: transform var(--sig-transition-fast),
-    z-index var(--sig-transition-fast);
+      z-index var(--sig-transition-fast);
 
     &:last-child {
       margin-left: 0;
@@ -171,36 +171,17 @@
     margin-left: -12px;
   }
 
-  // Counter for remaining avatars
+  /* Counter for remaining avatars */
   &__count {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    background: var(--sig-gray-100);
+    border-radius: var(--sig-radius-full);
+    background: var(--sig-bg-muted);
     color: var(--sig-text-secondary);
-    font-size: var(--sig-font-size-xs);
-    font-weight: var(--sig-font-weight-medium);
-    border: 2px solid var(--sig-surface);
+    font-size: var(--sig-text-xs);
+    font-weight: var(--sig-font-medium);
+    border: 2px solid var(--sig-bg-surface);
     margin-left: -8px;
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-avatar {
-    background: var(--sig-gray-700);
-
-    &--primary {
-      background: rgba(26, 109, 220, 0.2);
-    }
-
-    &__status {
-      border-color: var(--sig-gray-900);
-    }
-  }
-
-  .sig-avatar-group__count {
-    background: var(--sig-gray-700);
   }
 }

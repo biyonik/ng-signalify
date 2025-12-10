@@ -1,31 +1,23 @@
-// ==========================================================================
-// Accordion Component
-// ==========================================================================
+/* ==========================================================================
+   Accordion Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
 .sig-accordion {
   display: flex;
   flex-direction: column;
-  gap: var(--sig-spacing-2);
   width: 100%;
+  border: 1px solid var(--sig-border-color);
+  border-radius: var(--sig-radius-lg);
+  overflow: hidden;
+  background-color: var(--sig-bg-surface);
 
-  // Accordion Item
   &__item {
-    border: 1px solid var(--sig-border-color);
-    border-radius: var(--sig-radius-md);
-    background: var(--sig-surface);
-    overflow: hidden;
-    transition: border-color var(--sig-transition-fast),
-    box-shadow var(--sig-transition-fast);
+    border-bottom: 1px solid var(--sig-border-color);
 
-    &:hover {
-      border-color: var(--sig-border-color-hover);
-    }
-
-    &--expanded {
-      border-color: var(--sig-primary);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    &:last-child {
+      border-bottom: none;
     }
 
     &--disabled {
@@ -34,72 +26,65 @@
     }
   }
 
-  // Header / Trigger
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: var(--sig-spacing-4);
+    padding: var(--sig-space-4);
     background: transparent;
     border: none;
     cursor: pointer;
     font-family: inherit;
-    font-size: var(--sig-font-size-base);
-    font-weight: var(--sig-font-weight-medium);
+    font-size: var(--sig-text-sm);
+    font-weight: var(--sig-font-medium);
     color: var(--sig-text-primary);
     text-align: left;
     transition: background-color var(--sig-transition-fast);
 
     &:hover {
-      background: var(--sig-gray-50);
+      background-color: var(--sig-bg-hover);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--sig-primary);
-      outline-offset: -2px;
-    }
-
-    .sig-accordion__item--expanded & {
-      background: var(--sig-gray-50);
+      outline: none;
+      background-color: var(--sig-bg-hover);
     }
   }
 
   &__title {
     display: flex;
     align-items: center;
-    gap: var(--sig-spacing-3);
+    gap: var(--sig-space-3);
   }
 
   &__icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
-    color: var(--sig-text-secondary);
-    transition: transform var(--sig-transition-base);
-
-    .sig-accordion__item--expanded & {
-      transform: rotate(180deg);
-      color: var(--sig-primary);
-    }
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--sig-text-muted);
+    transition: transform var(--sig-transition-normal);
 
     svg {
-      width: 16px;
-      height: 16px;
+      width: 1rem;
+      height: 1rem;
     }
   }
 
-  // Content Panel
+  &__item--expanded &__icon {
+    transform: rotate(180deg);
+  }
+
   &__content {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows var(--sig-transition-base);
+    transition: grid-template-rows var(--sig-transition-normal);
+  }
 
-    .sig-accordion__item--expanded & {
-      grid-template-rows: 1fr;
-    }
+  &__item--expanded &__content {
+    grid-template-rows: 1fr;
   }
 
   &__body {
@@ -107,55 +92,51 @@
   }
 
   &__inner {
-    padding: 0 var(--sig-spacing-4) var(--sig-spacing-4);
+    padding: 0 var(--sig-space-4) var(--sig-space-4);
     color: var(--sig-text-secondary);
-    font-size: var(--sig-font-size-sm);
-    line-height: var(--sig-line-height-relaxed);
+    font-size: var(--sig-text-sm);
+    line-height: var(--sig-leading-relaxed);
   }
 
-  // Variants
-  &--bordered {
-    .sig-accordion__item {
-      border-radius: 0;
-
-      &:first-child {
-        border-radius: var(--sig-radius-md) var(--sig-radius-md) 0 0;
-      }
-
-      &:last-child {
-        border-radius: 0 0 var(--sig-radius-md) var(--sig-radius-md);
-      }
-
-      &:not(:last-child) {
-        border-bottom: none;
-      }
-    }
-  }
-
+  /* Variants */
   &--flush {
-    gap: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
 
     .sig-accordion__item {
-      border-radius: 0;
       border-left: none;
       border-right: none;
+      border-bottom: 1px solid var(--sig-border-color);
 
       &:first-child {
-        border-top: none;
+        border-top: 1px solid var(--sig-border-color);
       }
     }
   }
-}
 
-// Dark Mode
-[data-theme="dark"] {
-  .sig-accordion {
-    &__header:hover {
-      background: var(--sig-gray-800);
+  &--separated {
+    border: none;
+    gap: var(--sig-space-2);
+    background: transparent;
+
+    .sig-accordion__item {
+      border: 1px solid var(--sig-border-color);
+      border-radius: var(--sig-radius-lg);
+      background-color: var(--sig-bg-surface);
+    }
+  }
+
+  &--ghost {
+    border: none;
+    background: transparent;
+
+    .sig-accordion__item {
+      border-bottom: none;
     }
 
-    &__item--expanded .sig-accordion__header {
-      background: var(--sig-gray-800);
+    .sig-accordion__header {
+      border-radius: var(--sig-radius-md);
     }
   }
 }

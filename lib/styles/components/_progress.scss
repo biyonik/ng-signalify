@@ -1,44 +1,44 @@
-// ==========================================================================
-// Progress Component
-// ==========================================================================
+/* ==========================================================================
+   Progress Component
+   ========================================================================== */
 
 @use '../abstract/mixins' as *;
 
 .sig-progress {
   display: flex;
   flex-direction: column;
-  gap: var(--sig-spacing-2);
+  gap: var(--sig-space-2);
   width: 100%;
 
-  // Track
+  /* Track */
   &__track {
     position: relative;
     width: 100%;
     height: 8px;
-    background: var(--sig-gray-200);
+    background: var(--sig-neutral-200);
     border-radius: var(--sig-radius-full);
     overflow: hidden;
   }
 
-  // Bar
+  /* Bar */
   &__bar {
     height: 100%;
-    background: var(--sig-primary);
+    background: var(--sig-primary-600);
     border-radius: inherit;
-    transition: width var(--sig-transition-base);
+    transition: width var(--sig-transition-normal);
   }
 
-  // Label
+  /* Label */
   &__label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: var(--sig-font-size-sm);
+    font-size: var(--sig-text-sm);
     color: var(--sig-text-secondary);
   }
 
   &__text {
-    font-weight: var(--sig-font-weight-medium);
+    font-weight: var(--sig-font-medium);
     color: var(--sig-text-primary);
   }
 
@@ -46,7 +46,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  // Sizes
+  /* Sizes */
   &--xs .sig-progress__track {
     height: 4px;
   }
@@ -67,20 +67,20 @@
     height: 16px;
   }
 
-  // Color variants
+  /* Color variants */
   &--success .sig-progress__bar {
-    background: var(--sig-success);
+    background: var(--sig-success-500);
   }
 
   &--warning .sig-progress__bar {
-    background: var(--sig-warning);
+    background: var(--sig-warning-500);
   }
 
   &--error .sig-progress__bar {
-    background: var(--sig-error);
+    background: var(--sig-error-500);
   }
 
-  // Indeterminate state
+  /* Indeterminate state */
   &--indeterminate {
     .sig-progress__bar {
       width: 30% !important;
@@ -88,27 +88,27 @@
     }
   }
 
-  // Striped variant
+  /* Striped variant */
   &--striped .sig-progress__bar {
     background-image: linear-gradient(
-                    45deg,
-                    rgba(255, 255, 255, 0.15) 25%,
-                    transparent 25%,
-                    transparent 50%,
-                    rgba(255, 255, 255, 0.15) 50%,
-                    rgba(255, 255, 255, 0.15) 75%,
-                    transparent 75%,
-                    transparent
+      45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent
     );
     background-size: 1rem 1rem;
   }
 
-  // Animated striped
+  /* Animated striped */
   &--animated .sig-progress__bar {
     animation: sig-progress-stripes 1s linear infinite;
   }
 
-  // With value inside bar
+  /* With value inside bar */
   &--value-inside {
     .sig-progress__track {
       height: 20px;
@@ -122,14 +122,14 @@
     }
 
     .sig-progress__bar-value {
-      font-size: var(--sig-font-size-xs);
-      font-weight: var(--sig-font-weight-semibold);
+      font-size: var(--sig-text-xs);
+      font-weight: var(--sig-font-semibold);
       color: white;
     }
   }
 }
 
-// Circular Progress
+/* Circular Progress */
 .sig-progress-circular {
   position: relative;
   display: inline-flex;
@@ -142,33 +142,33 @@
 
   &__track {
     fill: none;
-    stroke: var(--sig-gray-200);
+    stroke: var(--sig-neutral-200);
     stroke-width: 4;
   }
 
   &__bar {
     fill: none;
-    stroke: var(--sig-primary);
+    stroke: var(--sig-primary-600);
     stroke-width: 4;
     stroke-linecap: round;
-    transition: stroke-dashoffset var(--sig-transition-base);
+    transition: stroke-dashoffset var(--sig-transition-normal);
   }
 
   &__value {
     position: absolute;
-    font-size: var(--sig-font-size-sm);
-    font-weight: var(--sig-font-weight-semibold);
+    font-size: var(--sig-text-sm);
+    font-weight: var(--sig-font-semibold);
     color: var(--sig-text-primary);
     font-variant-numeric: tabular-nums;
   }
 
-  // Sizes
+  /* Sizes */
   &--sm {
     width: 32px;
     height: 32px;
 
     .sig-progress-circular__value {
-      font-size: var(--sig-font-size-xs);
+      font-size: var(--sig-text-xs);
     }
   }
 
@@ -182,7 +182,7 @@
     height: 64px;
 
     .sig-progress-circular__value {
-      font-size: var(--sig-font-size-base);
+      font-size: var(--sig-text-base);
     }
   }
 
@@ -191,24 +191,24 @@
     height: 96px;
 
     .sig-progress-circular__value {
-      font-size: var(--sig-font-size-lg);
+      font-size: var(--sig-text-lg);
     }
   }
 
-  // Color variants
+  /* Color variants */
   &--success .sig-progress-circular__bar {
-    stroke: var(--sig-success);
+    stroke: var(--sig-success-500);
   }
 
   &--warning .sig-progress-circular__bar {
-    stroke: var(--sig-warning);
+    stroke: var(--sig-warning-500);
   }
 
   &--error .sig-progress-circular__bar {
-    stroke: var(--sig-error);
+    stroke: var(--sig-error-500);
   }
 
-  // Indeterminate
+  /* Indeterminate */
   &--indeterminate {
     .sig-progress-circular__svg {
       animation: sig-spin 1.5s linear infinite;
@@ -220,7 +220,7 @@
   }
 }
 
-// Animations
+/* Animations */
 @keyframes sig-progress-indeterminate {
   0% {
     transform: translateX(-100%);
@@ -236,20 +236,5 @@
   }
   to {
     background-position: 0 0;
-  }
-}
-
-// Dark Mode
-[data-theme="dark"] {
-  .sig-progress {
-    &__track {
-      background: var(--sig-gray-700);
-    }
-  }
-
-  .sig-progress-circular {
-    &__track {
-      stroke: var(--sig-gray-700);
-    }
   }
 }

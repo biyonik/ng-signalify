@@ -1,5 +1,5 @@
 /* ==========================================================================
-   sig-form-field - Form Field Wrapper Component
+   Form Field Component
    ========================================================================== */
 
 @use '../abstract/mixins' as *;
@@ -21,27 +21,23 @@
     line-height: var(--sig-leading-normal);
   }
 
-  /* Required indicator */
   &__required {
     color: var(--sig-error-500);
     font-weight: var(--sig-font-normal);
   }
 
-  /* Optional indicator */
   &__optional {
-    color: var(--sig-text-tertiary);
+    color: var(--sig-text-muted);
     font-size: var(--sig-text-xs);
     font-weight: var(--sig-font-normal);
   }
 
-  /* Control wrapper */
   &__control {
     position: relative;
     display: flex;
     align-items: center;
   }
 
-  /* Loading spinner */
   &__loading {
     position: absolute;
     right: var(--sig-space-3);
@@ -54,25 +50,23 @@
     width: 1rem;
     height: 1rem;
     border: 2px solid var(--sig-border-color);
-    border-top-color: var(--sig-color-primary);
-    border-radius: 50%;
+    border-top-color: var(--sig-primary-600);
+    border-radius: var(--sig-radius-full);
     animation: sig-spin 0.6s linear infinite;
   }
 
-  /* Hint text */
   &__hint {
     font-size: var(--sig-text-xs);
-    color: var(--sig-text-tertiary);
+    color: var(--sig-text-muted);
     line-height: var(--sig-leading-normal);
   }
 
-  /* Error message */
   &__error {
     display: flex;
     align-items: flex-start;
     gap: var(--sig-space-1);
     font-size: var(--sig-text-xs);
-    color: var(--sig-text-error);
+    color: var(--sig-error-600);
     line-height: var(--sig-leading-normal);
 
     svg {
@@ -83,29 +77,23 @@
     }
   }
 
-  /* Character counter */
   &__counter {
     font-size: var(--sig-text-xs);
-    color: var(--sig-text-tertiary);
+    color: var(--sig-text-muted);
     text-align: right;
     margin-top: var(--sig-space-0-5);
   }
 
-  /* ============================================
-     STATES
-     ============================================ */
-
-  /* Error state */
+  /* States */
   &--error {
     .sig-form-field__label {
-      color: var(--sig-text-error);
+      color: var(--sig-error-600);
     }
 
     .sig-form-field__counter {
-      color: var(--sig-text-error);
+      color: var(--sig-error-600);
     }
 
-    /* Apply error style to nested inputs */
     .sig-input__field,
     .sig-select__trigger,
     .sig-textarea__field {
@@ -113,7 +101,6 @@
     }
   }
 
-  /* Disabled state */
   &--disabled {
     .sig-form-field__label {
       color: var(--sig-text-disabled);
@@ -124,11 +111,7 @@
     }
   }
 
-  /* ============================================
-     LAYOUT VARIANTS
-     ============================================ */
-
-  /* Horizontal layout */
+  /* Layouts */
   &--horizontal {
     flex-direction: row;
     align-items: flex-start;
@@ -149,7 +132,6 @@
     }
   }
 
-  /* Inline layout */
   &--inline {
     flex-direction: row;
     align-items: center;
@@ -164,16 +146,12 @@
     }
   }
 
-  /* Compact spacing */
   &--compact {
     gap: var(--sig-space-1);
   }
 }
 
-/* ============================================
-   FORM LAYOUT HELPERS
-   ============================================ */
-
+/* Form Layout */
 .sig-form {
   display: flex;
   flex-direction: column;
@@ -215,17 +193,14 @@
   }
 }
 
-/* ============================================
-   FIELDSET / FORM SECTION
-   ============================================ */
-
+/* Fieldset */
 .sig-fieldset {
   padding: 0;
   margin: 0;
   border: none;
 
   &__legend {
-    font-size: var(--sig-text-md);
+    font-size: var(--sig-text-base);
     font-weight: var(--sig-font-semibold);
     color: var(--sig-text-primary);
     margin-bottom: var(--sig-space-4);
