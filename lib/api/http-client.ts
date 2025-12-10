@@ -59,10 +59,10 @@ export interface ApiError {
 
 /**
  * TR: HTTP İstemcisi yapılandırması.
- * Temel URL, varsayılan başlıklar ve yaşam döngüsü kancalarını (Interceptors) tanımlar.
+ * Temel URL, SSR URL'i ve yaşam döngüsü kancalarını (Interceptors) tanımlar.
  *
  * EN: HTTP Client configuration.
- * Defines base URL, default headers, and lifecycle hooks (Interceptors).
+ * Defines base URL, SSR URL, and lifecycle hooks (Interceptors).
  *
  * @author Ahmet ALTUN
  * @github  github.com/biyonik
@@ -70,28 +70,57 @@ export interface ApiError {
  * @email ahmet.altun60@gmail.com
  */
 export interface HttpClientConfig {
+    /**
+     * TR: İstemci tarafı (Browser) için temel URL.
+     * Örn: '/api'
+     *
+     * EN: Base URL for client side (Browser).
+     * E.g., '/api'
+     */
     baseUrl: string;
+
+    /**
+     * TR: Sunucu tarafı (SSR) için kök URL.
+     * Node.js ortamında relative path çalışmadığı için gereklidir.
+     * Örn: 'http://localhost:3000/api' veya 'http://backend-service:8080'
+     *
+     * EN: Root URL for server side (SSR).
+     * Required because relative paths do not work in Node.js environment.
+     * E.g., 'http://localhost:3000/api' or 'http://backend-service:8080'
+     */
+    serverBaseUrl?: string;
+
     defaultHeaders?: Record<string, string>;
     timeout?: number;
     retries?: number;
+
     /**
      * TR: İstek gönderilmeden önce çalışır (Token ekleme vb. için).
      *
      * EN: Executes before the request is sent (For adding tokens, etc.).
      */
     onRequest?: (config: RequestConfig) => RequestConfig | Promise<RequestConfig>;
+
     /**
      * TR: Yanıt geldikten sonra çalışır (Loglama veya veri işleme için).
      *
      * EN: Executes after the response is received (For logging or data processing).
      */
     onResponse?: <T>(response: ApiResponse<T>) => ApiResponse<T> | Promise<ApiResponse<T>>;
+
     /**
      * TR: Hata durumunda çalışır (Global hata yönetimi/Toast mesajı için).
      *
      * EN: Executes on error (For global error handling/Toast messages).
      */
     onError?: (error: ApiError) => void;
+
+    /**
+     * TR: Çalışma platformu sunucu mu? (Provider tarafından otomatik set edilir).
+     *
+     * EN: Is the execution platform server? (Automatically set by the Provider).
+     */
+    isServer?: boolean;
 }
 
 /**
@@ -110,12 +139,12 @@ export interface RequestState<T> {
 }
 
 /**
- * TR: Tip güvenli, genişletilebilir HTTP İstemcisi.
- * `fetch` API üzerine kuruludur. Otomatik JSON parse, zaman aşımı yönetimi ve
+ * TR: Tip güvenli, SSR uyumlu ve genişletilebilir HTTP İstemcisi.
+ * `fetch` API üzerine kuruludur. Otomatik JSON parse, modern timeout yönetimi ve
  * Interceptor desteği sunar.
  *
- * EN: Type-safe, extensible HTTP Client.
- * Built on top of `fetch` API. Offers automatic JSON parsing, timeout management,
+ * EN: Type-safe, SSR compatible, and extensible HTTP Client.
+ * Built on top of `fetch` API. Offers automatic JSON parsing, modern timeout management,
  * and Interceptor support.
  *
  * @author Ahmet ALTUN
@@ -163,21 +192,18 @@ export class HttpClient {
         return this.request<T>('DELETE', path, config);
     }
 
-
     /**
      * TR: Tüm HTTP metodlarının kullandığı çekirdek istek fonksiyonu.
      * 1. Interceptor'ları çalıştırır.
-     * 2. URL ve Query parametrelerini hazırlar.
-     * 3. Zaman aşımı (Timeout) için `AbortController` kurar.
-     * 4. İsteği atar ve yanıt tipine (JSON, Text, Blob) göre parse eder.
-     * 5. Hataları yakalar ve normalize eder.
+     * 2. URL çözümlemesini (SSR/Browser) yapar.
+     * 3. Modern Timeout (AbortSignal.timeout) kullanır (Zone.js dostu).
+     * 4. İsteği atar ve yanıtı işler.
      *
      * EN: Core request method used by all HTTP methods.
      * 1. Executes Interceptors.
-     * 2. Prepares URL and Query parameters.
-     * 3. Sets up `AbortController` for timeout.
-     * 4. Sends request and parses based on response type (JSON, Text, Blob).
-     * 5. Catches and normalizes errors.
+     * 2. Performs URL resolution (SSR/Browser).
+     * 3. Uses Modern Timeout (AbortSignal.timeout) (Zone.js friendly).
+     * 4. Sends request and processes response.
      */
     private async request<T>(
         method: HttpMethod,
@@ -190,7 +216,8 @@ export class HttpClient {
             finalConfig = await this.config.onRequest(config);
         }
 
-        // Build URL with query params
+        // TR: URL ve Query parametrelerini hazırla (SSR desteği ile)
+        // EN: Prepare URL and Query parameters (with SSR support)
         const url = this.buildUrl(path, finalConfig.params);
 
         // Build headers
@@ -199,21 +226,33 @@ export class HttpClient {
             ...finalConfig.headers,
         });
 
-        // TR: Zaman aşımı kontrolü için AbortController
-        // EN: AbortController for timeout check
-        const controller = new AbortController();
+        // TR: Modern Zaman Aşımı Kontrolü (AbortSignal.timeout)
+        // setTimeout kullanmayarak Zone.js ve SSR performansını koruyoruz.
+        // EN: Modern Timeout Control (AbortSignal.timeout)
+        // Preserving Zone.js and SSR performance by avoiding setTimeout.
         const timeout = finalConfig.timeout ?? this.config.timeout ?? 30000;
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        let timeoutSignal: AbortSignal | undefined;
+
+        try {
+            // TR: Modern tarayıcılar ve Node 18+ için
+            // EN: For modern browsers and Node 18+
+            timeoutSignal = AbortSignal.timeout(timeout);
+        } catch {
+            // TR: Eski ortamlar için fallback (Opsiyonel olarak polyfill eklenebilir)
+            // EN: Fallback for older environments (Polyfill can be added optionally)
+        }
+
+        // TR: Kullanıcı sinyali ile timeout sinyalini birleştirme (Basit yaklaşım)
+        // EN: Merging user signal with timeout signal (Simple approach)
+        const requestSignal = finalConfig.signal || timeoutSignal;
 
         try {
             const response = await fetch(url, {
                 method,
                 headers,
                 body: finalConfig.body ? JSON.stringify(finalConfig.body) : undefined,
-                signal: finalConfig.signal ?? controller.signal,
+                signal: requestSignal,
             });
-
-            clearTimeout(timeoutId);
 
             // TR: Content-Type'a göre otomatik parse
             // EN: Automatic parse based on Content-Type
@@ -255,18 +294,22 @@ export class HttpClient {
 
             return apiResponse;
         } catch (error) {
-            clearTimeout(timeoutId);
+            // TR: Zaman aşımı hatası kontrolü (Modern & Legacy)
+            // EN: Timeout error check (Modern & Legacy)
+            if (error instanceof DOMException && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+                // TR: Eğer kullanıcı manuel iptal etmediyse, bu bir timeout'tur.
+                // EN: If user didn't manually abort, it's a timeout.
+                const isUserAbort = finalConfig.signal?.aborted;
 
-            // TR: Zaman aşımı hatası kontrolü
-            // EN: Timeout error check
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                const apiError: ApiError = {
-                    message: 'İstek zaman aşımına uğradı',
-                    status: 408,
-                    code: 'TIMEOUT',
-                };
-                this.config.onError?.(apiError);
-                throw apiError;
+                if (!isUserAbort) {
+                    const apiError: ApiError = {
+                        message: 'İstek zaman aşımına uğradı',
+                        status: 408,
+                        code: 'TIMEOUT',
+                    };
+                    this.config.onError?.(apiError);
+                    throw apiError;
+                }
             }
 
             if ((error as ApiError).status) {
@@ -285,13 +328,24 @@ export class HttpClient {
 
     /**
      * TR: URL ve Query parametrelerini birleştirir.
+     * SSR durumunda 'serverBaseUrl' kullanır.
      *
      * EN: Combines URL and Query parameters.
+     * Uses 'serverBaseUrl' in SSR mode.
      */
     private buildUrl(path: string, params?: Record<string, string | number | boolean | undefined>): string {
-        const baseUrl = this.config.baseUrl.endsWith('/')
-            ? this.config.baseUrl.slice(0, -1)
-            : this.config.baseUrl;
+        // TR: Ortama göre Base URL seçimi
+        // EN: Base URL selection based on environment
+        let baseUrl = this.config.baseUrl;
+
+        if (this.config.isServer && this.config.serverBaseUrl) {
+            baseUrl = this.config.serverBaseUrl;
+        }
+
+        // Remove trailing slash
+        baseUrl = baseUrl.endsWith('/')
+            ? baseUrl.slice(0, -1)
+            : baseUrl;
 
         const fullPath = path.startsWith('/') ? path : `/${path}`;
         let url = `${baseUrl}${fullPath}`;
