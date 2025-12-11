@@ -355,9 +355,9 @@ import { SigFormField } from 'ng-signalify/components/core';
 ### Complete Examples
 
 See working examples:
-- [Material Adapter Example](../examples/material-adapter-example.ts) - Full CRUD with Material UI
-- [Headless Adapter Example](../examples/headless-adapter-example.ts) - Custom UI components
-- [Examples README](../examples/README.md) - More details
+- [Material Adapter Example](examples/material-adapter-example.ts) - Full CRUD with Material UI
+- [Headless Adapter Example](examples/headless-adapter-example.ts) - Custom UI components
+- [Examples README](examples/README.md) - More details
 
 ---
 

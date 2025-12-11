@@ -690,7 +690,7 @@ export class ProductFormComponent {
               <h3>{{ product.name }}</h3>
               <p class="description">{{ product.description }}</p>
               <div class="details">
-                <span class="price">\${{ product.price.toFixed(2) }}</span>
+                <span class="price">${{ product.price.toFixed(2) }}</span>
                 <span class="stock">Stock: {{ product.stock }}</span>
               </div>
               <div class="actions">
