@@ -399,20 +399,27 @@ export class ImporterService {
   }
 
   /**
-   * TR: Basit string hash fonksiyonu.
-   * Verinin parmak izini oluşturmak için kullanılır.
+   * TR: Verinin hash'ini oluşturur (duplicate kontrolü için).
+   * FNV-1a hash algoritması kullanarak collision riskini minimize eder.
    *
-   * EN: Simple string hash function.
-   * Used to generate the fingerprint of the data.
+   * EN: Generates hash of data (for duplicate checking).
+   * Uses FNV-1a hash algorithm to minimize collision risk.
    */
   private simpleHash(str: string): string {
-    let hash = 0;
+    if (str.length === 0) return '0';
+    
+    // FNV-1a hash (better distribution than simple hash)
+    const FNV_OFFSET_BASIS = 2166136261;
+    const FNV_PRIME = 16777619;
+    
+    let hash = FNV_OFFSET_BASIS;
     for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, FNV_PRIME);
     }
-    return Math.abs(hash).toString(16);
+    
+    // Convert to positive hex string
+    return (hash >>> 0).toString(16).padStart(8, '0');
   }
 
   /**

@@ -431,8 +431,28 @@ export function createWizard<T extends Record<string, unknown>>(
         return true;
     };
 
+    /**
+     * TR: Sonraki adıma ilerler.
+     * Linear mode etkinse, mevcut adım tamamlanmadan ilerlenemez.
+     *
+     * EN: Moves to the next step.
+     * If linear mode is active, cannot proceed without completing the current step.
+     */
     const next = async (): Promise<boolean> => {
         if (isLast()) return false;
+        
+        // Linear mode: current step must be completed before proceeding
+        if (linear && validateOnLeave) {
+            const currentStatus = currentState()?.status;
+            if (currentStatus !== 'completed' && currentStatus !== 'skipped') {
+                // Try to validate and complete current step
+                const valid = await validateCurrent();
+                if (!valid) {
+                    return false;  // Can't proceed if validation fails
+                }
+            }
+        }
+        
         return goTo(currentIndex() + 1);
     };
 

@@ -117,64 +117,65 @@ export function generateFieldCode(field: FieldDefinition): string {
       if (field.maxLength) opts.push(`maxLength: ${field.maxLength}`);
       if (field.pattern) opts.push(`pattern: '${field.pattern}'`);
       if (field.placeholder) opts.push(`placeholder: '${field.placeholder}'`);
-      return `StringField('${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
+      return `StringField('${field.name}', '${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
     },
     text: () => {
       const opts: string[] = [];
       if (field.required) opts.push('required: true');
       if (field.maxLength) opts.push(`maxLength: ${field.maxLength}`);
-      return `TextAreaField('${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
+      return `TextAreaField('${field.name}', '${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
     },
     integer: () => {
       const opts: string[] = [];
       if (field.required) opts.push('required: true');
       if (field.min !== undefined) opts.push(`min: ${field.min}`);
       if (field.max !== undefined) opts.push(`max: ${field.max}`);
-      return `IntegerField('${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
+      return `IntegerField('${field.name}', '${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
     },
     decimal: () => {
       const opts: string[] = [];
       if (field.required) opts.push('required: true');
       if (field.min !== undefined) opts.push(`min: ${field.min}`);
       if (field.max !== undefined) opts.push(`max: ${field.max}`);
-      return `DecimalField('${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
+      return `DecimalField('${field.name}', '${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
     },
-    boolean: () => `BooleanField('${field.label}')`,
+    boolean: () => `BooleanField('${field.name}', '${field.label}')`,
     date: () => {
       const opts: string[] = [];
       if (field.required) opts.push('required: true');
-      return `DateField('${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
+      return `DateField('${field.name}', '${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
     },
     datetime: () => {
       const opts: string[] = [];
       if (field.required) opts.push('required: true');
-      return `DateTimeField('${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
+      return `DateTimeField('${field.name}', '${field.label}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
     },
-    time: () => `TimeField('${field.label}')`,
+    time: () => `TimeField('${field.name}', '${field.label}')`,
     enum: () => {
-      const options = field.options?.map((o) => `{ value: '${o.value}', label: '${o.label}' }`).join(', ') ?? '';
+      const options = field.options?.map((o) => `{ id: '${o.value}', label: '${o.label}' }`).join(', ') ?? '';
       const opts = field.required ? ', { required: true }' : '';
-      return `EnumField('${field.label}', [${options}]${opts})`;
+      return `EnumField('${field.name}', '${field.label}', [${options}]${opts})`;
     },
     'multi-enum': () => {
-      const options = field.options?.map((o) => `{ value: '${o.value}', label: '${o.label}' }`).join(', ') ?? '';
-      return `MultiEnumField('${field.label}', [${options}])`;
+      const options = field.options?.map((o) => `{ id: '${o.value}', label: '${o.label}' }`).join(', ') ?? '';
+      const opts = field.required ? ', { required: true }' : '';
+      return `MultiEnumField('${field.name}', '${field.label}', [${options}]${opts})`;
     },
     relation: () => {
       const opts: string[] = [];
       if (field.required) opts.push('required: true');
-      return `RelationField('${field.label}', '${field.relationEntity}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
+      return `RelationField('${field.name}', '${field.label}', '${field.relationEntity}'${opts.length ? `, { ${opts.join(', ')} }` : ''})`;
     },
-    file: () => `FileField('${field.label}')`,
-    image: () => `ImageField('${field.label}')`,
-    json: () => `JsonField('${field.label}')`,
-    array: () => `ArrayField('${field.label}')`,
-    password: () => `PasswordField('${field.label}')`,
-    color: () => `ColorField('${field.label}')`,
+    file: () => `FileField('${field.name}', '${field.label}')`,
+    image: () => `ImageField('${field.name}', '${field.label}')`,
+    json: () => `JsonField('${field.name}', '${field.label}')`,
+    array: () => `ArrayField('${field.name}', '${field.label}')`,
+    password: () => `PasswordField('${field.name}', '${field.label}')`,
+    color: () => `ColorField('${field.name}', '${field.label}')`,
     slider: () => {
       const min = field.min ?? 0;
       const max = field.max ?? 100;
-      return `SliderField('${field.label}', ${min}, ${max})`;
+      return `SliderField('${field.name}', '${field.label}', ${min}, ${max})`;
     },
   };
 
