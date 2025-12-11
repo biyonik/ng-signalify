@@ -40,3 +40,6 @@ yarn-error.log*
 tmp/
 temp/
 *.tmp
+*.old
+*.backup
+*.bak

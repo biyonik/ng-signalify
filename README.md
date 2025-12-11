@@ -419,7 +419,7 @@ export class UserListComponent {
 | **Complex** | `ArrayField`, `JsonField` | Nested validation, Schema support |
 | **Special** | `PasswordField`, `ColorField`, `SliderField` | Strength check, Format conversion |
 
-[See all field types →](DOCUMENTATION.md#field-types)
+[See all field types →](DOCUMENTATION.md#fields-alan-tipleri)
 
 ### Form Features
 
@@ -430,7 +430,7 @@ export class UserListComponent {
 - ✅ **Auto-Save** - Debounced auto-save callbacks
 - ✅ **Dirty Tracking** - Track modified fields for PATCH requests
 
-[See form documentation →](DOCUMENTATION.md#form-schema)
+[See form documentation →](DOCUMENTATION.md#schemas-form--filter)
 
 ### Store Features
 
@@ -441,7 +441,7 @@ export class UserListComponent {
 - ✅ **Batch Operations** - `createMany`, `updateMany`, `deleteMany`
 - ✅ **Selection** - Single/multi selection support
 
-[See store documentation →](DOCUMENTATION.md#entity-store)
+[See store documentation →](DOCUMENTATION.md#entity-store-state-management)
 
 ### API Layer
 
@@ -606,7 +606,7 @@ const plakaField = new StringField('plaka', 'Plaka', {
 - [ ] Angular 20+ support
 - [ ] Performance optimizations
 
-[See full roadmap →](DOCUMENTATION.md#roadmap)
+[See full roadmap →](DOCUMENTATION.md#gelecek-özellikler)
 
 ---
 
