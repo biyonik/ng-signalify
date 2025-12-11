@@ -1,4 +1,5 @@
 import { signal, computed, Signal, effect } from '@angular/core';
+import { hasWebSocket, isBrowser } from '../utils/platform.utils';
 
 /**
  * TR: WebSocket bağlantı durumları.
@@ -190,6 +191,13 @@ export class RealtimeConnection {
    * Starts timeout check and sets up Event Listeners.
    */
   connect(): void {
+    if (!hasWebSocket()) {
+      console.error('[ng-signalify] WebSocket not available (SSR or unsupported browser)');
+      this._state.set('error');
+      this._error.set('WebSocket not available');
+      return;
+    }
+
     if (this.socket?.readyState === WebSocket.OPEN) {
       return;
     }
