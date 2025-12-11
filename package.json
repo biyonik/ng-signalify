@@ -83,7 +83,7 @@
     "./adapters": { "types": "./adapters/index. d.ts", "default": "./adapters/index.js" },
     "./validators": { "types": "./validators/index.d. ts", "default": "./validators/index.js" },
     "./advanced": { "types": "./advanced/index.d.ts", "default": "./advanced/index.js" },
-    "./components/core": { "types": "./components/core/index.d.ts", "default": "./components/core/index.js" },
+    "./components/core": { "types": "./components/core/index.d.ts", "default": "./components/core/index.js" }
   },
   "typesVersions": {},
   "engines": {
