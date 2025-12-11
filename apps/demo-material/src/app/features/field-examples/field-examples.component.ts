@@ -217,13 +217,13 @@ import { MaterialModule } from '../../shared/material.module';
                   <mat-card-title>SliderField</mat-card-title>
                 </mat-card-header>
                 <mat-card-content>
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Slider Value: {{ specialForm.get('sliderExample')?.value }}</mat-label>
+                  <div class="slider-container">
+                    <label class="slider-label">Slider Value: {{ specialForm.get('sliderExample')?.value }}</label>
                     <mat-slider min="0" max="100" step="5" discrete showTickMarks>
                       <input matSliderThumb formControlName="sliderExample">
                     </mat-slider>
-                    <mat-hint>Range selection with slider</mat-hint>
-                  </mat-form-field>
+                    <p class="slider-hint">Range selection with slider</p>
+                  </div>
                   <p class="example-code">
                     <code>new SliderField('volume', 'Volume', &#123; min: 0, max: 100, step: 5 &#125;)</code>
                   </p>
@@ -427,6 +427,23 @@ import { MaterialModule } from '../../shared/material.module';
       font-weight: 500;
       color: white;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .slider-container {
+      margin-bottom: 1rem;
+    }
+
+    .slider-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .slider-hint {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: rgba(0, 0, 0, 0.6);
     }
 
     mat-accordion {

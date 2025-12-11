@@ -97,7 +97,7 @@ export abstract class EntityStore<
      * EN: Platform ID (For SSR check).
      * Usage of inject() inside abstract class is possible with Angular 14+.
      */
-    private readonly platformId = inject(PLATFORM_ID);
+    private readonly platformId: Object;
 
     /**
      * TR: EntityStore sınıfını başlatır.
@@ -107,6 +107,9 @@ export abstract class EntityStore<
      * @param config - TR: Depo ayarları. / EN: Store settings.
      */
     constructor(config: StoreConfig<T>) {
+        // TR: inject() çağrısı constructor içinde yapılmalıdır
+        // EN: inject() call must be made inside constructor
+        this.platformId = inject(PLATFORM_ID);
         this.config = {
             name: config.name,
             selectId: config.selectId ?? ((e: T) => e.id),
