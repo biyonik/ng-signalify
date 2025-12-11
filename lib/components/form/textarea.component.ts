@@ -1,245 +1,148 @@
 import {
-    Component,
-    ChangeDetectionStrategy,
-    forwardRef,
-    signal,
-    computed,
-    input,
-    output,
-    model,
-    viewChild,
-    ElementRef,
-    AfterViewInit,
-    ViewEncapsulation,
-    OnInit,
-    effect,
+  Component,
+  ChangeDetectionStrategy,
+  forwardRef,
+  computed,
+  input,
+  output,
+  model,
+  ViewEncapsulation,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  effect,
+  Injector,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { generateId } from '../../utils/a11y.utils';
+import { FieldValue } from '../../fields';
+import { signal } from '@angular/core';
+import {EnhancedFieldValue} from "../../schemas/form-state";
 
-/**
- * SigTextarea - Signal-based accessible multiline text input
- */
 @Component({
-    selector: 'sig-textarea',
-    standalone: true,
-    imports: [CommonModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    encapsulation: ViewEncapsulation.None,
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => SigTextareaComponent),
-            multi: true,
-        },
-    ],
-    template: `
-    <div class="sig-textarea" [class.sig-textarea--disabled]="isDisabled()">
-      <textarea
-        #textareaRef
-        [id]="textareaId"
-        [placeholder]="placeholder()"
-        [disabled]="isDisabled()"
-        [readonly]="readonly()"
-        [rows]="rows()"
-        [maxLength]="maxLength()"
-        [attr.aria-label]="ariaLabel() || null"
-        [attr.aria-labelledby]="ariaLabelledBy() || null"
-        [attr.aria-describedby]="getDescribedBy()"
-        [attr.aria-invalid]="ariaInvalid()"
-        [attr.aria-required]="required()"
-        [attr.aria-readonly]="readonly() || null"
-        (input)="onInput($event)"
-        (blur)="onBlur()"
-        (focus)="onFocusEvent()"
-        class="sig-textarea__field"
-        [class.sig-textarea__field--resize-none]="!resize()"
-        [class.sig-textarea__field--resize-vertical]="resize() === 'vertical'"
-        [class.sig-textarea__field--resize-horizontal]="resize() === 'horizontal'"
-      ></textarea>
+  selector: 'sig-textarea',
+  standalone: true,
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => SigTextareaComponent),
+      multi: true,
+    },
+  ],
+  template: `
+        <div class="sig-textarea"
+             [class.sig-textarea--error]="hasError()"
+             [class.sig-textarea--disabled]="isDisabled()">
 
-      @if (showCounter() && maxLength()) {
-        <div 
-          [id]="counterId"
-          class="sig-textarea__counter"
-          [class.sig-textarea__counter--warning]="isNearLimit()"
-          [class.sig-textarea__counter--error]="isAtLimit()"
-          [attr.aria-live]="isNearLimit() ? 'polite' : 'off'"
-          role="status"
-        >
-          <span class="sig-visually-hidden">
-            {{ charCount() }} / {{ maxLength() }} karakter kullanıldı
-          </span>
-          <span aria-hidden="true">{{ charCount() }} / {{ maxLength() }}</span>
+            <textarea
+                #textareaElement
+                [id]="inputId"
+                [placeholder]="placeholder()"
+                [disabled]="isDisabled()"
+                [readonly]="readonly()"
+                [rows]="rows()"
+                [attr.maxlength]="maxLength()"
+                (input)="onInput($event)"
+                (blur)="onBlur()"
+                (focus)="onFocusEvent()"
+                class="sig-textarea__field"
+            ></textarea>
         </div>
-      }
-    </div>
-  `,
-    styles: [`
-    .sig-visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-  `]
+    `,
 })
-export class SigTextareaComponent implements ControlValueAccessor, AfterViewInit, OnInit {
-    readonly textareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('textareaRef');
+export class SigTextareaComponent implements ControlValueAccessor, AfterViewInit {
+  private readonly injector = inject(Injector);
+  @ViewChild('textareaElement') textareaElement!: ElementRef<HTMLTextAreaElement>;
 
-    readonly value = model<string>('');
-    readonly placeholder = input<string>('');
-    readonly disabled = input<boolean>(false);
-    readonly readonly = input<boolean>(false);
-    readonly rows = input<number>(3);
-    readonly maxLength = input<number | null>(null);
-    readonly resize = input<'none' | 'vertical' | 'horizontal' | 'both'>('vertical');
-    readonly autoResize = input<boolean>(false);
-    readonly showCounter = input<boolean>(true);
+  readonly placeholder = input<string>('');
+  readonly rows = input<number>(3);
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  readonly maxLength = input<number | null>(null);
 
-    // A11y inputs
-    readonly ariaLabel = input<string>('');
-    readonly ariaLabelledBy = input<string>('');
-    readonly ariaDescribedBy = input<string>('');
-    readonly ariaInvalid = input<boolean>(false);
-    readonly required = input<boolean>(false);
+  // --- SMART BINDING ---
+  readonly field = input<FieldValue<any> | EnhancedFieldValue<any> | null>(null);
+  readonly value = model<string | null>(null);
 
-    readonly focus = output<void>();
-    readonly blur = output<void>();
+  readonly focus = output<void>();
+  readonly blur = output<void>();
 
-    readonly charCount = signal(0);
+  inputId = generateId('sig-textarea');
+  private _isUserInput = false;
+  private _disabledByForm = signal(false); // signal import etmeyi unutma!
 
-    // IDs
-    textareaId = '';
-    counterId = '';
+  readonly isDisabled = computed(() => {
+    const f = this.field();
+    const fieldDisabled = (f && 'enabled' in f) ? !f.enabled() : false;
+    return this.disabled() || this._disabledByForm() || fieldDisabled;
+  });
 
-    // TR: Kullanıcı girişi mi yoksa external değişiklik mi olduğunu takip eder
-    // EN: Tracks whether change is from user input or external
-    private _isUserInput = false;
+  readonly hasError = computed(() => {
+    const f = this.field();
+    return f ? (!!f.error() && f.touched()) : false;
+  });
 
-    private _disabledByForm = signal(false);
-    readonly isDisabled = computed(() => this.disabled() || this._disabledByForm());
+  readonly fieldValue = computed(() => {
+    const f = this.field();
+    return f ? f.value() : this.value();
+  });
 
-    readonly isNearLimit = computed(() => {
-        const max = this.maxLength();
-        if (!max) return false;
-        return this.charCount() > max * 0.9;
-    });
+  private _onChange: (value: any) => void = () => {};
+  private _onTouched: () => void = () => {};
 
-    readonly isAtLimit = computed(() => {
-        const max = this.maxLength();
-        if (!max) return false;
-        return this.charCount() >= max;
-    });
+  ngAfterViewInit(): void {
+    this.syncValue(this.fieldValue());
 
-    private _onChange: (value: string) => void = () => {};
-    private _onTouched: () => void = () => {};
+    effect(() => {
+      const val = this.fieldValue();
+      if (!this._isUserInput) {
+        this.syncValue(val);
+      }
+      this._isUserInput = false;
+    }, { injector: this.injector });
+  }
 
-    constructor() {
-        // TR: Signal değişikliklerini izle ve sadece external değişikliklerde DOM'u güncelle
-        // EN: Watch signal changes and update DOM only on external changes
-        effect(() => {
-            const currentValue = this.value();
-            const textarea = this.textareaRef()?.nativeElement;
+  onInput(event: Event): void {
+    this._isUserInput = true;
+    const val = (event.target as HTMLTextAreaElement).value || null;
 
-            // TR: Kullanıcı girişi ise DOM'u güncelleme (zaten güncel)
-            // EN: If user input, don't update DOM (already up to date)
-            if (this._isUserInput) {
-                this._isUserInput = false;
-                return;
-            }
-
-            // TR: External değişiklik - DOM'u güncelle
-            // EN: External change - update DOM
-            if (textarea && textarea.value !== currentValue) {
-                textarea.value = currentValue;
-            }
-        });
+    const f = this.field();
+    if (f) {
+      f.value.set(val);
+      if (!f.touched()) f.touched.set(true);
     }
 
-    ngOnInit(): void {
-        this.textareaId = generateId('sig-textarea');
-        this.counterId = `${this.textareaId}-counter`;
+    this.value.set(val);
+    this._onChange(val);
+  }
+
+  onBlur(): void {
+    this._onTouched();
+    const f = this.field();
+    if (f) f.touched.set(true);
+    this.blur.emit();
+  }
+
+  onFocusEvent() { this.focus.emit(); }
+
+  private syncValue(val: any) {
+    if (this.textareaElement?.nativeElement) {
+      const display = val ?? '';
+      if (this.textareaElement.nativeElement.value !== display) {
+        this.textareaElement.nativeElement.value = display;
+      }
     }
+  }
 
-    ngAfterViewInit(): void {
-        // TR: İlk değeri set et
-        // EN: Set initial value
-        const textarea = this.textareaRef()?.nativeElement;
-        if (textarea) {
-            textarea.value = this.value();
-        }
-
-        if (this.autoResize()) {
-            this.adjustHeight();
-        }
-        this.charCount.set(this.value().length);
-    }
-
-    getDescribedBy(): string | null {
-        const parts: string[] = [];
-        if (this.ariaDescribedBy()) parts.push(this.ariaDescribedBy());
-        if (this.showCounter() && this.maxLength()) parts.push(this.counterId);
-        return parts.length > 0 ? parts.join(' ') : null;
-    }
-
-    onInput(event: Event): void {
-        const target = event.target as HTMLTextAreaElement;
-
-        // TR: Kullanıcı girişi olduğunu işaretle (effect'in DOM'u override etmesini engelle)
-        // EN: Mark as user input (prevent effect from overriding DOM)
-        this._isUserInput = true;
-
-        this.value.set(target.value);
-        this.charCount.set(target.value.length);
-        this._onChange(target.value);
-
-        if (this.autoResize()) {
-            this.adjustHeight();
-        }
-    }
-
-    onBlur(): void {
-        this._onTouched();
-        this.blur.emit();
-    }
-
-    onFocusEvent(): void {
-        this.focus.emit();
-    }
-
-    private adjustHeight(): void {
-        const textarea = this.textareaRef()?.nativeElement;
-        if (!textarea) return;
-
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-    }
-
-    writeValue(value: string): void {
-        this.value.set(value ?? '');
-        this.charCount.set(this.value().length);
-
-        if (this.autoResize() && this.textareaRef()) {
-            setTimeout(() => this.adjustHeight());
-        }
-    }
-
-    registerOnChange(fn: (value: string) => void): void {
-        this._onChange = fn;
-    }
-
-    registerOnTouched(fn: () => void): void {
-        this._onTouched = fn;
-    }
-
-    setDisabledState(isDisabled: boolean): void {
-        this._disabledByForm.set(isDisabled);
-    }
+  writeValue(obj: any): void { this.value.set(obj); }
+  registerOnChange(fn: any): void { this._onChange = fn; }
+  registerOnTouched(fn: any): void { this._onTouched = fn; }
+  setDisabledState(isDisabled: boolean): void { this._disabledByForm.set(isDisabled); }
 }
+
+

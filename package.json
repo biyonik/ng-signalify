@@ -1,6 +1,6 @@
 {
   "name": "ng-signalify",
-  "version": "1.0.0-beta-6.2",
+  "version": "1.0.0-rc-2",
   "description": "Angular 17+ için modern, signal-tabanlı form yönetimi, state management ve UI component kütüphanesi",
   "author": "Ahmet ALTUN",
   "license": "MIT",
@@ -27,7 +27,8 @@
     "@angular/forms": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
     "rxjs": "^7.0.0",
     "xlsx": "^0.18.5",
-    "zod": "^3.22.0"
+    "zod": "^3.22.0",
+    "idb": "^8.0.3"
   },
   "peerDependenciesMeta": {
     "xlsx": {
@@ -53,12 +54,13 @@
     "typescript": "~5.2.0",
     "xlsx": "^0.18.5",
     "zod": "^3.22.0",
-    "zone.js": "^0.14.0"
+    "zone.js": "^0.14.0",
+    "idb": "^8.0.3"
   },
   "scripts": {
-    "build": "ng-packagr -p ng-package.json && npm run build:styles",
+    "build": "ng-packagr -p ng-package.json && npm run build:styles && node scripts/post-build.js",
     "build:watch": "ng-packagr -p ng-package.json --watch",
-    "build:styles": "npm run build:css && npm run build:css:min",
+    "build:styles": "sass lib/styles/main.scss dist/ng-signalify.css --load-path=lib/styles",
     "build:css": "sass lib/styles/main.scss dist/ng-signalify.css --load-path=lib/styles",
     "build:css:min": "sass lib/styles/main.scss dist/ng-signalify.min.css --style=compressed --load-path=lib/styles",
     "test": "jest",
@@ -70,8 +72,5 @@
   "typesVersions": {},
   "engines": {
     "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "idb": "^8.0.3"
   }
 }

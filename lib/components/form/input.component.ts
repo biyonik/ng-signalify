@@ -1,45 +1,48 @@
 import {
-    Component,
-    ChangeDetectionStrategy,
-    forwardRef,
-    signal,
-    computed,
-    input,
-    output,
-    model,
-    ViewEncapsulation,
-    OnInit,
-    ViewChild,
-    ElementRef,
-    AfterViewInit,
-    effect,
-    Injector,
-    inject,
+  Component,
+  ChangeDetectionStrategy,
+  forwardRef,
+  signal,
+  computed,
+  input,
+  output,
+  model,
+  ViewEncapsulation,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  effect,
+  Injector,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { generateId } from '../../utils/a11y.utils';
+import { FieldValue } from '../../fields';
+import {EnhancedFieldValue} from "../../schemas/form-state";
 
 export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url';
 
-/**
- * SigInput - Signal-based accessible text input
- */
 @Component({
-    selector: 'sig-input',
-    standalone: true,
-    imports: [CommonModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    encapsulation: ViewEncapsulation.None,
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => SigInputComponent),
-            multi: true,
-        },
-    ],
-    template: `
-        <div class="sig-input" [class.sig-input--with-icon]="icon()">
+  selector: 'sig-input',
+  standalone: true,
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => SigInputComponent),
+      multi: true,
+    },
+  ],
+  template: `
+        <div class="sig-input"
+             [class.sig-input--with-icon]="icon()"
+             [class.sig-input--error]="hasError()"
+             [class.sig-input--disabled]="isDisabled()">
+
             @if (icon() && iconPosition() === 'left') {
                 <span class="sig-input__icon sig-input__icon--left" aria-hidden="true">{{ icon() }}</span>
             }
@@ -49,20 +52,10 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
                 [id]="inputId"
                 [type]="actualType()"
                 [placeholder]="placeholder()"
-                [disabled]="disabled()"
+                [disabled]="isDisabled()"
                 [readonly]="readonly()"
-                [attr.min]="min()"
-                [attr.max]="max()"
-                [attr.step]="step()"
-                [maxLength]="maxLength()"
+                [attr.maxlength]="maxLength()"
                 [autocomplete]="autocomplete()"
-                [attr.aria-label]="ariaLabel() || null"
-                [attr.aria-labelledby]="ariaLabelledBy() || null"
-                [attr.aria-describedby]="ariaDescribedBy() || null"
-                [attr.aria-invalid]="ariaInvalid()"
-                [attr.aria-required]="required()"
-                [attr.aria-readonly]="readonly() || null"
-                [attr.inputmode]="inputMode()"
                 (input)="onInput($event)"
                 (blur)="onBlur()"
                 (focus)="onFocusEvent()"
@@ -76,19 +69,18 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
                     (click)="togglePassword()"
                     tabindex="-1"
                     [attr.aria-label]="showPassword() ? 'Şifreyi gizle' : 'Şifreyi göster'"
-                    [attr.aria-pressed]="showPassword()"
                 >
                     <span aria-hidden="true">{{ showPassword() ? '👁️' : '👁️‍🗨️' }}</span>
                 </button>
             }
 
-            @if (clearable() && value()) {
+            @if (clearable() && (value() || fieldValue())) {
                 <button
                     type="button"
                     class="sig-input__clear"
                     (click)="onClear()"
                     tabindex="-1"
-                    aria-label="Alanı temizle"
+                    aria-label="Temizle"
                 >
                     <span aria-hidden="true">✕</span>
                 </button>
@@ -101,161 +93,147 @@ export type InputType = 'text' | 'number' | 'email' | 'password' | 'tel' | 'url'
     `,
 })
 export class SigInputComponent implements ControlValueAccessor, OnInit, AfterViewInit {
-    private readonly injector = inject(Injector);
+  private readonly injector = inject(Injector);
+  @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
 
-    // ViewChild for direct DOM access
-    @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
+  // --- Inputs ---
+  readonly type = input<InputType>('text');
+  readonly placeholder = input<string>('');
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  readonly clearable = input<boolean>(false);
+  readonly icon = input<string>('');
+  readonly iconPosition = input<'left' | 'right'>('left');
+  readonly maxLength = input<number | null>(null);
+  readonly autocomplete = input<string>('off');
 
-    // Mevcut input'lar
-    readonly type = input<InputType>('text');
-    readonly value = model<string | number | null>(null);
-    readonly placeholder = input<string>('');
-    readonly disabled = input<boolean>(false);
-    readonly readonly = input<boolean>(false);
-    readonly clearable = input<boolean>(false);
-    readonly icon = input<string>('');
-    readonly iconPosition = input<'left' | 'right'>('left');
-    readonly min = input<number | null>(null);
-    readonly max = input<number | null>(null);
-    readonly step = input<number | null>(null);
-    readonly maxLength = input<number | null>(null);
-    readonly autocomplete = input<string>('off');
+  // --- SMART FIELD BINDING ---
+  readonly field = input<FieldValue<any> | EnhancedFieldValue<any> | null>(null);
 
-    // YENİ: A11y input'ları
-    readonly ariaLabel = input<string>('');
-    readonly ariaLabelledBy = input<string>('');
-    readonly ariaDescribedBy = input<string>('');
-    readonly ariaInvalid = input<boolean>(false);
-    readonly required = input<boolean>(false);
-    readonly inputMode = input<'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url'>('text');
+  // --- CLASSIC MODEL ---
+  readonly value = model<string | number | null>(null);
 
-    // Output'lar
-    readonly focus = output<void>();
-    readonly blur = output<void>();
+  // --- Outputs ---
+  readonly focus = output<void>();
+  readonly blur = output<void>();
 
-    // Internal signals
-    readonly showPassword = signal(false);
+  // --- Internal State ---
+  readonly showPassword = signal(false);
+  inputId = generateId('sig-input');
+  private _isUserInput = false;
+  private _disabledByForm = signal(false);
 
-    // YENİ: Unique ID for input
-    inputId = '';
+  // --- Computed ---
+  readonly actualType = computed(() => (this.type() === 'password' && this.showPassword()) ? 'text' : this.type());
 
-    // TR: Kullanıcı girişi mi yoksa external değişiklik mi olduğunu takip eder
-    // EN: Tracks whether change is from user input or external
-    private _isUserInput = false;
+  // Field varsa onun değerini, yoksa model değerini kullan
+  readonly fieldValue = computed(() => {
+    const f = this.field();
+    return f ? f.value() : this.value();
+  });
 
-    readonly actualType = computed(() => {
-        if (this.type() === 'password' && this.showPassword()) {
-            return 'text';
-        }
-        return this.type();
-    });
+  readonly isDisabled = computed(() => {
+    const f = this.field();
+    // EnhancedFieldValue kontrolü (enabled sinyali var mı?)
+    const fieldDisabled = (f && 'enabled' in f) ? !f.enabled() : false;
+    return this.disabled() || this._disabledByForm() || fieldDisabled;
+  });
 
-    // setDisabledState için internal state
-    private _disabledByForm = signal(false);
-    readonly isDisabled = computed(() => this.disabled() || this._disabledByForm());
+  readonly hasError = computed(() => {
+    const f = this.field();
+    // Hata varsa ve kullanıcı dokunduysa göster
+    return f ? (!!f.error() && f.touched()) : false;
+  });
 
-    private _onChange: (value: string | number | null) => void = () => {};
-    private _onTouched: () => void = () => {};
+  // CVA Callbacks
+  private _onChange: (value: any) => void = () => {};
+  private _onTouched: () => void = () => {};
 
-    ngOnInit(): void {
-        this.inputId = generateId('sig-input');
+  ngOnInit() {}
+
+  ngAfterViewInit(): void {
+    // DOM'u başlangıç değeriyle senkronize et
+    this.syncInputValue(this.fieldValue());
+
+    // --- EFFECT: Signal -> DOM Senkronizasyonu ---
+    effect(() => {
+      const val = this.fieldValue(); // Field veya Model değeri
+      if (!this._isUserInput) {
+        this.syncInputValue(val);
+      }
+      this._isUserInput = false; // Flag'i resetle
+    }, { injector: this.injector });
+  }
+
+  onInput(event: Event): void {
+    this._isUserInput = true;
+    const target = event.target as HTMLInputElement;
+    let val: string | number | null = target.value;
+
+    if (val === '') val = null;
+    else if (this.type() === 'number') {
+      val = Number(val);
+      if (isNaN(val)) val = null;
     }
 
-    ngAfterViewInit(): void {
-        // TR: İlk değeri set et
-        // EN: Set initial value
-        this.syncInputValue(this.value());
-
-        // TR: Signal değişikliklerini izle ve sadece external değişikliklerde DOM'u güncelle
-        // EN: Watch signal changes and update DOM only on external changes
-        effect(() => {
-            const currentValue = this.value();
-
-            // TR: Kullanıcı girişi ise DOM'u güncelleme (zaten güncel)
-            // EN: If user input, don't update DOM (already up to date)
-            if (this._isUserInput) {
-                this._isUserInput = false;
-                return;
-            }
-
-            // TR: External değişiklik - DOM'u güncelle
-            // EN: External change - update DOM
-            this.syncInputValue(currentValue);
-        }, { injector: this.injector, allowSignalWrites: true });
+    // 1. Önce Field'ı güncelle (Varsa)
+    const f = this.field();
+    if (f) {
+      f.value.set(val);
+      if (!f.touched()) f.touched.set(true);
     }
 
-    /**
-     * TR: Input elementinin değerini senkronize eder
-     * EN: Syncs the input element value
-     */
-    private syncInputValue(value: string | number | null): void {
-        if (this.inputElement?.nativeElement) {
-            const displayValue = value ?? '';
-            if (this.inputElement.nativeElement.value !== String(displayValue)) {
-                this.inputElement.nativeElement.value = String(displayValue);
-            }
-        }
+    // 2. Sonra Model'i güncelle
+    this.value.set(val);
+    this._onChange(val);
+  }
+
+  onBlur(): void {
+    this._onTouched();
+
+    const f = this.field();
+    if (f && !f.touched()) {
+      f.touched.set(true);
     }
 
-    onInput(event: Event): void {
-        const target = event.target as HTMLInputElement;
+    this.blur.emit();
+  }
 
-        // TR: Kullanıcı girişi olduğunu işaretle (effect'in DOM'u override etmesini engelle)
-        // EN: Mark as user input (prevent effect from overriding DOM)
-        this._isUserInput = true;
+  onFocusEvent(): void {
+    this.focus.emit();
+  }
 
-        if (target.value === '') {
-            this.value.set(null);
-            this._onChange(null);
-            return;
-        }
+  onClear(): void {
+    const f = this.field();
+    if (f) f.value.set(null);
 
-        let val: string | number | null;
-        if (this.type() === 'number') {
-            const parsed = Number(target.value);
-            val = Number.isNaN(parsed) ? null : parsed;
-        } else {
-            val = target.value;
-        }
+    this.value.set(null);
+    this._onChange(null);
+    this.syncInputValue(null);
+  }
 
-        this.value.set(val);
-        this._onChange(val);
+  togglePassword(): void {
+    this.showPassword.update(v => !v);
+  }
+
+  private syncInputValue(value: any): void {
+    if (this.inputElement?.nativeElement) {
+      const display = value ?? '';
+      // Gereksiz DOM yazmalarını önle (Cursor zıplamasını engeller)
+      if (this.inputElement.nativeElement.value !== String(display)) {
+        this.inputElement.nativeElement.value = String(display);
+      }
     }
+  }
 
-    onBlur(): void {
-        this._onTouched();
-        this.blur.emit();
-    }
-
-    onFocusEvent(): void {
-        this.focus.emit();
-    }
-
-    onClear(): void {
-        this.value.set(null);
-        this._onChange(null);
-        // TR: Input elementini de temizle
-        // EN: Clear the input element too
-        this.syncInputValue(null);
-    }
-
-    togglePassword(): void {
-        this.showPassword.update((v) => !v);
-    }
-
-    writeValue(value: string | number | null): void {
-        this.value.set(value);
-    }
-
-    registerOnChange(fn: (value: string | number | null) => void): void {
-        this._onChange = fn;
-    }
-
-    registerOnTouched(fn: () => void): void {
-        this._onTouched = fn;
-    }
-
-    setDisabledState(isDisabled: boolean): void {
-        this._disabledByForm.set(isDisabled);
-    }
+  // CVA Interface Implementation
+  writeValue(obj: any): void {
+    // Form API'den gelen değeri hem modele hem field'a yazmaya çalışmayalım,
+    // CVA genelde [formControl] ile kullanılır, bizim yapımızda [field] önceliklidir.
+    // Ama hibrit kullanım için:
+    this.value.set(obj);
+  }
+  registerOnChange(fn: any): void { this._onChange = fn; }
+  registerOnTouched(fn: any): void { this._onTouched = fn; }
+  setDisabledState(isDisabled: boolean): void { this._disabledByForm.set(isDisabled); }
 }

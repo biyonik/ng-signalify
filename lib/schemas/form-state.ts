@@ -196,12 +196,12 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
         const initialFieldValue = signal<unknown>(initValue);
 
         const error = computed(() => {
-            if (!touched()) return null;
+            if (!touched()) return '';
             const result = field.schema().safeParse(value());
             return result.success ? '' : result.error.errors[0]?.message ?? 'Geçersiz';
         });
 
-        const valid = computed(() => error() === null);
+        const valid = computed(() => error() === '');
 
         // TR: Async Validasyon Kurulumu (YENİ SINIF İLE)
         // EN: Async Validation Setup (WITH NEW CLASS)

@@ -95,11 +95,11 @@ export abstract class BaseField<T> implements IField<T> {
         // UI'da gösterilecek mesajdır. Sadece 'touched' true ise görünür.
         const error = computed(() => {
             // Dokunulmadıysa hata gösterme (Kullanıcıyı darlama)
-            if (!touched()) return null;
+            if (!touched()) return '';
 
             const result = validationResult();
             // Veri geçerliyse hata yok
-            if (result.success) return null;
+            if (result.success) return '';
 
             // Hata varsa mesajı dön
             return result.error.errors[0]?.message ?? 'Geçersiz';
