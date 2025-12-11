@@ -258,17 +258,26 @@ export class UserListComponent implements OnInit {
   searchTerm = '';
   displayedColumns = ['id', 'firstName', 'lastName', 'email', 'role', 'status', 'actions'];
 
-  users = computed(() => this.userStore.signals.all());
+  users = computed(() => {
+    const all = this.userStore.signals.all();
+    const pageSize = this.userStore.pagination.pageSize();
+    const currentPage = this.userStore.pagination.page();
+    
+    // Server-side pagination: display only the data returned from the server
+    // which should already be sliced to the current page
+    // However, due to a caching issue, we manually slice here as a workaround
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    return all.slice(start, end);
+  });
 
   ngOnInit() {
+    // Use the store's default pageSize instead of hardcoding
     this.loadUsers();
   }
 
   loadUsers() {
-    this.userStore.loadAll({
-      page: 1,
-      pageSize: 10
-    });
+    this.userStore.loadAll();  // Will use pagination.pageSize() from store
   }
 
   onSearch() {

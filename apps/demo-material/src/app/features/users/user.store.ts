@@ -172,7 +172,8 @@ export class UserStore extends EntityStore<User> {
     console.log('🔍 UserStore Sliced Data:', { 
       start, 
       end, 
-      slicedCount: data.length 
+      slicedCount: data.length,
+      actualData: data.map(u => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }))
     });
     
     return {

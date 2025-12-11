@@ -297,17 +297,25 @@ export class ProductListComponent implements OnInit {
   searchTerm = '';
   displayedColumns = ['id', 'name', 'sku', 'price', 'discount', 'stock', 'status', 'actions'];
 
-  products = computed(() => this.productStore.signals.all());
+  products = computed(() => {
+    const all = this.productStore.signals.all();
+    const pageSize = this.productStore.pagination.pageSize();
+    const currentPage = this.productStore.pagination.page();
+    
+    // Server-side pagination: display only the data returned from the server
+    // which should already be sliced to the current page
+    // However, due to a caching issue, we manually slice here as a workaround
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    return all.slice(start, end);
+  });
 
   ngOnInit() {
     this.loadProducts();
   }
 
   loadProducts() {
-    this.productStore.loadAll({
-      page: 1,
-      pageSize: 10
-    });
+    this.productStore.loadAll();  // Will use pagination.pageSize() from store
   }
 
   onSearch() {
