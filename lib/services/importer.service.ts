@@ -153,6 +153,14 @@ export interface ImporterState {
 export type ImportFn = (row: Record<string, unknown>, hash: string) => Promise<void>;
 
 /**
+ * TR: FNV-1a hash algoritması sabitleri.
+ * EN: FNV-1a hash algorithm constants.
+ */
+const FNV_OFFSET_BASIS = 2166136261;
+const FNV_PRIME = 16777619;
+const EMPTY_HASH = '';
+
+/**
  * TR: Toplu veri içe aktarım (Bulk Import) süreçlerini yöneten servis sınıfı.
  * Excel dosyalarını okur (`xlsx` kütüphanesi ile), tanımlı alanlara (`IField`) göre map eder,
  * validasyonları çalıştırır ve veriyi parçalar halinde (Batch Processing) işler.
@@ -406,12 +414,9 @@ export class ImporterService {
    * Uses FNV-1a hash algorithm to minimize collision risk.
    */
   private simpleHash(str: string): string {
-    if (str.length === 0) return '0';
+    if (str.length === 0) return EMPTY_HASH;
     
     // FNV-1a hash (better distribution than simple hash)
-    const FNV_OFFSET_BASIS = 2166136261;
-    const FNV_PRIME = 16777619;
-    
     let hash = FNV_OFFSET_BASIS;
     for (let i = 0; i < str.length; i++) {
       hash ^= str.charCodeAt(i);
