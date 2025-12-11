@@ -53,6 +53,8 @@ export class MaterialAdapter extends BaseFormAdapter {
     
     const instance = componentRef.instance;
     
+    // String property accessors are used to avoid importing @angular/material types
+    // since Material is an optional peer dependency
     if (instance['appearance'] !== undefined && instance['appearance'] == null) {
       instance['appearance'] = 'outline';
     }

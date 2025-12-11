@@ -48,13 +48,22 @@ export class HeadlessAdapter extends BaseFormAdapter {
   ): void {
     const instance = componentRef.instance;
     
-    instance.fieldValue = field.value;
-    instance.fieldError = field.error;
-    instance.fieldTouched = field.touched;
+    // Only bind properties if they exist on the component instance
+    if (instance.fieldValue !== undefined) {
+      instance.fieldValue = field.value;
+    }
     
-    // Bind enabled state if available
+    if (instance.fieldError !== undefined) {
+      instance.fieldError = field.error;
+    }
+    
+    if (instance.fieldTouched !== undefined) {
+      instance.fieldTouched = field.touched;
+    }
+    
+    // Bind enabled state if available on both field and component
     const fieldWithEnabled = field as any;
-    if (typeof fieldWithEnabled.enabled === 'function') {
+    if (instance.fieldEnabled !== undefined && typeof fieldWithEnabled.enabled === 'function') {
       instance.fieldEnabled = fieldWithEnabled.enabled;
     }
   }

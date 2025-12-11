@@ -51,6 +51,7 @@ export abstract class BaseFormAdapter implements UIAdapter {
     // This is future-proofing for when that feature is added
     // The arrow function is intentional - it allows the component to reactively
     // read the signal value rather than getting a static boolean
+    // Memory management is handled by Angular's component lifecycle
     if (instance[disabledProperty] !== undefined) {
       const fieldWithEnabled = field as any;
       if (typeof fieldWithEnabled.enabled === 'function') {
