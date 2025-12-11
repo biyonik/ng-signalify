@@ -1,5 +1,6 @@
 import {computed, effect, Signal, signal} from '@angular/core';
 import {openDB, DBSchema, IDBPDatabase} from 'idb';
+import { hasIndexedDB, isBrowser } from '../utils/platform.utils';
 
 /**
  * TR: IndexedDB veritabanı şeması.
@@ -178,6 +179,7 @@ export class OfflineQueue {
     private isOnline = signal(typeof navigator !== 'undefined' ? navigator.onLine : true);
     private processingIds = new Set<string>();
     private dbPromise: Promise<IDBPDatabase<OfflineDB>>;
+    private isIndexedDBAvailable: boolean;
 
     /**
      * TR: OfflineQueue sınıfını başlatır.
@@ -204,21 +206,32 @@ export class OfflineQueue {
             onStatusChange: config.onStatusChange ?? (() => {}),
         };
 
-        // TR: Veritabanını başlat (Schema Upgrade dahil)
-        // EN: Initialize database (Including Schema Upgrade)
-        this.dbPromise = openDB<OfflineDB>(this.config.dbName, 1, {
-            upgrade(db) {
-                const store = db.createObjectStore('requests', { keyPath: 'id' });
-                store.createIndex('by-priority', 'priority');
-            },
-        });
+        // TR: IndexedDB kullanılabilirlik kontrolü (SSR desteği)
+        // EN: IndexedDB availability check (SSR support)
+        this.isIndexedDBAvailable = hasIndexedDB();
 
-        // TR: Kayıtlı kuyruğu yükle
-        // EN: Load persisted queue
-        this.loadFromStorage();
+        if (!this.isIndexedDBAvailable) {
+            console.warn('[ng-signalify] IndexedDB not available (SSR or unsupported browser). OfflineQueue disabled.');
+            // TR: Boş promise döndür (SSR güvenli)
+            // EN: Return empty promise (SSR safe)
+            this.dbPromise = Promise.resolve(null as any);
+        } else {
+            // TR: Veritabanını başlat (Schema Upgrade dahil)
+            // EN: Initialize database (Including Schema Upgrade)
+            this.dbPromise = openDB<OfflineDB>(this.config.dbName, 1, {
+                upgrade(db) {
+                    const store = db.createObjectStore('requests', { keyPath: 'id' });
+                    store.createIndex('by-priority', 'priority');
+                },
+            });
+
+            // TR: Kayıtlı kuyruğu yükle
+            // EN: Load persisted queue
+            this.loadFromStorage();
+        }
 
         // Listen for online/offline events
-        if (typeof window !== 'undefined') {
+        if (isBrowser()) {
             window.addEventListener('online', () => this.handleOnline());
             window.addEventListener('offline', () => this.handleOffline());
         }
@@ -252,6 +265,11 @@ export class OfflineQueue {
      * @returns TR: Oluşturulan istek ID'si. / EN: Generated request ID.
      */
     async enqueue(request: Omit<QueuedRequest, 'id' | 'createdAt' | 'retries'>): Promise<string> {
+        if (!this.isIndexedDBAvailable) {
+            console.warn('[ng-signalify] Cannot enqueue request: IndexedDB not available');
+            return '';
+        }
+
         const id = this.generateId();
 
         // TR: Güvenlik için Auth header'ı temizle
@@ -298,6 +316,10 @@ export class OfflineQueue {
      * EN: Removes the request from the queue and database.
      */
     async dequeue(id: string): Promise<boolean> {
+        if (!this.isIndexedDBAvailable) {
+            return false;
+        }
+
         const db = await this.dbPromise;
         const exists = (await db.get('requests', id)) !== undefined;
 
@@ -318,6 +340,10 @@ export class OfflineQueue {
      * Fetches data from IndexedDB by priority and processes it.
      */
     async process(): Promise<void> {
+        if (!this.isIndexedDBAvailable) {
+            return;
+        }
+
         if (this.status() === 'processing' || this.status() === 'paused') {
             return;
         }
@@ -476,6 +502,13 @@ export class OfflineQueue {
      * EN: Clears the queue completely (DB and Memory).
      */
     async clear(): Promise<void> {
+        if (!this.isIndexedDBAvailable) {
+            this.queue.set([]);
+            this.processingIds.clear();
+            this.updateStats();
+            return;
+        }
+
         const db = await this.dbPromise;
         await db.clear('requests');
 
@@ -545,7 +578,7 @@ export class OfflineQueue {
      * EN: Loads existing records from database on startup.
      */
     private async loadFromStorage(): Promise<void> {
-        if (typeof indexedDB === 'undefined') return;
+        if (!this.isIndexedDBAvailable) return;
 
         try {
             const db = await this.dbPromise;
