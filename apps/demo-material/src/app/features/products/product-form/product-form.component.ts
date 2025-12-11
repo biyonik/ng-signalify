@@ -301,7 +301,7 @@ export class ProductFormComponent implements OnInit {
   isEditMode = signal(false);
   productId: number | null = null;
 
-  form!: EnhancedFormState<Product>;
+  form!: EnhancedFormState<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'productImage'>>;
 
   constructor() {
     // Create form in constructor to ensure injection context for effect()
@@ -315,9 +315,7 @@ export class ProductFormComponent implements OnInit {
       tags: [] as string[],
       stockLevel: 0,
       primaryColor: '#000000',
-      isActive: true,
-      productImage: '',      // ✅ Default for optional field
-      createdAt: new Date()  // ✅ Default for optional field
+      isActive: true
     });
   }
 

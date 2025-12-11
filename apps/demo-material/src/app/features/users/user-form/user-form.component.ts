@@ -281,7 +281,7 @@ export class UserFormComponent implements OnInit {
   isEditMode = signal(false);
   userId: number | null = null;
 
-  form!: EnhancedFormState<User>;
+  form!: EnhancedFormState<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>;
 
   constructor() {
     // Create form in constructor to ensure injection context for effect()
