@@ -1,7 +1,7 @@
 {
   "name": "ng-signalify",
   "version": "1.0.0-rc-2",
-  "description": "Angular 17+ için modern, signal-tabanlı form yönetimi, state management ve UI component kütüphanesi",
+  "description": "Signal-first logic framework for Angular 17+ - Form management, state management, and API layer. UI-agnostic.",
   "author": "Ahmet ALTUN",
   "license": "MIT",
   "repository": {
@@ -32,6 +32,9 @@
   },
   "peerDependenciesMeta": {
     "xlsx": {
+      "optional": true
+    },
+    "@angular/material": {
       "optional": true
     }
   },
