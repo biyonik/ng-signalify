@@ -1,39 +1,42 @@
 # ng-signalify
 
-> Angular 17+ için modern, signal-tabanlı form yönetimi, state management ve UI component kütüphanesi.
-> Modern, signal-based form management, state management, and UI component library for Angular 17+.
+> Signal-first logic framework for Angular 17+ - Form management, state management, and API layer. UI-agnostic.
 
-**Versiyon / Version:** 1.0.0-rc.1
-**Angular:** 17+ | 18+ | 19+
-**Gereksinimler / Requirements:** Zod, Angular Signals API
+**Version:** 2.0.0-beta.1
+**Angular:** 17+ | 18+ | 19+ | 20+ | 21+
+**Requirements:** Zod, Angular Signals API
 
 ---
 
 ## 📑 İçindekiler
 
 1. [Kurulum](#kurulum)
-2. [Fields (Alan Tipleri)](#fields-alan-tipleri)
-3. [Schemas (Form & Filter)](#schemas-form--filter)
-4. [Enhanced Form (Gelişmiş Form)](#enhanced-form-gelişmiş-form)
-5. [Validators (Doğrulayıcılar)](#validators-doğrulayıcılar)
-6. [Services (Import/Export)](#services-importexport)
-7. [Entity Store (State Management)](#entity-store-state-management)
-8. [UI Components](#ui-components)
-9. [API Layer](#api-layer)
-10. [Advanced Features](#advanced-features)
-11. [Infrastructure](#infrastructure)
-12. [Gelecek Özellikler](#gelecek-özellikler)
+2. [Adapters (UI Integration)](#adapters-ui-integration)
+3. [Fields (Alan Tipleri)](#fields-alan-tipleri)
+4. [Schemas (Form & Filter)](#schemas-form--filter)
+5. [Enhanced Form (Gelişmiş Form)](#enhanced-form-gelişmiş-form)
+6. [Validators (Doğrulayıcılar)](#validators-doğrulayıcılar)
+7. [Services (Import/Export)](#services-importexport)
+8. [Entity Store (State Management)](#entity-store-state-management)
+9. [UI Components](#ui-components)
+10. [API Layer](#api-layer)
+11. [Advanced Features](#advanced-features)
+12. [Infrastructure](#infrastructure)
+13. [Gelecek Özellikler](#gelecek-özellikler)
 
 ---
 
 ## Kurulum
 
 ```bash
-# Proje klasörüne kopyalayın
-cp -r ng-signalify /your-project/libs/
+# npm
+npm install ng-signalify zod
 
-# veya npm paketi olarak (gelecekte)
-npm install ng-signalify
+# pnpm
+pnpm add ng-signalify zod
+
+# yarn
+yarn add ng-signalify zod
 ```
 
 ### Temel Import
@@ -47,6 +50,314 @@ import { StringField, IntegerField } from 'ng-signalify/fields';
 import { FormSchema, createForm } from 'ng-signalify/schemas';
 import { EntityStore } from 'ng-signalify/store';
 ```
+
+---
+
+## Adapters (UI Integration)
+
+**ng-signalify v2.0** is a **UI-agnostic logic framework**. It separates business logic (forms, validation, state) from UI components using the **Adapter Pattern**.
+
+### What are Adapters?
+
+Adapters bridge ng-signalify's logic layer with UI libraries. They allow you to:
+- ✅ Use **any UI library** (Material, PrimeNG, Spartan, custom)
+- ✅ Switch UI libraries **without rewriting business logic**
+- ✅ Test logic and UI **separately**
+- ✅ Have **smaller bundle sizes** (only include what you use)
+
+### Available Adapters
+
+#### Material Adapter
+
+For Angular Material projects:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideSigUI, MaterialAdapter } from 'ng-signalify/adapters';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideSigUI(new MaterialAdapter()),
+    // ... other providers
+  ]
+};
+```
+
+**Installation:**
+```bash
+ng add @angular/material
+```
+
+**Usage Example:**
+```typescript
+import { Component } from '@angular/core';
+import { StringField, IntegerField } from 'ng-signalify/fields';
+import { createEnhancedForm } from 'ng-signalify/schemas';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+
+@Component({
+  selector: 'app-user-form',
+  standalone: true,
+  imports: [MatInputModule, MatFormFieldModule],
+  template: `
+    <form (ngSubmit)="onSubmit()">
+      <!-- Material Input -->
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput
+          [value]="form.fields.name.value()"
+          (input)="form.fields.name.value.set($any($event.target).value)"
+          (blur)="form.fields.name.touch()" />
+        @if (form.fields.name.error() && form.fields.name.touched()) {
+          <mat-error>{{ form.fields.name.error() }}</mat-error>
+        }
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit">Submit</button>
+    </form>
+  `
+})
+export class UserFormComponent {
+  private fields = [
+    new StringField('name', 'Name', { required: true, min: 2 }),
+    new IntegerField('age', 'Age', { required: true, min: 18 }),
+  ];
+
+  protected form = createEnhancedForm(this.fields, { name: '', age: 18 });
+
+  async onSubmit() {
+    if (await this.form.validateAll()) {
+      console.log('Form Data:', this.form.getValues());
+    }
+  }
+}
+```
+
+**Pros:**
+- ✅ Enterprise-grade components
+- ✅ WCAG 2.1 compliant
+- ✅ Rich component library
+- ✅ Active maintenance
+
+**Cons:**
+- ❌ Larger bundle size
+- ❌ Material Design styling
+
+---
+
+#### Headless Adapter
+
+For custom UI or other libraries (PrimeNG, Spartan, custom components):
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideSigUI, HeadlessAdapter } from 'ng-signalify/adapters';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideSigUI(new HeadlessAdapter()),
+    // ... other providers
+  ]
+};
+```
+
+**Usage Example:**
+```typescript
+import { Component } from '@angular/core';
+import { StringField } from 'ng-signalify/fields';
+import { createEnhancedForm } from 'ng-signalify/schemas';
+import { SigFormField } from 'ng-signalify/components/core';
+
+@Component({
+  selector: 'app-user-form',
+  standalone: true,
+  imports: [SigFormField],
+  template: `
+    <form (ngSubmit)="onSubmit()">
+      <!-- Use SigFormField wrapper with your own input -->
+      <sig-form-field 
+        label="Name" 
+        [error]="form.fields.name.combinedError()"
+        [touched]="form.fields.name.touched()"
+        [required]="true">
+        <input type="text"
+          [value]="form.fields.name.value()"
+          (input)="form.fields.name.value.set($any($event.target).value)"
+          (blur)="form.fields.name.touch()" />
+      </sig-form-field>
+
+      <button type="submit">Submit</button>
+    </form>
+  `,
+  styles: [`
+    sig-form-field {
+      display: block;
+      margin-bottom: 16px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  `]
+})
+export class UserFormComponent {
+  private fields = [
+    new StringField('name', 'Name', { required: true, min: 2 }),
+  ];
+
+  protected form = createEnhancedForm(this.fields, { name: '' });
+
+  async onSubmit() {
+    if (await this.form.validateAll()) {
+      console.log('Form Data:', this.form.getValues());
+    }
+  }
+}
+```
+
+**Pros:**
+- ✅ Complete design freedom
+- ✅ Smaller bundle size
+- ✅ Use any CSS framework (Tailwind, Bootstrap)
+- ✅ No UI library lock-in
+
+**Cons:**
+- ❌ Build UI components yourself
+- ❌ Handle accessibility yourself
+
+---
+
+### Creating Custom Adapters
+
+Extend `BaseFormAdapter` to create your own adapter:
+
+```typescript
+import { BaseFormAdapter } from 'ng-signalify/adapters';
+import { Type } from '@angular/core';
+
+export class MyCustomAdapter extends BaseFormAdapter {
+  readonly name = 'my-custom-ui';
+  readonly version = '1.0.0';
+  
+  override getInputComponent(): Type<any> {
+    return MyCustomInputComponent;
+  }
+  
+  override getSelectComponent(): Type<any> {
+    return MyCustomSelectComponent;
+  }
+  
+  override getTextareaComponent(): Type<any> {
+    return MyCustomTextareaComponent;
+  }
+  
+  override getCheckboxComponent(): Type<any> {
+    return MyCustomCheckboxComponent;
+  }
+  
+  // Implement other required methods...
+}
+```
+
+**Use in app:**
+```typescript
+// app.config.ts
+import { provideSigUI } from 'ng-signalify/adapters';
+import { MyCustomAdapter } from './my-custom-adapter';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideSigUI(new MyCustomAdapter()),
+  ]
+};
+```
+
+**Adapter Interface:**
+```typescript
+interface FormAdapter {
+  name: string;
+  version: string;
+  
+  getInputComponent(): Type<any>;
+  getSelectComponent(): Type<any>;
+  getTextareaComponent(): Type<any>;
+  getCheckboxComponent(): Type<any>;
+  getRadioComponent(): Type<any>;
+  getDatePickerComponent(): Type<any>;
+  getFileUploadComponent(): Type<any>;
+  // ... other component getters
+}
+```
+
+---
+
+### Migration from v1.x Components
+
+**v1.x (Deprecated):**
+```typescript
+import { SigInput, SigSelect, SigFormField } from 'ng-signalify/components';
+
+// Template
+<sig-form-field label="Name" [error]="form.fields.name.error()">
+  <sig-input [(value)]="form.fields.name.value" />
+</sig-form-field>
+```
+
+**v2.x with Material Adapter:**
+```typescript
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+
+// Template
+<mat-form-field>
+  <mat-label>Name</mat-label>
+  <input matInput 
+    [value]="form.fields.name.value()" 
+    (input)="form.fields.name.value.set($any($event.target).value)" />
+  @if (form.fields.name.error() && form.fields.name.touched()) {
+    <mat-error>{{ form.fields.name.error() }}</mat-error>
+  }
+</mat-form-field>
+```
+
+**v2.x with Headless Adapter:**
+```typescript
+import { SigFormField } from 'ng-signalify/components/core';
+
+// Template
+<sig-form-field label="Name" [error]="form.fields.name.combinedError()">
+  <input 
+    type="text"
+    [value]="form.fields.name.value()" 
+    (input)="form.fields.name.value.set($any($event.target).value)" />
+</sig-form-field>
+```
+
+**Important:** The form logic (field definitions, validation, form creation) **remains identical** across all approaches!
+
+---
+
+### Complete Examples
+
+See working examples:
+- [Material Adapter Example](../examples/material-adapter-example.ts) - Full CRUD with Material UI
+- [Headless Adapter Example](../examples/headless-adapter-example.ts) - Custom UI components
+- [Examples README](../examples/README.md) - More details
 
 ---
 

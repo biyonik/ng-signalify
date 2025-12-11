@@ -2,327 +2,401 @@
 
 # ng-signalify
 
-### The Signal-First Enterprise Framework for Angular
+### Signal-First Logic Framework for Angular
+
+**Not a UI library.** A powerful logic layer for forms, state, and APIs.  
+Use with **any** UI library you love.
 
 [![Angular](https://img.shields.io/badge/Angular-17%2B%20%7C%2018%2B%20%7C%2019%2B-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](LICENSE)
 [![Coverage](https://img.shields.io/badge/Coverage-98%25-22C55E?style=for-the-badge)](https://github.com/biyonik/ng-signalify)
-[![Build](https://img.shields.io/badge/Build-Passing-22C55E?style=for-the-badge)](https://github.com/biyonik/ng-signalify)
-[![npm](https://img.shields.io/badge/npm-1.0.0--beta.1-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/ng-signalify)
+[![npm](https://img.shields.io/badge/npm-2.0.0--beta.1-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/ng-signalify)
 
 <br />
 
-**TR** | Modern Angular uygulamaları için Signal-tabanlı form yönetimi, state management, API katmanı ve 50+ UI bileşeni tek pakette.
-
-**EN** | Signal-based form management, state management, API layer, and 50+ UI components for modern Angular applications in one package.
-
-<br />
-
-[Kurulum](#-kurulum--installation) · [Hızlı Başlangıç](#-hızlı-başlangıç--quick-start) · [Dokümantasyon](DOCUMENTATION.md) · [Örnekler](#-cookbook) · [Katkıda Bulun](#-katkıda-bulunma--contributing)
+[Installation](#-installation) · [Quick Start](#-quick-start) · [Documentation](DOCUMENTATION.md) · [Examples](examples/) · [Migration Guide](MIGRATION.md)
 
 </div>
 
 ---
 
-## Neden ng-signalify? / Why ng-signalify?
+## 🎯 What is ng-signalify?
 
-<table>
-<tr>
-<td width="50%">
+**ng-signalify** is a **UI-agnostic** logic framework for Angular applications. It provides:
 
-### TR - Türkçe
+- ✅ **Signal-based form management** - Type-safe, reactive forms with Zod validation
+- ✅ **Entity state management** - CRUD operations, caching, pagination out of the box  
+- ✅ **API layer** - Type-safe HTTP client with retry, circuit breaker, offline queue
+- ✅ **Rich field types** - 24+ field types with import/export capabilities
+- ✅ **Advanced features** - Wizards, repeaters, WebSocket, i18n, and more
 
-Geleneksel Angular geliştirmesinde:
-- `ReactiveForms` karmaşık ve boilerplate dolu
-- `Ngrx/Ngxs` öğrenme eğrisi yüksek
-- Observable subscription yönetimi zahmetli
-- Form, State, API birbirinden kopuk
+**The key difference:** ng-signalify handles the **logic**, you choose the **UI**.
 
-**ng-signalify** bunları tek çatı altında, Angular Signals ile çözüyor:
+### Why Not a Full UI Library?
 
-- **Sıfır Boilerplate** - Action/Reducer yok
-- **Tip Güvenli** - Zod + TypeScript
-- **Reaktif** - Fine-grained Signals
-- **Hazır UI** - 50+ Standalone Component
-- **Türkiye Uyumlu** - TC Kimlik, IBAN, Telefon validatorları
+Traditional all-in-one libraries bundle logic + UI together, forcing you into their design choices. We believe:
 
-</td>
-<td width="50%">
+> **"Separate concerns, maximize flexibility"**
 
-### EN - English
+With ng-signalify:
+- 🎨 **Use Angular Material** - For enterprise-grade UI components
+- 🎨 **Use Spartan/shadcn** - For modern, accessible components  
+- 🎨 **Use PrimeNG** - For feature-rich components
+- 🎨 **Build custom UI** - Complete design freedom
+- 🎨 **Mix and match** - Use different libraries in the same app
 
-In traditional Angular development:
-- `ReactiveForms` is complex with boilerplate
-- `Ngrx/Ngxs` has steep learning curve
-- Observable subscription management is tedious
-- Form, State, API are disconnected
-
-**ng-signalify** solves these under one roof with Angular Signals:
-
-- **Zero Boilerplate** - No Action/Reducer
-- **Type Safe** - Zod + TypeScript
-- **Reactive** - Fine-grained Signals
-- **Ready UI** - 50+ Standalone Components
-- **Production Ready** - Enterprise-grade features
-
-</td>
-</tr>
-</table>
+**The migration from v1.x?** Your business logic code stays the same. Only UI layer changes.  
+[See Migration Guide →](MIGRATION.md)
 
 ---
 
-## Mimari / Architecture
+## 🏗️ Architecture
+
+ng-signalify uses the **Adapter Pattern** to separate logic from UI:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           UI COMPONENT LAYER                                │
-│         50+ Standalone Components · OnPush · Signal-integrated              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                              STORE LAYER                                    │
-│      EntityStore · CRUD · Caching · Optimistic Updates · Pagination         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                             SCHEMA LAYER                                    │
-│   FormState · Dependencies · Async Validation · Cross-Field · History       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                         FIELD DEFINITION LAYER                              │
-│         24 Field Types · Zod Schemas · Import/Export · Formatting           │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                         YOUR UI LAYER                               │
+│     Angular Material | Spartan | PrimeNG | Custom Components       │
+├─────────────────────────────────────────────────────────────────────┤
+│                         ADAPTER LAYER                               │
+│           MaterialAdapter | HeadlessAdapter | CustomAdapter         │
+├─────────────────────────────────────────────────────────────────────┤
+│                      ng-signalify LOGIC LAYER                       │
+│                                                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
+│  │   FIELDS     │  │   SCHEMAS    │  │    STORE     │             │
+│  │              │  │              │  │              │             │
+│  │ • String     │  │ • Form       │  │ • CRUD       │             │
+│  │ • Integer    │  │ • Validation │  │ • Caching    │             │
+│  │ • Date       │  │ • Dependencies│  │ • Pagination │             │
+│  │ • Enum       │  │ • History    │  │ • Optimistic │             │
+│  │ • 20+ more   │  │ • Auto-save  │  │ • Filtering  │             │
+│  └──────────────┘  └──────────────┘  └──────────────┘             │
+│                                                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
+│  │     API      │  │   ADVANCED   │  │ INFRASTRUCTURE│             │
+│  │              │  │              │  │              │             │
+│  │ • HttpClient │  │ • Wizard     │  │ • i18n       │             │
+│  │ • Retry      │  │ • Repeater   │  │ • DevTools   │             │
+│  │ • Circuit    │  │ • WebSocket  │  │ • Testing    │             │
+│  │ • Offline    │  │ • Presence   │  │ • Validators │             │
+│  └──────────────┘  └──────────────┘  └──────────────┘             │
+└─────────────────────────────────────────────────────────────────────┘
 ```
+
+**Benefits:**
+- 📦 **Smaller bundles** - Only include what you use
+- 🔄 **Easy migration** - Switch UI libraries without rewriting logic
+- 🎯 **Better testing** - Test logic and UI separately
+- 🚀 **Future-proof** - Adapt to new UI trends easily
 
 ---
 
-## Kurulum / Installation
+## 📦 Installation
 
 ```bash
-# npm
 npm install ng-signalify zod
-
-# pnpm
+# or
 pnpm add ng-signalify zod
-
-# yarn
+# or
 yarn add ng-signalify zod
 ```
 
-### Stil Kurulumu / Style Setup
+### Choose Your UI Strategy
 
-**Seçenek A: Pre-compiled CSS (Hızlı Başlangıç / Quick Start)**
+**Option A: Use Angular Material (Recommended for most apps)**
 
-```json
-// angular.json
-{
-  "styles": [
-    "node_modules/ng-signalify/ng-signalify.css",
-    "src/styles.scss"
-  ]
-}
+```bash
+ng add @angular/material
 ```
 
-**Seçenek B: SCSS (Özelleştirme için / For Customization)**
+**Option B: Use Headless (For custom UI)**
 
-```scss
-// styles.scss
+No additional dependencies needed.
 
-// Önce kendi değişkenlerini tanımla (opsiyonel)
-// Define your variables first (optional)
-$sig-color-primary: #8b5cf6;
-$sig-radius-md: 0.5rem;
+**Option C: Keep v1.x components temporarily**
 
-// Sonra ng-signalify'ı import et
-// Then import ng-signalify
-@import 'ng-signalify/styles/main';
-```
+Available in `ng-signalify/components/_legacy` (will be removed in v3.0)
 
 ---
 
-## Hızlı Başlangıç / Quick Start
+## 🚀 Quick Start
 
-### 1. Basit Form / Simple Form
+### 1. Configure Adapter
+
+**For Angular Material:**
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideSigUI, MaterialAdapter } from 'ng-signalify/adapters';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideSigUI(new MaterialAdapter()),
+    // ... other providers
+  ]
+};
+```
+
+**For Headless (Custom UI):**
+
+```typescript
+// app.config.ts
+import { provideSigUI, HeadlessAdapter } from 'ng-signalify/adapters';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideSigUI(new HeadlessAdapter()),
+    // ... other providers
+  ]
+};
+```
+
+### 2. Create a Form with Material UI
 
 ```typescript
 import { Component } from '@angular/core';
 import { StringField, IntegerField, EnumField } from 'ng-signalify/fields';
-import { FormSchema, createEnhancedForm } from 'ng-signalify/schemas';
-import { SigInput, SigSelect, SigFormField } from 'ng-signalify/components';
+import { createEnhancedForm } from 'ng-signalify/schemas';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-user-form',
   standalone: true,
-  imports: [SigInput, SigSelect, SigFormField],
+  imports: [
+    MatInputModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatButtonModule,
+  ],
   template: `
     <form (ngSubmit)="onSubmit()">
-      <!-- Ad Soyad / Full Name -->
-      <sig-form-field label="Ad Soyad" [error]="form.fields.name.combinedError()">
-        <sig-input [(value)]="form.fields.name.value" />
-      </sig-form-field>
+      <!-- Name Field -->
+      <mat-form-field appearance="outline">
+        <mat-label>Full Name</mat-label>
+        <input matInput
+          [value]="form.fields.name.value()"
+          (input)="form.fields.name.value.set($any($event.target).value)"
+          (blur)="form.fields.name.touch()" />
+        @if (form.fields.name.error() && form.fields.name.touched()) {
+          <mat-error>{{ form.fields.name.error() }}</mat-error>
+        }
+      </mat-form-field>
 
-      <!-- Yaş / Age -->
-      <sig-form-field label="Yaş" [error]="form.fields.age.combinedError()">
-        <sig-input type="number" [(value)]="form.fields.age.value" />
-      </sig-form-field>
+      <!-- Age Field -->
+      <mat-form-field appearance="outline">
+        <mat-label>Age</mat-label>
+        <input matInput type="number"
+          [value]="form.fields.age.value()"
+          (input)="form.fields.age.value.set(+$any($event.target).value)" />
+        @if (form.fields.age.error() && form.fields.age.touched()) {
+          <mat-error>{{ form.fields.age.error() }}</mat-error>
+        }
+      </mat-form-field>
 
-      <!-- Rol / Role -->
-      <sig-form-field label="Rol" [error]="form.fields.role.combinedError()">
-        <sig-select
-          [options]="roleOptions"
-          [(value)]="form.fields.role.value"
-        />
-      </sig-form-field>
+      <!-- Role Select -->
+      <mat-form-field appearance="outline">
+        <mat-label>Role</mat-label>
+        <mat-select
+          [value]="form.fields.role.value()"
+          (selectionChange)="form.fields.role.value.set($event.value)">
+          @for (role of roleOptions; track role.id) {
+            <mat-option [value]="role.id">{{ role.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-      <button type="submit" [disabled]="!form.valid()">
-        Kaydet / Save
+      <button mat-raised-button color="primary" type="submit" 
+        [disabled]="!form.valid()">
+        Submit
       </button>
     </form>
   `
 })
 export class UserFormComponent {
-  // Field tanımları / Field definitions
+  // Define fields with ng-signalify
   private fields = [
-    new StringField('name', 'Ad Soyad', { required: true, min: 3, max: 50 }),
-    new IntegerField('age', 'Yaş', { required: true, min: 18, max: 120 }),
-    new EnumField('role', 'Rol', {
+    new StringField('name', 'Full Name', { required: true, min: 2, max: 100 }),
+    new IntegerField('age', 'Age', { required: true, min: 18, max: 120 }),
+    new EnumField('role', 'Role', {
       required: true,
       options: [
-        { id: 'admin', label: 'Yönetici' },
-        { id: 'user', label: 'Kullanıcı' },
-        { id: 'guest', label: 'Misafir' }
+        { id: 'admin', label: 'Administrator' },
+        { id: 'user', label: 'User' },
+        { id: 'guest', label: 'Guest' },
       ]
-    })
+    }),
   ];
 
-  // Form oluştur / Create form
+  // Create reactive form
   protected form = createEnhancedForm(this.fields, {
-    name: 'Ahmet Yılmaz',
-    age: 28,
+    name: '',
+    age: 18,
     role: 'user'
   });
 
   protected roleOptions = [
-    { id: 'admin', label: 'Yönetici' },
-    { id: 'user', label: 'Kullanıcı' },
-    { id: 'guest', label: 'Misafir' }
+    { id: 'admin', label: 'Administrator' },
+    { id: 'user', label: 'User' },
+    { id: 'guest', label: 'Guest' },
   ];
 
   async onSubmit() {
     if (await this.form.validateAll()) {
       console.log('Form Data:', this.form.getValues());
-      // { name: 'Ahmet Yılmaz', age: 28, role: 'user' }
     }
   }
 }
 ```
 
-### 2. Entity Store / State Management
+### 3. Create a Form with Headless UI
 
 ```typescript
-import { Injectable, computed } from '@angular/core';
-import { EntityStore, PaginatedResponse, EntityId, FetchParams } from 'ng-signalify/store';
-import { createHttpClient, HttpClient } from 'ng-signalify/api';
+import { Component } from '@angular/core';
+import { StringField, IntegerField } from 'ng-signalify/fields';
+import { createEnhancedForm } from 'ng-signalify/schemas';
+import { SigFormField } from 'ng-signalify/components/core';
 
-interface Product {
-  id: string;
+@Component({
+  selector: 'app-user-form',
+  standalone: true,
+  imports: [SigFormField],
+  template: `
+    <form (ngSubmit)="onSubmit()">
+      <!-- Use SigFormField wrapper with your own input -->
+      <sig-form-field 
+        label="Full Name" 
+        [error]="form.fields.name.combinedError()"
+        [touched]="form.fields.name.touched()"
+        [required]="true">
+        <input type="text"
+          [value]="form.fields.name.value()"
+          (input)="form.fields.name.value.set($any($event.target).value)"
+          (blur)="form.fields.name.touch()"
+          placeholder="Enter your name" />
+      </sig-form-field>
+
+      <sig-form-field 
+        label="Age"
+        [error]="form.fields.age.combinedError()">
+        <input type="number"
+          [value]="form.fields.age.value()"
+          (input)="form.fields.age.value.set(+$any($event.target).value)" />
+      </sig-form-field>
+
+      <button type="submit" [disabled]="!form.valid()">
+        Submit
+      </button>
+    </form>
+  `
+})
+export class UserFormComponent {
+  private fields = [
+    new StringField('name', 'Full Name', { required: true, min: 2 }),
+    new IntegerField('age', 'Age', { required: true, min: 18 }),
+  ];
+
+  protected form = createEnhancedForm(this.fields, {
+    name: '',
+    age: 18
+  });
+
+  async onSubmit() {
+    if (await this.form.validateAll()) {
+      console.log('Form Data:', this.form.getValues());
+    }
+  }
+}
+```
+
+**Notice:** The form logic (fields, validation, state) is **identical** in both approaches!
+
+### 4. Entity Store (State Management)
+
+```typescript
+import { Injectable } from '@angular/core';
+import { EntityStore, PaginatedResponse, FetchParams, EntityId } from 'ng-signalify/store';
+import { createHttpClient } from 'ng-signalify/api';
+
+interface User {
+  id: number;
   name: string;
-  price: number;
-  stock: number;
-  category: string;
+  email: string;
+  role: string;
 }
 
-// HTTP Client örneği oluştur / Create HTTP Client instance
 const http = createHttpClient({
   baseUrl: 'https://api.example.com',
   timeout: 30000,
 });
 
 @Injectable({ providedIn: 'root' })
-export class ProductStore extends EntityStore<Product> {
+export class UserStore extends EntityStore<User> {
   constructor() {
     super({
-      name: 'products',
-      selectId: (p) => p.id,
+      name: 'users',
+      selectId: (user) => user.id,
       defaultPageSize: 20,
-      cacheTTL: 5 * 60 * 1000, // 5 dakika / 5 minutes
-      optimistic: true
+      cacheTTL: 5 * 60 * 1000, // 5 minutes
+      optimistic: true,
     });
   }
 
-  // Abstract metodları implemente et / Implement abstract methods
-  protected async fetchAll(params: FetchParams): Promise<PaginatedResponse<Product>> {
-    const response = await http.get<PaginatedResponse<Product>>('/api/products', { params });
+  protected async fetchAll(params: FetchParams): Promise<PaginatedResponse<User>> {
+    const response = await http.get<PaginatedResponse<User>>('/api/users', { params });
     return response.data;
   }
 
-  protected async fetchOne(id: EntityId): Promise<Product> {
-    const response = await http.get<Product>(`/api/products/${id}`);
+  protected async fetchOne(id: EntityId): Promise<User> {
+    const response = await http.get<User>(`/api/users/${id}`);
     return response.data;
   }
 
-  protected async createOne(data: Partial<Product>): Promise<Product> {
-    const response = await http.post<Product>('/api/products', { body: data });
+  protected async createOne(data: Partial<User>): Promise<User> {
+    const response = await http.post<User>('/api/users', { body: data });
     return response.data;
   }
 
-  protected async updateOne(id: EntityId, data: Partial<Product>): Promise<Product> {
-    const response = await http.put<Product>(`/api/products/${id}`, { body: data });
+  protected async updateOne(id: EntityId, data: Partial<User>): Promise<User> {
+    const response = await http.patch<User>(`/api/users/${id}`, { body: data });
     return response.data;
   }
 
   protected async deleteOne(id: EntityId): Promise<void> {
-    await http.delete(`/api/products/${id}`);
-  }
-
-  // Custom selectors / Özel seçiciler
-  readonly lowStockProducts = computed(() =>
-    this.signals.all().filter(p => p.stock < 10)
-  );
-
-  readonly totalValue = computed(() =>
-    this.signals.all().reduce((sum, p) => sum + (p.price * p.stock), 0)
-  );
-
-  // Custom action / Özel aksiyon
-  async decreaseStock(productId: string, amount: number): Promise<void> {
-    const { rollback } = this.optimisticUpdate(productId, {
-      stock: (this.getById(productId)?.stock ?? 0) - amount
-    });
-
-    try {
-      await http.post(`/api/products/${productId}/decrease-stock`, { body: { amount } });
-    } catch (error) {
-      rollback();
-      throw error;
-    }
+    await http.delete(`/api/users/${id}`);
   }
 }
 ```
 
-**Kullanım / Usage:**
+**Usage in Component:**
 
 ```typescript
 @Component({
   template: `
     @if (store.signals.isLoading()) {
-      <sig-loading />
+      <mat-spinner />
     }
 
-    @for (product of store.signals.all(); track product.id) {
-      <div class="product-card">
-        <h3>{{ product.name }}</h3>
-        <p>{{ product.price | currency }}</p>
-        <p>Stok: {{ product.stock }}</p>
-        <button (click)="store.delete(product.id)">Sil</button>
-      </div>
+    @for (user of store.signals.all(); track user.id) {
+      <div>{{ user.name }} - {{ user.email }}</div>
     }
 
-    <sig-pagination
-      [page]="store.signals.page()"
-      [totalPages]="store.signals.totalPages()"
-      (pageChange)="store.goToPage($event)"
+    <mat-paginator
+      [length]="store.pagination.total()"
+      [pageSize]="store.pagination.pageSize()"
+      [pageIndex]="store.pagination.page() - 1"
+      (page)="store.goToPage($event.pageIndex + 1)"
     />
   `
 })
-export class ProductListComponent {
-  store = inject(ProductStore);
+export class UserListComponent {
+  store = inject(UserStore);
 
   ngOnInit() {
     this.store.loadAll();
@@ -332,127 +406,182 @@ export class ProductListComponent {
 
 ---
 
-## Modüller / Modules
+## 📚 Core Modules
 
-### Field Tipleri / Field Types
+### Fields (24+ Types)
 
-| Kategori | Tipler | Özellikler |
-|----------|--------|------------|
-| **Primitives** | `StringField`, `IntegerField`, `DecimalField`, `BooleanField`, `TextAreaField` | Min/Max, Email, URL, Regex, Precision |
-| **Date/Time** | `DateField`, `TimeField`, `DateTimeField`, `DateRangeField` | Excel import, Timezone, 12h/24h |
-| **Selection** | `EnumField`, `MultiEnumField`, `RelationField` | Whitelist, Async lookup, CSV import |
-| **Media** | `FileField`, `ImageField` | Size/MIME validation, Dimensions |
-| **Complex** | `ArrayField`, `JsonField` | Nested validation, Schema validation |
-| **Special** | `PasswordField`, `ColorField`, `SliderField` | Entropy analysis, HEX/RGB/HSL |
+| Category | Types | Features |
+|----------|-------|----------|
+| **Primitives** | `StringField`, `IntegerField`, `DecimalField`, `BooleanField`, `TextAreaField` | Min/Max, Email, URL, Regex |
+| **Date/Time** | `DateField`, `TimeField`, `DateTimeField`, `DateRangeField` | Format handling, Timezone support |
+| **Selection** | `EnumField`, `MultiEnumField`, `RelationField` | Async options, Search, Cascade |
+| **Media** | `FileField`, `ImageField` | Size/type validation, Dimensions |
+| **Complex** | `ArrayField`, `JsonField` | Nested validation, Schema support |
+| **Special** | `PasswordField`, `ColorField`, `SliderField` | Strength check, Format conversion |
 
-### Form Özellikleri / Form Features
+[See all field types →](DOCUMENTATION.md#field-types)
 
-| Özellik | Açıklama / Description |
-|---------|------------------------|
-| **Async Validation** | Debounced API validation (email uniqueness, etc.) |
-| **Field Dependencies** | Show/hide, computed values, cascading selects |
-| **Cross-Field Validation** | Multi-field rules (startDate < endDate) |
-| **Form History** | Undo/Redo with configurable depth |
-| **Auto-Save** | Debounced auto-save callback |
-| **Dirty Tracking** | Track modified fields |
+### Form Features
 
-### Store Özellikleri / Store Features
+- ✅ **Async Validation** - Debounced API checks (email uniqueness, etc.)
+- ✅ **Field Dependencies** - Show/hide, computed values, cascading selects
+- ✅ **Cross-Field Validation** - Multi-field rules (startDate < endDate)
+- ✅ **Form History** - Undo/Redo with configurable depth
+- ✅ **Auto-Save** - Debounced auto-save callbacks
+- ✅ **Dirty Tracking** - Track modified fields for PATCH requests
 
-| Özellik | Açıklama / Description |
-|---------|------------------------|
-| **Smart Caching** | TTL-based cache with `isStale` signal |
-| **Optimistic Updates** | Instant UI updates with rollback |
-| **Pagination** | Built-in pagination state |
-| **Filtering & Sorting** | Managed filter/sort state |
-| **Batch Operations** | `createMany`, `updateMany`, `deleteMany` |
-| **Selection** | Single/multi selection support |
+[See form documentation →](DOCUMENTATION.md#form-schema)
 
-### API Katmanı / API Layer
+### Store Features
 
-| Özellik | Açıklama / Description |
-|---------|------------------------|
-| **HttpClient** | Type-safe fetch wrapper with interceptors |
-| **Retry Handler** | Exponential backoff retry |
-| **Circuit Breaker** | Fail-fast for failing services |
-| **API Cache** | Response caching with TTL |
-| **Offline Queue** | Store-and-forward pattern |
+- ✅ **Smart Caching** - TTL-based with `isStale` signal
+- ✅ **Optimistic Updates** - Instant UI updates with rollback
+- ✅ **Pagination** - Built-in pagination state
+- ✅ **Filtering & Sorting** - Managed filter/sort state
+- ✅ **Batch Operations** - `createMany`, `updateMany`, `deleteMany`
+- ✅ **Selection** - Single/multi selection support
 
-### Gelişmiş Özellikler / Advanced Features
+[See store documentation →](DOCUMENTATION.md#entity-store)
 
-| Özellik | Açıklama / Description |
-|---------|------------------------|
-| **Wizard** | Multi-step form state machine |
-| **Repeater** | Dynamic form arrays with nested support |
-| **Realtime** | WebSocket with auto-reconnect |
-| **i18n** | Signal-based internationalization |
-| **DevTools** | Performance timing, signal tracking |
+### API Layer
 
----
+- ✅ **Type-Safe HTTP Client** - Built on fetch API with interceptors
+- ✅ **Retry Handler** - Exponential backoff with jitter
+- ✅ **Circuit Breaker** - Fail-fast for degraded services
+- ✅ **API Cache** - Response caching with TTL
+- ✅ **Offline Queue** - Store-and-forward pattern
 
-## UI Bileşenleri / UI Components
+[See API documentation →](DOCUMENTATION.md#api-layer)
 
-### Form (19)
+### Advanced Features
 
-`SigInput` · `SigTextarea` · `SigSelect` · `SigAutocomplete` · `SigCheckbox` · `SigRadio` · `SigDatePicker` · `SigTimePicker` · `SigDateRangePicker` · `SigFileUpload` · `SigColorPicker` · `SigOtpInput` · `SigTagsInput` · `SigRichTextEditor` · `SigNumberStepper` · `SigRating` · `SigPasswordStrength` · `SigSearchInput` · `SigFormField`
+- ✅ **Wizard** - Multi-step form state machine
+- ✅ **Repeater** - Dynamic form arrays with drag & drop
+- ✅ **WebSocket** - Real-time with auto-reconnect
+- ✅ **i18n** - Signal-based internationalization
+- ✅ **DevTools** - Performance tracking, logging
 
-### Data (4)
-
-`SigTable` · `SigDataGrid` · `SigPagination` · `SigVirtualScroll`
-
-### Feedback (4)
-
-`SigModal` · `SigToast` · `SigLoading` · `SigSlider`
-
-### Layout (5)
-
-`SigTabs` · `SigAccordion` · `SigStepper` · `SigDrawer` · `SigCard`
-
-### Overlay (4)
-
-`SigTooltip` · `SigDropdownMenu` · `SigConfirmDialog` · `SigPopover`
-
-### Display (9)
-
-`SigBadge` · `SigAvatar` · `SigAlert` · `SigProgress` · `SigTimeline` · `SigCarousel` · `SigImageGallery` · `SigTree` · `SigCalendar`
-
-### Utility (2)
-
-`SigCopyButton` · `SigBreadcrumb`
+[See advanced features →](DOCUMENTATION.md#advanced-features)
 
 ---
 
-## Türkiye Validatorları / Turkish Validators
+## 🎨 Adapter Options
+
+### Material Adapter
+
+For Angular Material projects:
+
+```typescript
+import { provideSigUI, MaterialAdapter } from 'ng-signalify/adapters';
+
+provideSigUI(new MaterialAdapter())
+```
+
+**Pros:** Enterprise-grade, WCAG compliant, rich components  
+**Cons:** Larger bundle, Material design language
+
+[Material Example →](examples/material-adapter-example.ts)
+
+### Headless Adapter
+
+For custom UI or other libraries:
+
+```typescript
+import { provideSigUI, HeadlessAdapter } from 'ng-signalify/adapters';
+
+provideSigUI(new HeadlessAdapter())
+```
+
+**Pros:** Complete design freedom, smaller bundle  
+**Cons:** Build UI components yourself
+
+[Headless Example →](examples/headless-adapter-example.ts)
+
+### Custom Adapter
+
+Create your own:
+
+```typescript
+import { BaseFormAdapter } from 'ng-signalify/adapters';
+
+export class MyCustomAdapter extends BaseFormAdapter {
+  readonly name = 'my-ui-library';
+  readonly version = '1.0.0';
+  
+  // Implement adapter methods
+}
+```
+
+[Adapter Documentation →](lib/adapters/README.md)
+
+---
+
+## 🔄 Migration from v1.x
+
+**Good news:** Your business logic code is **100% backward compatible**.
+
+Only UI layer needs updates:
+
+```typescript
+// ❌ v1.x (deprecated)
+import { SigInput, SigSelect } from 'ng-signalify/components';
+
+// ✅ v2.x with Material
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+
+// ✅ v2.x with Headless
+import { SigFormField } from 'ng-signalify/components/core';
+```
+
+**Migration strategies:**
+- 🟢 **Gradual** - Migrate page by page (2-4 weeks)
+- 🔵 **Big Bang** - Migrate everything at once (1-2 weeks)
+- 🟡 **Hybrid** - Migrate critical paths first (3-4 weeks)
+
+[Complete Migration Guide →](MIGRATION.md)
+
+---
+
+## 📖 Examples
+
+Explore complete, runnable examples:
+
+- [Material Adapter Example](examples/material-adapter-example.ts) - Full CRUD with Material UI
+- [Headless Adapter Example](examples/headless-adapter-example.ts) - Custom UI components
+- [Examples README](examples/README.md) - Usage guide and tips
+
+---
+
+## 🧪 Turkish Validators
+
+Built-in validators for Turkish-specific data:
 
 ```typescript
 import { tcKimlikNo, phoneNumber, iban, vergiNo, plaka } from 'ng-signalify/validators';
 
-// TC Kimlik No (11 hane, checksum kontrolü)
-// Turkish ID Number (11 digits with checksum)
+// TC ID Number (11 digits with algorithm check)
 const tcField = new StringField('tc', 'TC Kimlik No', {
   required: true,
   customSchema: tcKimlikNo
 });
 
-// Telefon (+90 veya 0 ile başlayan)
-// Phone (+90 or 0 prefix)
+// Phone (Turkish formats: 05551234567, +905551234567)
 const phoneField = new StringField('phone', 'Telefon', {
   customSchema: phoneNumber
 });
 
-// IBAN (TR + 24 rakam)
 // IBAN (TR + 24 digits)
 const ibanField = new StringField('iban', 'IBAN', {
   customSchema: iban
 });
 
-// Vergi No (10 hane)
 // Tax Number (10 digits)
 const vergiField = new StringField('vergi', 'Vergi No', {
   customSchema: vergiNo
 });
 
-// Plaka (01-81 arası il kodu)
-// License Plate (01-81 province codes)
+// License Plate (Turkish format)
 const plakaField = new StringField('plaka', 'Plaka', {
   customSchema: plaka
 });
@@ -460,240 +589,60 @@ const plakaField = new StringField('plaka', 'Plaka', {
 
 ---
 
-## Cookbook
+## 📋 Roadmap
 
-### Wizard (Çok Adımlı Form / Multi-Step Form)
+### v2.1 (Q1 2025)
+- [ ] Form Builder UI (drag & drop)
+- [ ] Additional adapters (Spartan, PrimeNG)
+- [ ] Enhanced DevTools extension
 
-```typescript
-import { createWizard, WizardStep } from 'ng-signalify/advanced';
-import { z } from 'zod';
-
-const steps: WizardStep[] = [
-  {
-    id: 'account',
-    title: 'Hesap Bilgileri',
-    schema: z.object({
-      email: z.string().email(),
-      password: z.string().min(8)
-    }),
-    beforeLeave: async (data) => {
-      // Email kontrolü / Check email availability
-      const available = await checkEmail(data.email);
-      return available;
-    }
-  },
-  {
-    id: 'profile',
-    title: 'Profil',
-    schema: z.object({
-      fullName: z.string().min(2),
-      phone: z.string()
-    })
-  },
-  {
-    id: 'confirm',
-    title: 'Onay',
-    optional: false
-  }
-];
-
-const wizard = createWizard(steps);
-
-// Navigation
-wizard.next();          // Sonraki adım (validasyon ile)
-wizard.prev();          // Önceki adım
-wizard.goTo('confirm'); // Belirli adıma git
-
-// State
-wizard.currentStep();   // Aktif adım
-wizard.isFirstStep();   // İlk adımda mı?
-wizard.isLastStep();    // Son adımda mı?
-wizard.data();          // Tüm adımların verileri
-wizard.canProceed();    // İlerlenebilir mi?
-```
-
-### Repeater (Dinamik Form Dizisi / Dynamic Form Array)
-
-```typescript
-import { createRepeater } from 'ng-signalify/advanced';
-import { z } from 'zod';
-
-const ItemSchema = z.object({
-  product: z.string().min(1),
-  quantity: z.number().min(1),
-  price: z.number().min(0)
-});
-
-const repeater = createRepeater({
-  schema: ItemSchema,
-  defaultItem: () => ({ product: '', quantity: 1, price: 0 }),
-  min: 1,
-  max: 20
-});
-
-// Actions
-repeater.add();                         // Yeni satır ekle
-repeater.remove(itemId);                // Satır sil
-repeater.update(itemId, { quantity: 5 }); // Güncelle
-repeater.move(itemId, newIndex);        // Sıra değiştir
-
-// State
-repeater.items();      // Tüm satırlar
-repeater.values();     // Sadece veriler
-repeater.isValid();    // Tümü geçerli mi?
-repeater.errors();     // Hatalar
-```
-
-### Field Dependencies (Alan Bağımlılıkları)
-
-```typescript
-import { createEnhancedForm, DependencyPatterns } from 'ng-signalify/schemas';
-
-const form = createEnhancedForm(fields, initialValues, {
-  fieldConfigs: {
-    // Ülke değişince şehir sıfırlansın
-    // Reset city when country changes
-    city: {
-      dependency: DependencyPatterns.resetOnChange('country')
-    },
-
-    // "Diğer" seçilince açıklama görünsün
-    // Show description when "other" is selected
-    otherDescription: {
-      dependency: DependencyPatterns.showWhenEquals('reason', 'other')
-    },
-
-    // Toplam = Fiyat × Adet
-    // Total = Price × Quantity
-    total: {
-      dependency: {
-        dependsOn: ['price', 'quantity'],
-        compute: (values) => (values.price ?? 0) * (values.quantity ?? 0)
-      }
-    },
-
-    // Özel async seçenek yükleme
-    // Custom async options loading
-    city: {
-      dependency: {
-        dependsOn: ['country'],
-        onDependencyChange: async (values, ctx) => {
-          if (values.country) {
-            const cities = await fetchCities(values.country);
-            ctx.setOptions(cities);
-          } else {
-            ctx.reset();
-          }
-        }
-      }
-    }
-  }
-});
-```
-
----
-
-## Tema Özelleştirme / Theming
-
-```scss
-// styles.scss
-
-// 1. Renkleri override et / Override colors
-$sig-color-primary: #8b5cf6;       // Mor / Purple
-$sig-color-primary-hover: #7c3aed;
-$sig-color-success: #10b981;       // Yeşil / Green
-$sig-color-error: #ef4444;         // Kırmızı / Red
-
-// 2. Spacing ve radius
-$sig-radius-md: 0.5rem;
-$sig-spacing-4: 1.25rem;
-
-// 3. ng-signalify'ı import et / Import ng-signalify
-@import 'ng-signalify/styles/main';
-
-// 4. Ek özelleştirmeler / Additional customizations
-.sig-input__field {
-  font-family: 'Inter', sans-serif;
-}
-
-// 5. Dark mode (manuel class ile / with manual class)
-.dark {
-  --sig-bg-surface: #1e1e2e;
-  --sig-bg-background: #11111b;
-  --sig-text-main: #cdd6f4;
-  --sig-border-color: #45475a;
-}
-```
-
----
-
-## API Reference
-
-Detaylı API dokümantasyonu için [DOCUMENTATION.md](DOCUMENTATION.md) dosyasına bakın.
-
-For detailed API documentation, see [DOCUMENTATION.md](DOCUMENTATION.md).
-
-### Quick Links
-
-- [Field Types](DOCUMENTATION.md#field-types)
-- [Form Schema](DOCUMENTATION.md#form-schema)
-- [Entity Store](DOCUMENTATION.md#entity-store)
-- [Components](DOCUMENTATION.md#components)
-- [Validators](DOCUMENTATION.md#validators)
-
----
-
-## Test
-
-```bash
-# Tüm testleri çalıştır / Run all tests
-npm test
-
-# Watch mode
-npm run test:watch
-
-# Coverage raporu / Coverage report
-npm run test:coverage
-```
-
----
-
-## Roadmap
-
-- [ ] Angular 19 `linkedSignal()` desteği
-- [ ] Form Builder (Drag & Drop)
-- [ ] Accessibility (WCAG 2.1 AA)
-- [ ] Server-Side Rendering (SSR)
-- [ ] Storybook entegrasyonu
+### v2.5 (Q2 2025)
+- [ ] Legacy components show warnings
+- [ ] GraphQL client support
 - [ ] VS Code extension
-- [ ] Form Analytics
-- [ ] AI-powered suggestions
+
+### v3.0 (Q1 2026)
+- [ ] Remove legacy components
+- [ ] Angular 20+ support
+- [ ] Performance optimizations
+
+[See full roadmap →](DOCUMENTATION.md#roadmap)
 
 ---
 
-## Katkıda Bulunma / Contributing
+## 🤝 Contributing
 
-Katkılarınızı bekliyoruz! / Contributions are welcome!
+Contributions are welcome!
 
-1. Fork yapın / Fork the repo
-2. Feature branch oluşturun / Create feature branch (`git checkout -b feature/amazing`)
-3. Commit atın / Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push yapın / Push to branch (`git push origin feature/amazing`)
-5. Pull Request açın / Open a Pull Request
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing`)
+3. Commit changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing`)
+5. Open a Pull Request
+
+**Commit Convention:** `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`
 
 ---
 
-## Lisans / License
-
-MIT License - Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+## 📄 License
 
 MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
+## 📞 Support
+
+- **Documentation:** [DOCUMENTATION.md](DOCUMENTATION.md)
+- **Examples:** [examples/](examples/)
+- **Issues:** [GitHub Issues](https://github.com/biyonik/ng-signalify/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/biyonik/ng-signalify/discussions)
+- **Email:** ahmet.altun60@gmail.com
+
+---
+
 <div align="center">
 
-## Yazar / Author
+## 👨‍💻 Author
 
 **Ahmet ALTUN**
 
@@ -703,10 +652,8 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!
+**If you find ng-signalify useful, give it a ⭐!**
 
-If you find this project useful, don't forget to give it a star!
-
-**ng-signalify** - Developed with ❤️ by Biyonik
+**ng-signalify v2.0** - Developed with ❤️ for the Angular community
 
 </div>
