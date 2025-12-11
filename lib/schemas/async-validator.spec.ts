@@ -16,7 +16,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
     describe('Debouncing (Default 300ms)', () => {
         it('should debounce validation requests with default 300ms', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn);
 
                 // Rapid fire requests
@@ -39,7 +39,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should debounce validation requests with custom debounce time', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 500);
 
                 validator.validate('test');
@@ -56,7 +56,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should reset debounce timer on each new validation', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 300);
 
                 validator.validate('a');
@@ -82,7 +82,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 const mockFn: AsyncValidatorFn<string> = jest.fn().mockImplementation(async (value, signal) => {
                     signal.addEventListener('abort', () => abortedCount++);
                     await new Promise(resolve => setTimeout(resolve, 100));
-                    return signal.aborted ? '' : '';
+                    return signal.aborted ? null : null;
                 });
 
                 const validator = new AsyncValidator(mockFn, 0);
@@ -106,7 +106,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 const validator = new AsyncValidator(async (value: string, signal) => {
                     await new Promise(resolve => setTimeout(resolve, 100));
                     if (signal.aborted) return '';
-                    return value === 'error' ? 'Error message' : '';
+                    return value === 'error' ? 'Error message' : null;
                 }, 0);
 
                 validator.validate('error');
@@ -116,13 +116,13 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 jest.advanceTimersByTime(150);
                 await Promise.resolve();
 
-                expect(validator.error()).toBe('');
+                expect(validator.error()).toBeNull();
             });
         });
 
         it('should handle concurrent validations correctly', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 0);
 
                 // Each call with debounce=0 will execute after timeout
@@ -171,7 +171,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should set loading to false after validation completes', async () => {
             await run(async () => {
-                const validator = new AsyncValidator(async () => '', 0);
+                const validator = new AsyncValidator(async () => null, 0);
 
                 validator.validate('test');
                 jest.runAllTimers();
@@ -226,7 +226,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
         it('should set error message on validation failure', async () => {
             await run(async () => {
                 const validator = new AsyncValidator(async (value: string) => {
-                    return value === 'taken' ? 'Username is taken' : '';
+                    return value === 'taken' ? 'Username is taken' : null;
                 }, 0);
 
                 validator.validate('taken');
@@ -240,7 +240,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
         it('should clear error on successful validation', async () => {
             await run(async () => {
                 const validator = new AsyncValidator(async (value: string) => {
-                    return value === 'taken' ? 'Username is taken' : '';
+                    return value === 'taken' ? 'Username is taken' : null;
                 }, 0);
 
                 validator.validate('taken');
@@ -253,7 +253,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 jest.runAllTimers();
                 await Promise.resolve();
 
-                expect(validator.error()).toBe('');
+                expect(validator.error()).toBeNull();
             });
         });
 
@@ -301,7 +301,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should handle null values gracefully', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 0);
 
                 validator.validate(null as any);
@@ -309,13 +309,13 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 await Promise.resolve();
 
                 expect(mockFn).not.toHaveBeenCalled();
-                expect(validator.error()).toBe('');
+                expect(validator.error()).toBeNull();
             });
         });
 
         it('should handle undefined values gracefully', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 0);
 
                 validator.validate(undefined as any);
@@ -323,13 +323,13 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 await Promise.resolve();
 
                 expect(mockFn).not.toHaveBeenCalled();
-                expect(validator.error()).toBe('');
+                expect(validator.error()).toBeNull();
             });
         });
 
         it('should handle empty string values gracefully', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 0);
 
                 validator.validate('');
@@ -337,7 +337,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 await Promise.resolve();
 
                 expect(mockFn).not.toHaveBeenCalled();
-                expect(validator.error()).toBe('');
+                expect(validator.error()).toBeNull();
             });
         });
     });
@@ -345,7 +345,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
     describe('validateAsync() Method (Bug Fix Feature)', () => {
         it('should validate immediately without debounce', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 500);
 
                 const promise = validator.validateAsync('test');
@@ -354,13 +354,13 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 const result = await promise;
 
                 expect(mockFn).toHaveBeenCalledTimes(1);
-                expect(result).toBe('');
+                expect(result).toBeNull();
             });
         });
 
         it('should cancel pending debounced validation when called', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 500);
 
                 validator.validate('debounced');
@@ -379,7 +379,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
         it('should return error message from validation', async () => {
             await run(async () => {
                 const validator = new AsyncValidator(async (value: string) => {
-                    return value === 'invalid' ? 'Validation error' : '';
+                    return value === 'invalid' ? 'Validation error' : null;
                 }, 300);
 
                 const result = await validator.validateAsync('invalid');
@@ -392,13 +392,13 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
         it('should return empty string for valid value', async () => {
             await run(async () => {
                 const validator = new AsyncValidator(async (value: string) => {
-                    return value === 'invalid' ? 'Validation error' : '';
+                    return value === 'invalid' ? 'Validation error' : null;
                 }, 300);
 
                 const result = await validator.validateAsync('valid');
 
-                expect(result).toBe('');
-                expect(validator.error()).toBe('');
+                expect(result).toBeNull();
+                expect(validator.error()).toBeNull();
             });
         });
 
@@ -422,14 +422,14 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should handle empty values without calling validator', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 300);
 
                 const result = await validator.validateAsync('');
 
                 expect(mockFn).not.toHaveBeenCalled();
-                expect(result).toBe('');
-                expect(validator.error()).toBe('');
+                expect(result).toBeNull();
+                expect(validator.error()).toBeNull();
                 expect(validator.loading()).toBe(false);
             });
         });
@@ -443,7 +443,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
                 const result = await validator.validateAsync('test');
 
-                expect(result).toBe('');
+                expect(result).toBeNull();
                 expect(consoleSpy).toHaveBeenCalled();
 
                 consoleSpy.mockRestore();
@@ -482,13 +482,13 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
                 validator.reset();
 
-                expect(validator.error()).toBe('');
+                expect(validator.error()).toBeNull();
             });
         });
 
         it('should cancel pending validation on reset', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 300);
 
                 validator.validate('test');
@@ -526,7 +526,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should allow new validation after reset', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 0);
 
                 validator.validate('first');
@@ -547,7 +547,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
     describe('Memory Cleanup', () => {
         it('should not leak timers after multiple validations', async () => {
             await run(async () => {
-                const validator = new AsyncValidator(async () => '', 300);
+                const validator = new AsyncValidator(async () => null, 300);
 
                 for (let i = 0; i < 100; i++) {
                     validator.validate(`test${i}`);
@@ -557,13 +557,13 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 validator.reset();
 
                 expect(validator.loading()).toBe(false);
-                expect(validator.error()).toBe('');
+                expect(validator.error()).toBeNull();
             });
         });
 
         it('should not leak abort controllers', async () => {
             await run(async () => {
-                const validator = new AsyncValidator(async () => '', 0);
+                const validator = new AsyncValidator(async () => null, 0);
 
                 for (let i = 0; i < 100; i++) {
                     validator.validate(`test${i}`);
@@ -583,7 +583,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
     describe('Edge Cases', () => {
         it('should handle zero debounce time', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 0);
 
                 validator.validate('test');
@@ -596,7 +596,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should handle very long debounce time', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 10000);
 
                 validator.validate('test');
@@ -613,7 +613,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should handle rapid validation cycles', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 100);
 
                 for (let i = 0; i < 10; i++) {
@@ -631,7 +631,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should handle complex object values', async () => {
             await run(async () => {
-                const mockFn = jest.fn().mockResolvedValue('');
+                const mockFn = jest.fn().mockResolvedValue(null);
                 const validator = new AsyncValidator(mockFn, 0);
 
                 const complexValue = { name: 'test', nested: { value: 123 } };
@@ -660,7 +660,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
     describe('Signal Reactivity', () => {
         it('should expose loading as readonly signal', async () => {
             await run(async () => {
-                const validator = new AsyncValidator(async () => '', 0);
+                const validator = new AsyncValidator(async () => null, 0);
 
                 expect(validator.loading()).toBe(false);
 
@@ -671,9 +671,9 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
 
         it('should expose error as readonly signal', async () => {
             await run(async () => {
-                const validator = new AsyncValidator(async () => '', 0);
+                const validator = new AsyncValidator(async () => null, 0);
 
-                expect(validator.error()).toBe('');
+                expect(validator.error()).toBeNull();
 
                 // Verify it's a signal by checking it's a function
                 expect(typeof validator.error).toBe('function');
@@ -693,7 +693,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 }, 0);
 
                 const loadingStates: boolean[] = [];
-                const errorStates: string[] = [];
+                const errorStates: (string | null)[] = [];
 
                 // Capture initial state
                 loadingStates.push(validator.loading());
@@ -715,7 +715,7 @@ describe('AsyncValidator (Comprehensive Expert-Level Tests)', () => {
                 errorStates.push(validator.error());
 
                 expect(loadingStates).toEqual([false, true, false]);
-                expect(errorStates).toEqual(['', '', 'Error message']);
+                expect(errorStates).toEqual([null, null, 'Error message']);
             });
         });
     });
