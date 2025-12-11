@@ -318,12 +318,14 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  onPageChange(event: any) {
-    this.productStore.loadAll({
-      page: event.pageIndex + 1,
-      pageSize: event.pageSize,
-      filters: this.searchTerm ? { search: this.searchTerm } : undefined
-    });
+  async onPageChange(event: any) {
+    const currentPageSize = this.productStore.pagination.pageSize();
+    
+    if (currentPageSize !== event.pageSize) {
+      await this.productStore.setPageSize(event.pageSize);
+    } else {
+      await this.productStore.goToPage(event.pageIndex + 1);
+    }
   }
 
   createProduct() {

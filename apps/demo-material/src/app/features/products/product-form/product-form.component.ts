@@ -12,20 +12,20 @@
  */
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MaterialModule } from '../../../shared/material.module';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ProductStore } from '../product.store';
 import { Product } from '../product.model';
+import { productFields } from '../product.fields';
+import { createEnhancedForm } from 'ng-signalify/schemas';
 
 @Component({
   selector: 'app-product-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     MaterialModule,
     LoadingSpinnerComponent
   ],
@@ -49,50 +49,91 @@ import { Product } from '../product.model';
             [message]="'Loading product data...'"
           />
 
-          <form *ngIf="!loading()" [formGroup]="productForm" class="product-form">
+          <form *ngIf="!loading()" class="product-form">
             <!-- Product Name -->
             <mat-form-field appearance="outline">
-              <mat-label>Product Name</mat-label>
-              <input matInput formControlName="name" placeholder="Enter product name">
-              <mat-hint>Enter the product name</mat-hint>
-              <mat-error *ngIf="productForm.get('name')?.hasError('required')">
-                Product name is required
-              </mat-error>
+              <mat-label>{{ form.fields.name.label }}</mat-label>
+              <input 
+                matInput 
+                [value]="form.fields.name.value()"
+                (input)="form.fields.name.value.set($any($event.target).value)"
+                (blur)="form.fields.name.touch()"
+                placeholder="Enter product name"
+              />
+              @if (form.fields.name.hint) {
+                <mat-hint>{{ form.fields.name.hint }}</mat-hint>
+              }
+              @if (form.fields.name.error() && form.fields.name.touched()) {
+                <mat-error>{{ form.fields.name.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- SKU -->
             <mat-form-field appearance="outline">
-              <mat-label>SKU</mat-label>
-              <input matInput formControlName="sku" placeholder="Enter SKU">
-              <mat-hint>Stock Keeping Unit</mat-hint>
-              <mat-error *ngIf="productForm.get('sku')?.hasError('required')">
-                SKU is required
-              </mat-error>
+              <mat-label>{{ form.fields.sku.label }}</mat-label>
+              <input 
+                matInput 
+                [value]="form.fields.sku.value()"
+                (input)="form.fields.sku.value.set($any($event.target).value)"
+                (blur)="form.fields.sku.touch()"
+                placeholder="Enter SKU"
+              />
+              @if (form.fields.sku.hint) {
+                <mat-hint>{{ form.fields.sku.hint }}</mat-hint>
+              }
+              @if (form.fields.sku.error() && form.fields.sku.touched()) {
+                <mat-error>{{ form.fields.sku.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Price -->
             <mat-form-field appearance="outline">
-              <mat-label>Price</mat-label>
-              <input matInput formControlName="price" type="number" step="0.01">
+              <mat-label>{{ form.fields.price.label }}</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                step="0.01"
+                [value]="form.fields.price.value()"
+                (input)="form.fields.price.value.set(+$any($event.target).value)"
+                (blur)="form.fields.price.touch()"
+              />
               <span matTextPrefix>$&nbsp;</span>
-              <mat-hint>Product price in USD</mat-hint>
-              <mat-error *ngIf="productForm.get('price')?.hasError('required')">
-                Price is required
-              </mat-error>
+              @if (form.fields.price.hint) {
+                <mat-hint>{{ form.fields.price.hint }}</mat-hint>
+              }
+              @if (form.fields.price.error() && form.fields.price.touched()) {
+                <mat-error>{{ form.fields.price.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Discount -->
             <mat-form-field appearance="outline">
-              <mat-label>Discount %</mat-label>
-              <input matInput formControlName="discount" type="number">
+              <mat-label>{{ form.fields.discount.label }}</mat-label>
+              <input 
+                matInput 
+                type="number"
+                [value]="form.fields.discount.value()"
+                (input)="form.fields.discount.value.set(+$any($event.target).value)"
+                (blur)="form.fields.discount.touch()"
+              />
               <span matTextSuffix>%</span>
-              <mat-hint>Discount percentage (0-100)</mat-hint>
+              @if (form.fields.discount.hint) {
+                <mat-hint>{{ form.fields.discount.hint }}</mat-hint>
+              }
+              @if (form.fields.discount.error() && form.fields.discount.touched()) {
+                <mat-error>{{ form.fields.discount.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Categories -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Categories</mat-label>
-              <mat-select formControlName="categories" multiple>
+              <mat-label>{{ form.fields.categories.label }}</mat-label>
+              <mat-select 
+                multiple
+                [value]="form.fields.categories.value()"
+                (selectionChange)="form.fields.categories.value.set($event.value)"
+                (blur)="form.fields.categories.touch()"
+              >
                 <mat-option value="electronics">Electronics</mat-option>
                 <mat-option value="clothing">Clothing</mat-option>
                 <mat-option value="books">Books</mat-option>
@@ -100,59 +141,95 @@ import { Product } from '../product.model';
                 <mat-option value="sports">Sports</mat-option>
                 <mat-option value="toys">Toys</mat-option>
               </mat-select>
-              <mat-error *ngIf="productForm.get('categories')?.hasError('required')">
-                At least one category is required
-              </mat-error>
+              @if (form.fields.categories.error() && form.fields.categories.touched()) {
+                <mat-error>{{ form.fields.categories.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Tags -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Tags</mat-label>
-              <mat-select formControlName="tags" multiple>
+              <mat-label>{{ form.fields.tags.label }}</mat-label>
+              <mat-select 
+                multiple
+                [value]="form.fields.tags.value()"
+                (selectionChange)="form.fields.tags.value.set($event.value)"
+                (blur)="form.fields.tags.touch()"
+              >
                 <mat-option value="new">New Arrival</mat-option>
                 <mat-option value="sale">On Sale</mat-option>
                 <mat-option value="featured">Featured</mat-option>
                 <mat-option value="trending">Trending</mat-option>
                 <mat-option value="bestseller">Best Seller</mat-option>
               </mat-select>
+              @if (form.fields.tags.error() && form.fields.tags.touched()) {
+                <mat-error>{{ form.fields.tags.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Stock Level -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Stock Level</mat-label>
+              <mat-label>{{ form.fields.stockLevel.label }}</mat-label>
               <mat-slider min="0" max="1000" step="10" discrete showTickMarks>
-                <input matSliderThumb formControlName="stockLevel">
+                <input 
+                  matSliderThumb 
+                  [value]="form.fields.stockLevel.value()"
+                  (valueChange)="form.fields.stockLevel.value.set($event)"
+                />
               </mat-slider>
-              <mat-hint>Current stock: {{ productForm.get('stockLevel')?.value }}</mat-hint>
+              @if (form.fields.stockLevel.hint) {
+                <mat-hint>Current stock: {{ form.fields.stockLevel.value() }}</mat-hint>
+              }
+              @if (form.fields.stockLevel.error() && form.fields.stockLevel.touched()) {
+                <mat-error>{{ form.fields.stockLevel.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Primary Color -->
             <mat-form-field appearance="outline">
-              <mat-label>Primary Color</mat-label>
-              <input matInput formControlName="primaryColor" type="color">
-              <mat-hint>Main product color</mat-hint>
+              <mat-label>{{ form.fields.primaryColor.label }}</mat-label>
+              <input 
+                matInput 
+                type="color"
+                [value]="form.fields.primaryColor.value()"
+                (input)="form.fields.primaryColor.value.set($any($event.target).value)"
+                (blur)="form.fields.primaryColor.touch()"
+              />
+              @if (form.fields.primaryColor.hint) {
+                <mat-hint>{{ form.fields.primaryColor.hint }}</mat-hint>
+              }
+              @if (form.fields.primaryColor.error() && form.fields.primaryColor.touched()) {
+                <mat-error>{{ form.fields.primaryColor.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Active Status -->
             <div class="checkbox-field">
-              <mat-checkbox formControlName="isActive">
-                Product is active
+              <mat-checkbox 
+                [checked]="form.fields.isActive.value()"
+                (change)="form.fields.isActive.value.set($event.checked)"
+              >
+                {{ form.fields.isActive.label }}
               </mat-checkbox>
             </div>
 
             <!-- Description -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
+              <mat-label>{{ form.fields.description.label }}</mat-label>
               <textarea
                 matInput
-                formControlName="description"
+                [value]="form.fields.description.value()"
+                (input)="form.fields.description.value.set($any($event.target).value)"
+                (blur)="form.fields.description.touch()"
                 rows="4"
                 placeholder="Enter product description"
                 maxlength="1000"></textarea>
-              <mat-hint align="end">{{ productForm.get('description')?.value?.length || 0 }}/1000</mat-hint>
-              <mat-error *ngIf="productForm.get('description')?.hasError('required')">
-                Description is required
-              </mat-error>
+              <mat-hint align="end">{{ form.fields.description.value()?.length || 0 }}/1000</mat-hint>
+              @if (form.fields.description.hint) {
+                <mat-hint>{{ form.fields.description.hint }}</mat-hint>
+              }
+              @if (form.fields.description.error() && form.fields.description.touched()) {
+                <mat-error>{{ form.fields.description.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Form Actions -->
@@ -167,7 +244,7 @@ import { Product } from '../product.model';
                 mat-raised-button
                 color="primary"
                 type="submit"
-                [disabled]="productForm.invalid || saving()"
+                [disabled]="!form.valid() || saving()"
                 (click)="onSubmit()">
                 {{ saving() ? 'Saving...' : 'Save' }}
               </button>
@@ -239,17 +316,17 @@ export class ProductFormComponent implements OnInit {
   isEditMode = signal(false);
   productId: number | null = null;
 
-  productForm = new FormGroup({
-    name: new FormControl('', { nonNullable: true }),
-    sku: new FormControl('', { nonNullable: true }),
-    description: new FormControl('', { nonNullable: true }),
-    price: new FormControl<number>(0, { nonNullable: true }),
-    discount: new FormControl<number>(0, { nonNullable: true }),
-    categories: new FormControl<string[]>([], { nonNullable: true }),
-    tags: new FormControl<string[]>([], { nonNullable: true }),
-    stockLevel: new FormControl<number>(0, { nonNullable: true }),
-    primaryColor: new FormControl('#000000', { nonNullable: true }),
-    isActive: new FormControl(true, { nonNullable: true })
+  form = createEnhancedForm(productFields, {
+    name: '',
+    sku: '',
+    description: '',
+    price: 0,
+    discount: 0,
+    categories: [],
+    tags: [],
+    stockLevel: 0,
+    primaryColor: '#000000',
+    isActive: true
   });
 
   async ngOnInit() {
@@ -269,7 +346,7 @@ export class ProductFormComponent implements OnInit {
       const product = this.productStore.getById(id);
       
       if (product) {
-        this.productForm.patchValue({
+        this.form.patchValues({
           name: product.name,
           sku: product.sku,
           description: product.description,
@@ -295,24 +372,26 @@ export class ProductFormComponent implements OnInit {
   }
 
   async onSubmit() {
-    if (this.productForm.invalid) {
+    if (!this.form.valid()) {
+      this.form.touchAll();
+      this.snackBar.open('Please fix validation errors', 'Close', { duration: 3000 });
       return;
     }
 
     this.saving.set(true);
     
     try {
-      const formValue = this.productForm.getRawValue();
+      const data = this.form.getValues();
       
       if (this.isEditMode() && this.productId) {
-        await this.productStore.update(this.productId, formValue);
+        await this.productStore.update(this.productId, data);
         this.snackBar.open('Product updated successfully', 'Close', {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
         });
       } else {
-        await this.productStore.create(formValue as Omit<Product, 'id'>);
+        await this.productStore.create(data as Omit<Product, 'id'>);
         this.snackBar.open('Product created successfully', 'Close', {
           duration: 3000,
           horizontalPosition: 'end',
