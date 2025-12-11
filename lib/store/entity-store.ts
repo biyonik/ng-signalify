@@ -203,7 +203,7 @@ export abstract class EntityStore<
             this._loadController.abort();
             this._loadController = null;
         }
-        
+
         // TR: Refresh promise'i temizle
         // EN: Clear refresh promise
         this._refreshPromise = null;
