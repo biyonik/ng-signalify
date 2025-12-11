@@ -123,35 +123,40 @@ export class ProductStore extends EntityStore<Product> {
     let filtered = [...MOCK_PRODUCTS];
     
     // Apply search filter
-    if (params.filters?.search) {
-      const search = params.filters.search.toLowerCase();
-      filtered = filtered.filter(p => 
+    if (params.filters?.['search']) {
+      const search = String(params.filters['search']).toLowerCase();
+      filtered = filtered.filter((p: Product) => 
         p.name.toLowerCase().includes(search) ||
         p.sku.toLowerCase().includes(search) ||
         p.description.toLowerCase().includes(search)
       );
     }
     
-    // Apply sorting
+    // Apply sorting with null checks
     if (params.sort) {
       filtered.sort((a, b) => {
         const aVal = a[params.sort!.field as keyof Product];
         const bVal = b[params.sort!.field as keyof Product];
+        // Use == null to check for both null and undefined
+        if (aVal == null || bVal == null) return 0;
         const modifier = params.sort!.direction === 'asc' ? 1 : -1;
         return aVal > bVal ? modifier : -modifier;
       });
     }
     
-    // Apply pagination
-    const start = (params.page - 1) * params.pageSize;
-    const end = start + params.pageSize;
+    // Apply pagination with defaults
+    const page = params.page ?? 1;
+    const pageSize = params.pageSize ?? 10;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
     const data = filtered.slice(start, end);
     
     return {
       data,
       total: filtered.length,
-      page: params.page,
-      pageSize: params.pageSize
+      page,
+      pageSize,
+      totalPages: Math.ceil(filtered.length / pageSize)
     };
   }
 

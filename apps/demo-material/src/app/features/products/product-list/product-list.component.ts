@@ -62,19 +62,19 @@ import { Product } from '../product.model';
 
           <!-- Loading State -->
           <app-loading-spinner
-            *ngIf="productStore.loading()"
+            *ngIf="productStore.signals.isLoading()"
             [message]="'Loading products...'"
           />
 
           <!-- Error State -->
-          <div *ngIf="productStore.error()" class="error-message">
+          <div *ngIf="productStore.signals.error()" class="error-message">
             <mat-icon color="warn">error</mat-icon>
-            <p>{{ productStore.error() }}</p>
+            <p>{{ productStore.signals.error() }}</p>
             <button mat-raised-button (click)="loadProducts()">Retry</button>
           </div>
 
           <!-- Data Table -->
-          <div *ngIf="!productStore.loading() && !productStore.error()" class="table-container">
+          <div *ngIf="!productStore.signals.isLoading() && !productStore.signals.error()" class="table-container">
             <table mat-table [dataSource]="products()" class="product-table">
               <!-- ID Column -->
               <ng-container matColumnDef="id">
@@ -167,8 +167,8 @@ import { Product } from '../product.model';
 
             <!-- Paginator -->
             <mat-paginator
-              [length]="productStore.total()"
-              [pageSize]="productStore.pageSize()"
+              [length]="productStore.pagination.total()"
+              [pageSize]="productStore.pagination.pageSize()"
               [pageSizeOptions]="[5, 10, 25, 50]"
               (page)="onPageChange($event)"
               showFirstLastButtons>
@@ -297,7 +297,7 @@ export class ProductListComponent implements OnInit {
   searchTerm = '';
   displayedColumns = ['id', 'name', 'sku', 'price', 'discount', 'stock', 'status', 'actions'];
 
-  products = computed(() => this.productStore.entities());
+  products = computed(() => this.productStore.signals.all());
 
   ngOnInit() {
     this.loadProducts();
@@ -313,7 +313,7 @@ export class ProductListComponent implements OnInit {
   onSearch() {
     this.productStore.loadAll({
       page: 1,
-      pageSize: this.productStore.pageSize(),
+      pageSize: this.productStore.pagination.pageSize(),
       filters: { search: this.searchTerm }
     });
   }

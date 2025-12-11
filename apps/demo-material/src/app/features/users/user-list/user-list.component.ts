@@ -62,19 +62,19 @@ import { User } from '../user.model';
 
           <!-- Loading State -->
           <app-loading-spinner
-            *ngIf="userStore.loading()"
+            *ngIf="userStore.signals.isLoading()"
             [message]="'Loading users...'"
           />
 
           <!-- Error State -->
-          <div *ngIf="userStore.error()" class="error-message">
+          <div *ngIf="userStore.signals.error()" class="error-message">
             <mat-icon color="warn">error</mat-icon>
-            <p>{{ userStore.error() }}</p>
+            <p>{{ userStore.signals.error() }}</p>
             <button mat-raised-button (click)="loadUsers()">Retry</button>
           </div>
 
           <!-- Data Table -->
-          <div *ngIf="!userStore.loading() && !userStore.error()" class="table-container">
+          <div *ngIf="!userStore.signals.isLoading() && !userStore.signals.error()" class="table-container">
             <table mat-table [dataSource]="users()" class="user-table">
               <!-- ID Column -->
               <ng-container matColumnDef="id">
@@ -150,8 +150,8 @@ import { User } from '../user.model';
 
             <!-- Paginator -->
             <mat-paginator
-              [length]="userStore.total()"
-              [pageSize]="userStore.pageSize()"
+              [length]="userStore.pagination.total()"
+              [pageSize]="userStore.pagination.pageSize()"
               [pageSizeOptions]="[5, 10, 25, 50]"
               (page)="onPageChange($event)"
               showFirstLastButtons>
@@ -258,7 +258,7 @@ export class UserListComponent implements OnInit {
   searchTerm = '';
   displayedColumns = ['id', 'firstName', 'lastName', 'email', 'role', 'status', 'actions'];
 
-  users = computed(() => this.userStore.entities());
+  users = computed(() => this.userStore.signals.all());
 
   ngOnInit() {
     this.loadUsers();
@@ -274,7 +274,7 @@ export class UserListComponent implements OnInit {
   onSearch() {
     this.userStore.loadAll({
       page: 1,
-      pageSize: this.userStore.pageSize(),
+      pageSize: this.userStore.pagination.pageSize(),
       filters: { search: this.searchTerm }
     });
   }
