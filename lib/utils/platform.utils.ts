@@ -35,7 +35,7 @@ export function hasLocalStorage(): boolean {
   if (!isBrowser()) return false;
   
   try {
-    const testKey = '__sig_test__';
+    const testKey = '__sig_ls_test__';
     window.localStorage.setItem(testKey, 'test');
     window.localStorage.removeItem(testKey);
     return true;
@@ -51,7 +51,7 @@ export function hasSessionStorage(): boolean {
   if (!isBrowser()) return false;
   
   try {
-    const testKey = '__sig_test__';
+    const testKey = '__sig_ss_test__';
     window.sessionStorage.setItem(testKey, 'test');
     window.sessionStorage.removeItem(testKey);
     return true;

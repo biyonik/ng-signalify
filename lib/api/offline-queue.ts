@@ -178,7 +178,7 @@ export class OfflineQueue {
     private config: Required<OfflineQueueConfig>;
     private isOnline = signal(typeof navigator !== 'undefined' ? navigator.onLine : true);
     private processingIds = new Set<string>();
-    private dbPromise: Promise<IDBPDatabase<OfflineDB>>;
+    private dbPromise: Promise<IDBPDatabase<OfflineDB>> | null;
     private isIndexedDBAvailable: boolean;
 
     /**
@@ -212,9 +212,9 @@ export class OfflineQueue {
 
         if (!this.isIndexedDBAvailable) {
             console.warn('[ng-signalify] IndexedDB not available (SSR or unsupported browser). OfflineQueue disabled.');
-            // TR: Boş promise döndür (SSR güvenli)
-            // EN: Return empty promise (SSR safe)
-            this.dbPromise = Promise.resolve(null as any);
+            // TR: SSR ortamında dbPromise null olarak ayarlanır
+            // EN: In SSR environment, dbPromise is set to null
+            this.dbPromise = null;
         } else {
             // TR: Veritabanını başlat (Schema Upgrade dahil)
             // EN: Initialize database (Including Schema Upgrade)
@@ -290,7 +290,7 @@ export class OfflineQueue {
 
         // TR: Veritabanına asenkron yaz
         // EN: Write asynchronously to database
-        const db = await this.dbPromise;
+        const db = await this.dbPromise!;
         await db.put('requests', queuedRequest);
 
         // TR: UI state'i güncelle
@@ -320,7 +320,7 @@ export class OfflineQueue {
             return false;
         }
 
-        const db = await this.dbPromise;
+        const db = await this.dbPromise!;
         const exists = (await db.get('requests', id)) !== undefined;
 
         if (exists) {
@@ -355,7 +355,7 @@ export class OfflineQueue {
 
         this.setStatus('processing');
 
-        const db = await this.dbPromise;
+        const db = await this.dbPromise!;
 
         // TR: İşlem tutarlılığı için Transaction başlat
         // EN: Start Transaction for process consistency
@@ -509,7 +509,7 @@ export class OfflineQueue {
             return;
         }
 
-        const db = await this.dbPromise;
+        const db = await this.dbPromise!;
         await db.clear('requests');
 
         this.queue.set([]);
@@ -581,7 +581,7 @@ export class OfflineQueue {
         if (!this.isIndexedDBAvailable) return;
 
         try {
-            const db = await this.dbPromise;
+            const db = await this.dbPromise!;
             const all = await db.getAll('requests');
             // TR: Önceliğe göre sıralı yükle
             // EN: Load sorted by priority
