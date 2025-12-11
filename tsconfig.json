@@ -23,6 +23,12 @@
       "ng-signalify/*": ["./lib/*"]
     }
   },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "examples",
+    "**/*.spec.ts"
+  ],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
