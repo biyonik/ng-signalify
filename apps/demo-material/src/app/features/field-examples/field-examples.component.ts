@@ -433,17 +433,20 @@ import { MaterialModule } from '../../shared/material.module';
       margin-bottom: 1rem;
     }
 
+    .slider-label,
+    .slider-hint {
+      color: rgba(0, 0, 0, 0.6);
+    }
+
     .slider-label {
       display: block;
       margin-bottom: 0.5rem;
       font-size: 0.875rem;
-      color: rgba(0, 0, 0, 0.6);
     }
 
     .slider-hint {
       margin-top: 0.5rem;
       font-size: 0.75rem;
-      color: rgba(0, 0, 0, 0.6);
     }
 
     mat-accordion {

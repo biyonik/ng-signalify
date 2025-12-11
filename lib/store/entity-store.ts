@@ -97,7 +97,7 @@ export abstract class EntityStore<
      * EN: Platform ID (For SSR check).
      * Usage of inject() inside abstract class is possible with Angular 14+.
      */
-    private readonly platformId: Object;
+    private readonly platformId: string | Object;
 
     /**
      * TR: EntityStore sınıfını başlatır.
