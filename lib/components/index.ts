@@ -1,8 +1,5 @@
-// Form components
-export * from './form';
+// Core (recommended)
+export * from './core';
 
-// Data components
-export * from './data';
-
-// Feedback components
-export * from './feedback';
+// Legacy (deprecated)
+export * from './_legacy';
