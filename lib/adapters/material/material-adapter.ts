@@ -92,11 +92,6 @@ export class MaterialAdapter extends BaseFormAdapter {
    * EN: Adapter configuration.
    */
   private config: MaterialAdapterConfig;
-  /**
-   * TR: Adapter yapılandırması.
-   * EN: Adapter configuration.
-   */
-  private config: MaterialAdapterConfig;
   
   /**
    * TR: MaterialAdapter constructor.
