@@ -78,9 +78,11 @@ describe('HttpClient & Interceptors', () => {
         api = createHttpClient({
             baseUrl: 'https://api.test.com',
             onRequest: async (config) => {
+                // Await config in case it's a promise
+                const cfg = await Promise.resolve(config);
                 // Mevcut headerları koruyarak yenisini ekle
-                config.headers = { ...config.headers, 'Authorization': 'Bearer 123' };
-                return config;
+                cfg.headers = { ...cfg.headers, 'Authorization': 'Bearer 123' };
+                return cfg;
             }
         });
 

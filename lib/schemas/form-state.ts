@@ -51,13 +51,13 @@ export interface EnhancedFormOptions<T> {
 
 export interface EnhancedFieldValue<T> extends FieldValue<T> {
     asyncValidating: Signal<boolean>;
-    asyncError: Signal<string>;
+    asyncError: Signal<string | null>;
     dirty: Signal<boolean>;
     visible: Signal<boolean>;
     enabled: Signal<boolean>;
     readonly: boolean;
     fullyValid: Signal<boolean>;
-    combinedError: Signal<string>;
+    combinedError: Signal<string | null>;
 }
 
 export interface EnhancedFormState<T extends Record<keyof T, unknown>> {
@@ -66,8 +66,8 @@ export interface EnhancedFormState<T extends Record<keyof T, unknown>> {
     initialValues: Signal<T>;
     valid: Signal<boolean>;
     validating: Signal<boolean>;
-    errors: Signal<Partial<Record<keyof T, string>>>;
-    asyncErrors: Signal<Partial<Record<keyof T, string>>>;
+    errors: Signal<Partial<Record<keyof T, string | null>>>;
+    asyncErrors: Signal<Partial<Record<keyof T, string | null>>>;
     crossErrors: Signal<string[]>;
     dirty: Signal<boolean>;
     pristine: Signal<boolean>;
@@ -196,17 +196,17 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
         const initialFieldValue = signal<unknown>(initValue);
 
         const error = computed(() => {
-            if (!touched()) return '';
+            if (!touched()) return null;
             const result = field.schema().safeParse(value());
-            return result.success ? '' : result.error.errors[0]?.message ?? 'Geçersiz';
+            return result.success ? null : result.error.errors[0]?.message ?? 'Geçersiz';
         });
 
-        const valid = computed(() => error() === '');
+        const valid = computed(() => error() === null);
 
         // TR: Async Validasyon Kurulumu (YENİ SINIF İLE)
         // EN: Async Validation Setup (WITH NEW CLASS)
         let asyncValidating: Signal<boolean> = signal(false);
-        let asyncError: Signal<string> = signal('');
+        let asyncError: Signal<string | null> = signal(null);
 
         if (config?.asyncValidate) {
             // TR: createAsyncValidator yerine new AsyncValidator
@@ -348,7 +348,7 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
     });
 
     const errors = computed(() => {
-        const result: Partial<Record<keyof T, string>> = {};
+        const result: Partial<Record<keyof T, string | null>> = {};
         for (const [name, fv] of Object.entries(formFields)) {
             result[name as keyof T] = (fv as EnhancedFieldValue<unknown>).error();
         }
@@ -356,7 +356,7 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
     });
 
     const asyncErrors = computed(() => {
-        const result: Partial<Record<keyof T, string>> = {};
+        const result: Partial<Record<keyof T, string | null>> = {};
         for (const [name, fv] of Object.entries(formFields)) {
             result[name as keyof T] = (fv as EnhancedFieldValue<unknown>).asyncError();
         }
@@ -422,7 +422,7 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
         // TR: Async validasyonları paralel olarak çalıştır ve BEKLE
         // EN: Run async validations in parallel and WAIT for them
         if (asyncValidators.size > 0) {
-            const asyncPromises: Promise<string>[] = [];
+            const asyncPromises: Promise<string | null>[] = [];
             const validatorNames: string[] = [];
 
             for (const [name, validator] of asyncValidators) {
@@ -442,7 +442,7 @@ export function createEnhancedForm<T extends Record<keyof T, unknown>>(
 
             // TR: Herhangi bir async hata varsa false dön
             // EN: Return false if any async error exists
-            const hasAsyncError = results.some(error => error !== '' && error !== null);
+            const hasAsyncError = results.some(error => error !== null);
             if (hasAsyncError) {
                 return false;
             }

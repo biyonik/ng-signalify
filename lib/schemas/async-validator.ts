@@ -7,7 +7,7 @@ import {signal, Signal, WritableSignal} from '@angular/core';
  * EN: Async validation result.
  * Returns string message if error exists, null otherwise.
  */
-export type AsyncValidationResult = string;
+export type AsyncValidationResult = string | null;
 
 /**
  * TR: Validasyon fonksiyonu tipi.
@@ -34,7 +34,7 @@ export type AsyncValidatorFn<T> = (value: T, signal: AbortSignal) => Promise<Asy
  */
 export class AsyncValidator<T = unknown> {
     private readonly _loading = signal(false);
-    private readonly _error = signal<string>('');
+    private readonly _error = signal<string | null>(null);
 
     private _timeoutId: any = null;
     private _abortController: AbortController | null = null;
@@ -117,9 +117,9 @@ export class AsyncValidator<T = unknown> {
      * BY-PASSES debounce, validates immediately.
      * Used by validateAll() during form submission.
      *
-     * @returns TR: Hata mesajı veya boş string. / EN: Error message or empty string.
+     * @returns TR: Hata mesajı veya null. / EN: Error message or null.
      */
-    async validateAsync(value: T): Promise<string> {
+    async validateAsync(value: T): Promise<string | null> {
         // 1. Bekleyen zamanlayıcıyı iptal et
         if (this._timeoutId) {
             clearTimeout(this._timeoutId);
@@ -133,9 +133,9 @@ export class AsyncValidator<T = unknown> {
 
         // 3. Değer boşsa hata yok
         if (value === null || value === undefined || value === '') {
-            this._error.set('');
+            this._error.set(null);
             this._loading.set(false);
-            return '';
+            return null;
         }
 
         // 4. Yeni kontrolcü oluştur ve hemen çalıştır (debounce yok!)
@@ -157,7 +157,7 @@ export class AsyncValidator<T = unknown> {
                 console.error('Async validation error:', error);
                 this._loading.set(false);
             }
-            return '';
+            return null;
         } finally {
             if (this._abortController?.signal === signal) {
                 this._abortController = null;
@@ -180,7 +180,7 @@ export class AsyncValidator<T = unknown> {
             this._timeoutId = null;
         }
         this._loading.set(false);
-        this._error.set('');
+        this._error.set(null);
     }
 
     // --- Getters ---
@@ -199,7 +199,7 @@ export class AsyncValidator<T = unknown> {
      *
      * EN: Current error message.
      */
-    get error(): Signal<string> {
+    get error(): Signal<string | null> {
         return this._error.asReadonly();
     }
 }

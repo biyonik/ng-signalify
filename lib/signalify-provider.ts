@@ -9,7 +9,7 @@ import { isPlatformServer } from '@angular/common';
 
 // Modül importları (Dosya yollarının projenizle eşleştiğinden emin olun)
 import {HttpClient, HttpClientConfig, ApiError, RequestConfig, RequestContext} from './api/http-client';
-import { ToastService } from './components/feedback/toast.component'; // Toast servisi component dosyasındaysa
+import { ToastService } from './components/_legacy/feedback/toast.component'; // Toast servisi component dosyasındaysa
 import { DevTools, DevToolsConfig, getDevTools } from './infrastructure/devtools';
 
 /**
