@@ -58,7 +58,7 @@ describe('generateFieldCode', () => {
         };
 
         const result = generateFieldCode(field);
-        expect(result).toBe("StringField('Başlık')");
+        expect(result).toBe("StringField('title', 'Başlık')");
     });
 
     it('required string field üretmeli', () => {
@@ -110,7 +110,7 @@ describe('generateFieldCode', () => {
         };
 
         const result = generateFieldCode(field);
-        expect(result).toContain("IntegerField('Yaş'");
+        expect(result).toContain("IntegerField('age', 'Yaş'");
         expect(result).toContain('min: 18');
         expect(result).toContain('max: 100');
     });
@@ -124,7 +124,7 @@ describe('generateFieldCode', () => {
         };
 
         const result = generateFieldCode(field);
-        expect(result).toContain("DecimalField('Fiyat'");
+        expect(result).toContain("DecimalField('price', 'Fiyat'");
         expect(result).toContain('min: 0');
     });
 
@@ -136,7 +136,7 @@ describe('generateFieldCode', () => {
         };
 
         const result = generateFieldCode(field);
-        expect(result).toBe("BooleanField('Aktif')");
+        expect(result).toBe("BooleanField('active', 'Aktif')");
     });
 
     it('date field üretmeli', () => {
@@ -148,7 +148,7 @@ describe('generateFieldCode', () => {
         };
 
         const result = generateFieldCode(field);
-        expect(result).toContain("DateField('Doğum Tarihi'");
+        expect(result).toContain("DateField('birthDate', 'Doğum Tarihi'");
         expect(result).toContain('required: true');
     });
 
@@ -165,8 +165,8 @@ describe('generateFieldCode', () => {
         };
 
         const result = generateFieldCode(field);
-        expect(result).toContain("EnumField('Durum'");
-        expect(result).toContain("value: 'active'");
+        expect(result).toContain("EnumField('status', 'Durum'");
+        expect(result).toContain("id: 'active'");
         expect(result).toContain("label: 'Aktif'");
     });
 
@@ -180,7 +180,7 @@ describe('generateFieldCode', () => {
         };
 
         const result = generateFieldCode(field);
-        expect(result).toContain("RelationField('Kategori', 'Category'");
+        expect(result).toContain("RelationField('categoryId', 'Kategori', 'Category'");
         expect(result).toContain('required: true');
     });
 
@@ -194,7 +194,7 @@ describe('generateFieldCode', () => {
         };
 
         const result = generateFieldCode(field);
-        expect(result).toContain("SliderField('Puan', 1, 10)");
+        expect(result).toContain("SliderField('rating', 'Puan', 1, 10)");
     });
 
     it('slider default min/max kullanmalı', () => {
@@ -205,7 +205,7 @@ describe('generateFieldCode', () => {
         };
 
         const result = generateFieldCode(field);
-        expect(result).toContain("SliderField('Değer', 0, 100)");
+        expect(result).toContain("SliderField('value', 'Değer', 0, 100)");
     });
 });
 

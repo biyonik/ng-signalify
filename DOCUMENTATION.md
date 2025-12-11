@@ -849,13 +849,10 @@ const userFields = [
   new StringField('name', 'Ad Soyad', { required: true, max: 100 }),
   new StringField('email', 'E-posta', { required: true, email: true }),
   new IntegerField('age', 'Yaş', { min: 18, max: 100 }),
-  new EnumField('status', 'Durum', {
-    required: true,
-    options: [
-      { id: 'active', label: 'Aktif' },
-      { id: 'inactive', label: 'Pasif' },
-    ]
-  }),
+  new EnumField('status', 'Durum', [
+    { id: 'active', label: 'Aktif' },
+    { id: 'inactive', label: 'Pasif' },
+  ], { required: true }),
 ];
 
 // 2. Tip tanımı (opsiyonel ama önerilir) / Type definition (optional but recommended)

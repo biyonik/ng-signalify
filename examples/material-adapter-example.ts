@@ -254,14 +254,11 @@ export class UserFormComponent {
       min: 18, 
       max: 120 
     }),
-    new EnumField('role', 'Role', {
-      required: true,
-      options: [
-        { id: 'admin', label: 'Administrator' },
-        { id: 'user', label: 'User' },
-        { id: 'guest', label: 'Guest' },
-      ]
-    }),
+    new EnumField('role', 'Role', [
+      { id: 'admin', label: 'Administrator' },
+      { id: 'user', label: 'User' },
+      { id: 'guest', label: 'Guest' },
+    ], { required: true }),
   ];
 
   // Create form with ng-signalify

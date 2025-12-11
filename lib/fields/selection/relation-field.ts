@@ -187,6 +187,52 @@ export class RelationField extends BaseField<RelationRef> {
   }
 
   /**
+   * TR: Dış kaynaktan ID geldiğinde label'ı lookup ile getirir (async).
+   * Import işlemleri sırasında, sadece ID varsa entity'yi fetch edip label'ı alır.
+   *
+   * EN: Fetches label via lookup when ID comes from external source (async).
+   * During import operations, if only ID exists, fetches the entity to get its label.
+   *
+   * @param raw - TR: Ham veri (ID veya tam nesne). / EN: Raw data (ID or full object).
+   * @returns TR: RelationRef nesnesi. / EN: RelationRef object.
+   */
+  async fromImportAsync(raw: unknown): Promise<RelationRef> {
+    // Handle full object
+    if (typeof raw === 'object' && raw !== null) {
+      const obj = raw as Partial<RelationRef>;
+      if (obj.id !== undefined && obj.label !== undefined) {
+        return { id: obj.id, label: obj.label };
+      }
+    }
+    
+    // Handle ID only - need to fetch label
+    const id = typeof raw === 'number' ? raw : 
+               (typeof raw === 'string' ? parseInt(raw, 10) : null);
+    
+    if (id !== null && !isNaN(id)) {
+      try {
+        // Try to fetch items and search for the ID
+        // Note: This fetches a limited set. For production use, consider implementing
+        // a dedicated lookup endpoint that fetches by ID directly.
+        const items = await this.fetchFn('', 100);  // Fetch more items to increase chance of finding the ID
+        const found = items.find(item => item.id === id);
+        
+        if (found) {
+          return found;
+        }
+        
+        // Not found - return with placeholder label
+        // In production, consider implementing a direct ID lookup endpoint
+        return { id, label: `[ID: ${id}]` };
+      } catch {
+        return { id, label: `[ID: ${id}]` };
+      }
+    }
+    
+    return { id: 0, label: '' };
+  }
+
+  /**
    * TR: Seçili kaydın detay sayfasına gitmek için tam URL'i oluşturur.
    * Config içindeki `viewUrl` ve kaydın `id` bilgisini birleştirir.
    *

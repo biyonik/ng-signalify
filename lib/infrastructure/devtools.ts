@@ -384,10 +384,24 @@ export class DevTools {
 
   /**
    * TR: Belirtilen sinyali izler ve değişiklikleri kaydeder.
+   * ÖNEMLI: Component destroy edildiğinde dönen cleanup fonksiyonunu mutlaka çağırın!
    * Polling veya Effect kullanarak değer değişimlerini yakalar.
    *
    * EN: Tracks the specified signal and records changes.
+   * IMPORTANT: Call the returned cleanup function when component is destroyed!
    * Captures value changes using Polling or Effect.
+   *
+   * @example
+   * // Component içinde kullanım / Usage in component
+   * private cleanupFn?: () => void;
+   *
+   * ngOnInit() {
+   *   this.cleanupFn = devTools.trackSignal(this.mySignal, 'mySignal');
+   * }
+   *
+   * ngOnDestroy() {
+   *   this.cleanupFn?.();  // ✅ Bellek sızıntısını önlemek için mutlaka çağırın / Must call to prevent memory leak
+   * }
    */
   trackSignal<T>(sig: Signal<T>, name: string, source?: string): () => void {
     if (!this.config.enabled || !this.config.trackSignals) {

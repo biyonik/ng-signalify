@@ -604,15 +604,12 @@ export class ProductFormComponent {
       required: true, 
       min: 0 
     }),
-    new EnumField('category', 'Category', {
-      required: true,
-      options: [
-        { id: 'electronics', label: 'Electronics' },
-        { id: 'clothing', label: 'Clothing' },
-        { id: 'home', label: 'Home & Garden' },
-        { id: 'sports', label: 'Sports' },
-      ]
-    }),
+    new EnumField('category', 'Category', [
+      { id: 'electronics', label: 'Electronics' },
+      { id: 'clothing', label: 'Clothing' },
+      { id: 'home', label: 'Home & Garden' },
+      { id: 'sports', label: 'Sports' },
+    ], { required: true }),
     new BooleanField('featured', 'Featured', {
       yesLabel: 'Yes',
       noLabel: 'No',

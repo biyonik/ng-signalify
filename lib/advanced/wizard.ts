@@ -431,8 +431,17 @@ export function createWizard<T extends Record<string, unknown>>(
         return true;
     };
 
+    /**
+     * TR: Sonraki adıma ilerler.
+     * Linear mode etkinse, mevcut adım tamamlanmadan ilerlenemez.
+     *
+     * EN: Moves to the next step.
+     * If linear mode is active, cannot proceed without completing the current step.
+     */
     const next = async (): Promise<boolean> => {
         if (isLast()) return false;
+        
+        // goTo will handle validation, so just delegate to it
         return goTo(currentIndex() + 1);
     };
 

@@ -153,6 +153,14 @@ export interface ImporterState {
 export type ImportFn = (row: Record<string, unknown>, hash: string) => Promise<void>;
 
 /**
+ * TR: FNV-1a hash algoritması sabitleri.
+ * EN: FNV-1a hash algorithm constants.
+ */
+const FNV_OFFSET_BASIS = 2166136261;
+const FNV_PRIME = 16777619;
+const EMPTY_HASH = '';
+
+/**
  * TR: Toplu veri içe aktarım (Bulk Import) süreçlerini yöneten servis sınıfı.
  * Excel dosyalarını okur (`xlsx` kütüphanesi ile), tanımlı alanlara (`IField`) göre map eder,
  * validasyonları çalıştırır ve veriyi parçalar halinde (Batch Processing) işler.
@@ -399,20 +407,24 @@ export class ImporterService {
   }
 
   /**
-   * TR: Basit string hash fonksiyonu.
-   * Verinin parmak izini oluşturmak için kullanılır.
+   * TR: Verinin hash'ini oluşturur (duplicate kontrolü için).
+   * FNV-1a hash algoritması kullanarak collision riskini minimize eder.
    *
-   * EN: Simple string hash function.
-   * Used to generate the fingerprint of the data.
+   * EN: Generates hash of data (for duplicate checking).
+   * Uses FNV-1a hash algorithm to minimize collision risk.
    */
   private simpleHash(str: string): string {
-    let hash = 0;
+    if (str.length === 0) return EMPTY_HASH;
+    
+    // FNV-1a hash (better distribution than simple hash)
+    let hash = FNV_OFFSET_BASIS;
     for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, FNV_PRIME);
     }
-    return Math.abs(hash).toString(16);
+    
+    // Convert to positive hex string
+    return (hash >>> 0).toString(16).padStart(8, '0');
   }
 
   /**

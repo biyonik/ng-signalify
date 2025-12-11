@@ -224,14 +224,11 @@ export class UserFormComponent {
   private fields = [
     new StringField('name', 'Full Name', { required: true, min: 2, max: 100 }),
     new IntegerField('age', 'Age', { required: true, min: 18, max: 120 }),
-    new EnumField('role', 'Role', {
-      required: true,
-      options: [
-        { id: 'admin', label: 'Administrator' },
-        { id: 'user', label: 'User' },
-        { id: 'guest', label: 'Guest' },
-      ]
-    }),
+    new EnumField('role', 'Role', [
+      { id: 'admin', label: 'Administrator' },
+      { id: 'user', label: 'User' },
+      { id: 'guest', label: 'Guest' },
+    ], { required: true }),
   ];
 
   // Create reactive form
