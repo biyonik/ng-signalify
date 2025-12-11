@@ -441,18 +441,7 @@ export function createWizard<T extends Record<string, unknown>>(
     const next = async (): Promise<boolean> => {
         if (isLast()) return false;
         
-        // Linear mode: current step must be completed before proceeding
-        if (linear && validateOnLeave) {
-            const currentStatus = currentState()?.status;
-            if (currentStatus !== 'completed' && currentStatus !== 'skipped') {
-                // Try to validate and complete current step
-                const valid = await validateCurrent();
-                if (!valid) {
-                    return false;  // Can't proceed if validation fails
-                }
-            }
-        }
-        
+        // goTo will handle validation, so just delegate to it
         return goTo(currentIndex() + 1);
     };
 

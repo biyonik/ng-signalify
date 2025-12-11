@@ -211,8 +211,10 @@ export class RelationField extends BaseField<RelationRef> {
     
     if (id !== null && !isNaN(id)) {
       try {
-        // Try to fetch the entity to get its label
-        const items = await this.fetchFn('', 1);
+        // Try to fetch items and search for the ID
+        // Note: This fetches a limited set. For production use, consider implementing
+        // a dedicated lookup endpoint that fetches by ID directly.
+        const items = await this.fetchFn('', 100);  // Fetch more items to increase chance of finding the ID
         const found = items.find(item => item.id === id);
         
         if (found) {
@@ -220,6 +222,7 @@ export class RelationField extends BaseField<RelationRef> {
         }
         
         // Not found - return with placeholder label
+        // In production, consider implementing a direct ID lookup endpoint
         return { id, label: `[ID: ${id}]` };
       } catch {
         return { id, label: `[ID: ${id}]` };
