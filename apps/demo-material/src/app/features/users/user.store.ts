@@ -146,6 +146,7 @@ export class UserStore extends EntityStore<User> {
       filtered.sort((a, b) => {
         const aVal = a[params.sort!.field as keyof User];
         const bVal = b[params.sort!.field as keyof User];
+        // Use == null to check for both null and undefined
         if (aVal == null || bVal == null) return 0;
         const modifier = params.sort!.direction === 'asc' ? 1 : -1;
         return aVal > bVal ? modifier : -modifier;
