@@ -31,6 +31,7 @@ const config: Config = {
   },
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   testMatch: ['**/*.spec.ts', '**/*.test.ts'],
+    testEnvironment: 'jsdom'
 };
 
 export default config;

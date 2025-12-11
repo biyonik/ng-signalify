@@ -26,10 +26,10 @@
     "@angular/core": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
     "@angular/forms": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
     "@angular/material": "^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
+    "idb": "^8.0.3",
     "rxjs": "^7.0.0",
     "xlsx": "^0.18.5",
-    "zod": "^3.22.0",
-    "idb": "^8.0.3"
+    "zod": "^3.22.0"
   },
   "peerDependenciesMeta": {
     "xlsx": {
@@ -50,6 +50,8 @@
     "@angular/platform-browser": "^17.3.9",
     "@angular/platform-browser-dynamic": "^17.3.9",
     "@types/jest": "^29.5.0",
+    "fake-indexeddb": "^6.2.5",
+    "idb": "^8.0.3",
     "jest": "^29.7.0",
     "jest-preset-angular": "^14.0.0",
     "ng-packagr": "^17.3.0",
@@ -58,8 +60,7 @@
     "typescript": "~5.2.0",
     "xlsx": "^0.18.5",
     "zod": "^3.22.0",
-    "zone.js": "^0.14.0",
-    "idb": "^8.0.3"
+    "zone.js": "^0.14.0"
   },
   "scripts": {
     "build": "ng-packagr -p ng-package.json && npm run build:styles && node scripts/post-build.js",

@@ -9,7 +9,6 @@ import { isPlatformServer } from '@angular/common';
 
 // Modül importları (Dosya yollarının projenizle eşleştiğinden emin olun)
 import {HttpClient, HttpClientConfig, ApiError, RequestConfig, RequestContext} from './api/http-client';
-import { ToastService } from './components/_legacy/feedback/toast.component'; // Toast servisi component dosyasındaysa
 import { DevTools, DevToolsConfig, getDevTools } from './infrastructure/devtools';
 
 /**
@@ -59,8 +58,6 @@ export function provideSignalify(config: SignalifyConfig): EnvironmentProviders 
             provide: DevTools,
             useFactory: () => getDevTools(config.devtools)
         },
-        // 2. Toast Servisi (Eğer root değilse buradan sağlanır)
-        ToastService,
         // 3. Akıllı HttpClient Sağlayıcısı
         {
             provide: SIGNALIFY_HTTP,
@@ -68,7 +65,6 @@ export function provideSignalify(config: SignalifyConfig): EnvironmentProviders 
                 // Dependency Injection
                 const userConfig = inject(SIGNALIFY_CONFIG);
                 const platformId = inject(PLATFORM_ID);
-                const toastService = inject(ToastService);
                 const devTools = inject(DevTools);
 
                 const isServer = isPlatformServer(platformId);
@@ -114,7 +110,7 @@ export function provideSignalify(config: SignalifyConfig): EnvironmentProviders 
                             const message = error.message || 'Beklenmedik bir hata oluştu';
 
                             // ToastService entegrasyonu
-                            toastService.error(message, title);
+                            console.error(message, title);
                         }
 
                         // 3. User Config: Kullanıcının özel hata yönetimi varsa çalıştır
