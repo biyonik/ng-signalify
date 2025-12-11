@@ -6,7 +6,7 @@
  * powerful form and state management logic.
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApplicationConfig } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -134,9 +134,9 @@ class ProductStore extends EntityStore<Product, CreateProductDto, UpdateProductD
           [placeholder]="placeholder"
           [disabled]="disabled"
           [readonly]="readonly"
-          (input)="onInput($event)"
-          (blur)="onBlur()"
-          (focus)="onFocus()"
+          (input)="onInputChange($event)"
+          (blur)="onBlurEvent()"
+          (focus)="onFocusEvent()"
           class="input-field"
         />
         
@@ -227,29 +227,34 @@ class ProductStore extends EntityStore<Product, CreateProductDto, UpdateProductD
   `]
 })
 export class CustomInputComponent {
-  label = '';
-  type = 'text';
-  value: any = '';
-  placeholder = '';
-  disabled = false;
-  readonly = false;
-  required = false;
-  error: string | null = null;
-  touched = false;
-  hint = '';
-  loading = false;
+  @Input() label = '';
+  @Input() type = 'text';
+  @Input() value: any = '';
+  @Input() placeholder = '';
+  @Input() disabled = false;
+  @Input() readonly = false;
+  @Input() required = false;
+  @Input() error: string | null = null;
+  @Input() touched = false;
+  @Input() hint = '';
+  @Input() loading = false;
+  
+  @Output() valueChange = new EventEmitter<any>();
+  @Output() blur = new EventEmitter<void>();
+  @Output() focus = new EventEmitter<void>();
 
-  onInput(event: Event) {
+  onInputChange(event: Event) {
     const target = event.target as HTMLInputElement;
-    this.value = this.type === 'number' ? +target.value : target.value;
+    const newValue = this.type === 'number' ? +target.value : target.value;
+    this.valueChange.emit(newValue);
   }
 
-  onBlur() {
-    this.touched = true;
+  onBlurEvent() {
+    this.blur.emit();
   }
 
-  onFocus() {
-    // Handle focus
+  onFocusEvent() {
+    this.focus.emit();
   }
 }
 
@@ -276,8 +281,8 @@ export class CustomInputComponent {
         <select
           [value]="value"
           [disabled]="disabled"
-          (change)="onChange($event)"
-          (blur)="onBlur()"
+          (change)="onChangeEvent($event)"
+          (blur)="onBlurEvent()"
           class="select-field"
         >
           @if (placeholder) {
@@ -368,22 +373,25 @@ export class CustomInputComponent {
   `]
 })
 export class CustomSelectComponent {
-  label = '';
-  value: any = '';
-  options: Array<{ id: string; label: string }> = [];
-  placeholder = '';
-  disabled = false;
-  required = false;
-  error: string | null = null;
-  touched = false;
+  @Input() label = '';
+  @Input() value: any = '';
+  @Input() options: Array<{ id: string; label: string }> = [];
+  @Input() placeholder = '';
+  @Input() disabled = false;
+  @Input() required = false;
+  @Input() error: string | null = null;
+  @Input() touched = false;
 
-  onChange(event: Event) {
+  @Output() valueChange = new EventEmitter<any>();
+  @Output() blur = new EventEmitter<void>();
+
+  onChangeEvent(event: Event) {
     const target = event.target as HTMLSelectElement;
-    this.value = target.value;
+    this.valueChange.emit(target.value);
   }
 
-  onBlur() {
-    this.touched = true;
+  onBlurEvent() {
+    this.blur.emit();
   }
 }
 
@@ -431,7 +439,7 @@ export class CustomSelectComponent {
         [touched]="form.fields.description.touched()"
         placeholder="Product description"
         hint="Brief description of the product"
-        (input)="form.fields.description.value.set($event)"
+        (valueChange)="form.fields.description.value.set($event)"
         (blur)="form.fields.description.touch()"
       />
 
@@ -444,7 +452,7 @@ export class CustomSelectComponent {
           [touched]="form.fields.price.touched()"
           [required]="true"
           placeholder="0.00"
-          (input)="form.fields.price.value.set($event)"
+          (valueChange)="form.fields.price.value.set($event)"
           (blur)="form.fields.price.touch()"
         />
 
@@ -456,7 +464,7 @@ export class CustomSelectComponent {
           [touched]="form.fields.stock.touched()"
           [required]="true"
           placeholder="0"
-          (input)="form.fields.stock.value.set($event)"
+          (valueChange)="form.fields.stock.value.set($event)"
           (blur)="form.fields.stock.touch()"
         />
       </div>
@@ -469,7 +477,7 @@ export class CustomSelectComponent {
         [touched]="form.fields.category.touched()"
         [required]="true"
         placeholder="Select category"
-        (change)="form.fields.category.value.set($event)"
+        (valueChange)="form.fields.category.value.set($event)"
         (blur)="form.fields.category.touch()"
       />
 
