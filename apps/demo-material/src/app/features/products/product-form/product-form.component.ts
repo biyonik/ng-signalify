@@ -19,7 +19,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { ProductStore } from '../product.store';
 import { Product } from '../product.model';
 import { productFields } from '../product.fields';
-import { createEnhancedForm } from 'ng-signalify/schemas';
+import { createEnhancedForm, EnhancedForm } from 'ng-signalify/schemas';
 
 @Component({
   selector: 'app-product-form',
@@ -211,7 +211,7 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
                 rows="4"
                 placeholder="Enter product description"
                 maxlength="1000"></textarea>
-              <mat-hint align="end">{{ form.fields.description.value()?.length || 0 }}/1000</mat-hint>
+              <mat-hint align="end">{{ form.fields.description.value().length }}/1000</mat-hint>
               @if (form.fields.description.error() && form.fields.description.touched()) {
                 <mat-error>{{ form.fields.description.error() }}</mat-error>
               }
@@ -301,18 +301,23 @@ export class ProductFormComponent implements OnInit {
   isEditMode = signal(false);
   productId: number | null = null;
 
-  form = createEnhancedForm(productFields, {
-    name: '',
-    sku: '',
-    description: '',
-    price: 0,
-    discount: 0,
-    categories: [] as string[],
-    tags: [] as string[],
-    stockLevel: 0,
-    primaryColor: '#000000',
-    isActive: true
-  });
+  form!: EnhancedForm<Product>;
+
+  constructor() {
+    // Create form in constructor to ensure injection context for effect()
+    this.form = createEnhancedForm(productFields, {
+      name: '',
+      sku: '',
+      description: '',
+      price: 0,
+      discount: 0,
+      categories: [] as string[],
+      tags: [] as string[],
+      stockLevel: 0,
+      primaryColor: '#000000',
+      isActive: true
+    });
+  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
