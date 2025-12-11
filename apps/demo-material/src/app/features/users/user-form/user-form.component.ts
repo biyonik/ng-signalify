@@ -12,7 +12,6 @@
  */
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MaterialModule } from '../../../shared/material.module';
@@ -20,13 +19,13 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { UserStore } from '../user.store';
 import { userFields } from '../user.fields';
 import { User } from '../user.model';
+import { createEnhancedForm } from 'ng-signalify/schemas';
 
 @Component({
   selector: 'app-user-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     MaterialModule,
     LoadingSpinnerComponent
   ],
@@ -50,98 +49,129 @@ import { User } from '../user.model';
             [message]="'Loading user data...'"
           />
 
-          <form *ngIf="!loading()" [formGroup]="userForm" class="user-form">
+          <form *ngIf="!loading()" class="user-form">
             <!-- First Name -->
             <mat-form-field appearance="outline">
               <mat-label>First Name</mat-label>
-              <input matInput formControlName="firstName" placeholder="Enter first name">
+              <input 
+                matInput 
+                [value]="form.fields.firstName.value()"
+                (input)="form.fields.firstName.value.set($any($event.target).value)"
+                (blur)="form.fields.firstName.touched.set(true)"
+                placeholder="Enter first name"
+              />
               <mat-hint>Enter your first name</mat-hint>
-              <mat-error *ngIf="userForm.get('firstName')?.hasError('required')">
-                First name is required
-              </mat-error>
-              <mat-error *ngIf="userForm.get('firstName')?.hasError('minlength')">
-                Minimum 2 characters required
-              </mat-error>
+              @if (form.fields.firstName.error() && form.fields.firstName.touched()) {
+                <mat-error>{{ form.fields.firstName.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Last Name -->
             <mat-form-field appearance="outline">
               <mat-label>Last Name</mat-label>
-              <input matInput formControlName="lastName" placeholder="Enter last name">
-              <mat-error *ngIf="userForm.get('lastName')?.hasError('required')">
-                Last name is required
-              </mat-error>
-              <mat-error *ngIf="userForm.get('lastName')?.hasError('minlength')">
-                Minimum 2 characters required
-              </mat-error>
+              <input 
+                matInput 
+                [value]="form.fields.lastName.value()"
+                (input)="form.fields.lastName.value.set($any($event.target).value)"
+                (blur)="form.fields.lastName.touched.set(true)"
+                placeholder="Enter last name"
+              />
+              @if (form.fields.lastName.error() && form.fields.lastName.touched()) {
+                <mat-error>{{ form.fields.lastName.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Email -->
             <mat-form-field appearance="outline">
               <mat-label>Email Address</mat-label>
-              <input matInput formControlName="email" type="email" placeholder="Enter email">
+              <input 
+                matInput 
+                type="email"
+                [value]="form.fields.email.value()"
+                (input)="form.fields.email.value.set($any($event.target).value)"
+                (blur)="form.fields.email.touched.set(true)"
+                placeholder="Enter email"
+              />
               <mat-hint>We'll never share your email</mat-hint>
-              <mat-error *ngIf="userForm.get('email')?.hasError('required')">
-                Email is required
-              </mat-error>
-              <mat-error *ngIf="userForm.get('email')?.hasError('email')">
-                Please enter a valid email address
-              </mat-error>
+              @if (form.fields.email.error() && form.fields.email.touched()) {
+                <mat-error>{{ form.fields.email.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Age -->
             <mat-form-field appearance="outline">
               <mat-label>Age</mat-label>
-              <input matInput formControlName="age" type="number" placeholder="Enter age">
-              <mat-error *ngIf="userForm.get('age')?.hasError('required')">
-                Age is required
-              </mat-error>
-              <mat-error *ngIf="userForm.get('age')?.hasError('min')">
-                Minimum age is 18
-              </mat-error>
-              <mat-error *ngIf="userForm.get('age')?.hasError('max')">
-                Maximum age is 120
-              </mat-error>
+              <input 
+                matInput 
+                type="number"
+                [value]="form.fields.age.value()"
+                (input)="form.fields.age.value.set(+$any($event.target).value)"
+                (blur)="form.fields.age.touched.set(true)"
+                placeholder="Enter age"
+              />
+              @if (form.fields.age.error() && form.fields.age.touched()) {
+                <mat-error>{{ form.fields.age.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Role -->
             <mat-form-field appearance="outline">
               <mat-label>Role</mat-label>
-              <mat-select formControlName="role">
+              <mat-select 
+                [value]="form.fields.role.value()"
+                (selectionChange)="form.fields.role.value.set($event.value)"
+                (blur)="form.fields.role.touched.set(true)"
+              >
                 <mat-option value="admin">Administrator</mat-option>
                 <mat-option value="user">User</mat-option>
                 <mat-option value="guest">Guest</mat-option>
               </mat-select>
-              <mat-error *ngIf="userForm.get('role')?.hasError('required')">
-                Role is required
-              </mat-error>
+              @if (form.fields.role.error() && form.fields.role.touched()) {
+                <mat-error>{{ form.fields.role.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Status -->
             <mat-form-field appearance="outline">
               <mat-label>Status</mat-label>
-              <mat-select formControlName="status">
+              <mat-select 
+                [value]="form.fields.status.value()"
+                (selectionChange)="form.fields.status.value.set($event.value)"
+                (blur)="form.fields.status.touched.set(true)"
+              >
                 <mat-option value="active">Active</mat-option>
                 <mat-option value="inactive">Inactive</mat-option>
                 <mat-option value="pending">Pending</mat-option>
               </mat-select>
-              <mat-error *ngIf="userForm.get('status')?.hasError('required')">
-                Status is required
-              </mat-error>
+              @if (form.fields.status.error() && form.fields.status.touched()) {
+                <mat-error>{{ form.fields.status.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Birth Date -->
             <mat-form-field appearance="outline">
               <mat-label>Birth Date</mat-label>
-              <input matInput [matDatepicker]="picker" formControlName="birthDate">
+              <input 
+                matInput 
+                [matDatepicker]="picker"
+                [value]="form.fields.birthDate.value()"
+                (dateChange)="form.fields.birthDate.value.set($event.value)"
+                (blur)="form.fields.birthDate.touched.set(true)"
+              />
               <mat-hint>Your date of birth</mat-hint>
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
+              @if (form.fields.birthDate.error() && form.fields.birthDate.touched()) {
+                <mat-error>{{ form.fields.birthDate.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Email Verified -->
             <div class="checkbox-field">
-              <mat-checkbox formControlName="emailVerified">
+              <mat-checkbox 
+                [checked]="form.fields.emailVerified.value()"
+                (change)="form.fields.emailVerified.value.set($event.checked)"
+              >
                 Email Verified
               </mat-checkbox>
             </div>
@@ -151,12 +181,17 @@ import { User } from '../user.model';
               <mat-label>Biography</mat-label>
               <textarea
                 matInput
-                formControlName="bio"
+                [value]="form.fields.bio.value()"
+                (input)="form.fields.bio.value.set($any($event.target).value)"
+                (blur)="form.fields.bio.touched.set(true)"
                 rows="4"
                 placeholder="Tell us about yourself"
                 maxlength="500"></textarea>
-              <mat-hint align="end">{{ userForm.get('bio')?.value?.length || 0 }}/500</mat-hint>
+              <mat-hint align="end">{{ form.fields.bio.value()?.length || 0 }}/500</mat-hint>
               <mat-hint>Tell us about yourself (max 500 characters)</mat-hint>
+              @if (form.fields.bio.error() && form.fields.bio.touched()) {
+                <mat-error>{{ form.fields.bio.error() }}</mat-error>
+              }
             </mat-form-field>
 
             <!-- Form Actions -->
@@ -171,7 +206,7 @@ import { User } from '../user.model';
                 mat-raised-button
                 color="primary"
                 type="submit"
-                [disabled]="userForm.invalid || saving()"
+                [disabled]="!form.valid() || saving()"
                 (click)="onSubmit()">
                 <mat-icon *ngIf="saving()">
                   <mat-spinner diameter="20"></mat-spinner>
@@ -246,16 +281,16 @@ export class UserFormComponent implements OnInit {
   isEditMode = signal(false);
   userId: number | null = null;
 
-  userForm = new FormGroup({
-    firstName: new FormControl('', { nonNullable: true }),
-    lastName: new FormControl('', { nonNullable: true }),
-    email: new FormControl('', { nonNullable: true }),
-    age: new FormControl<number>(18, { nonNullable: true }),
-    role: new FormControl<'admin' | 'user' | 'guest'>('user', { nonNullable: true }),
-    status: new FormControl<'active' | 'inactive' | 'pending'>('active', { nonNullable: true }),
-    birthDate: new FormControl<Date | null>(null),
-    emailVerified: new FormControl(false, { nonNullable: true }),
-    bio: new FormControl('', { nonNullable: true })
+  form = createEnhancedForm(userFields, {
+    firstName: '',
+    lastName: '',
+    email: '',
+    age: 18,
+    role: 'user' as 'admin' | 'user' | 'guest',
+    status: 'active' as 'active' | 'inactive' | 'pending',
+    birthDate: null as Date | null,
+    emailVerified: false,
+    bio: ''
   });
 
   async ngOnInit() {
@@ -275,7 +310,7 @@ export class UserFormComponent implements OnInit {
       const user = this.userStore.getById(id);
       
       if (user) {
-        this.userForm.patchValue({
+        this.form.patchValues({
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
@@ -300,24 +335,26 @@ export class UserFormComponent implements OnInit {
   }
 
   async onSubmit() {
-    if (this.userForm.invalid) {
+    if (!this.form.valid()) {
+      this.form.touchAll();
+      this.snackBar.open('Please fix validation errors', 'Close', { duration: 3000 });
       return;
     }
 
     this.saving.set(true);
     
     try {
-      const formValue = this.userForm.getRawValue();
+      const data = this.form.getValues();
       
       if (this.isEditMode() && this.userId) {
-        await this.userStore.update(this.userId, formValue);
+        await this.userStore.update(this.userId, data);
         this.snackBar.open('User updated successfully', 'Close', {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
         });
       } else {
-        await this.userStore.create(formValue as Omit<User, 'id'>);
+        await this.userStore.create(data as Omit<User, 'id'>);
         this.snackBar.open('User created successfully', 'Close', {
           duration: 3000,
           horizontalPosition: 'end',

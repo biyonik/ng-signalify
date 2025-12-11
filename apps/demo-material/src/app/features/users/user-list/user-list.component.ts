@@ -279,12 +279,14 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  onPageChange(event: any) {
-    this.userStore.loadAll({
-      page: event.pageIndex + 1,
-      pageSize: event.pageSize,
-      filters: this.searchTerm ? { search: this.searchTerm } : undefined
-    });
+  async onPageChange(event: any) {
+    const currentPageSize = this.userStore.pagination.pageSize();
+    
+    if (currentPageSize !== event.pageSize) {
+      await this.userStore.setPageSize(event.pageSize);
+    } else {
+      await this.userStore.goToPage(event.pageIndex + 1);
+    }
   }
 
   createUser() {
