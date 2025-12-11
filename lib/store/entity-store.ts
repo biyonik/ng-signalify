@@ -1,4 +1,4 @@
-import {computed, DestroyRef, effect, inject, PLATFORM_ID, signal, WritableSignal} from '@angular/core';
+import {computed, effect, PLATFORM_ID, signal, WritableSignal} from '@angular/core';
 import {
     createInitialState,
     Entity,
@@ -20,7 +20,7 @@ import {isPlatformBrowser} from "@angular/common";
 /**
  * TR: Signal tabanlı Varlık Deposu (Entity Store).
  * Genel amaçlı (Generic) CRUD durum yönetimini sağlar.
- * Her varlık servisi (örn: UserService, ProductService) bu sınıftan türetilerek
+ * Her varlık servisi (örn:  UserService, ProductService) bu sınıftan türetilerek
  * standartlaşmış bir yapı kazanır.
  *
  * EN: Signal-based Entity Store.
@@ -28,7 +28,7 @@ import {isPlatformBrowser} from "@angular/common";
  * Each entity service (e.g., UserService, ProductService) inherits from this class
  * to gain a standardized structure.
  *
- * @template T - TR: Varlık tipi. / EN: Entity type.
+ * @template T - TR: Varlık tipi.  / EN: Entity type.
  * @template CreateDto - TR: Oluşturma modeli. / EN: Create model.
  * @template UpdateDto - TR: Güncelleme modeli. / EN: Update model.
  *
@@ -70,12 +70,12 @@ export abstract class EntityStore<
     /**
      * TR: Sayfalama durumu ve yöneticisi.
      *
-     * EN: Pagination state and manager.
+     * EN:  Pagination state and manager.
      */
     public readonly pagination: PaginationState;
 
     /**
-     * TR: Dış dünyaya açılan salt okunur sinyaller.
+     * TR:  Dış dünyaya açılan salt okunur sinyaller.
      * UI bileşenleri bu sinyalleri dinleyerek veriyi görüntüler.
      *
      * EN: Public read-only signals exposed to the outside world.
@@ -91,61 +91,48 @@ export abstract class EntityStore<
     private _refreshPromise: Promise<void> | null = null;
 
     /**
-     * TR: Platform ID (SSR kontrolü için).
-     * Abstract class içinde inject() kullanımı Angular 14+ ile mümkündür.
+     * TR:  Platform tarayıcı mı kontrolü (SSR için).
      *
-     * EN: Platform ID (For SSR check).
-     * Usage of inject() inside abstract class is possible with Angular 14+.
+     * EN: Is platform browser check (for SSR).
      */
-    private readonly platformId: string | Object;
+    private readonly isBrowser:  boolean;
 
     /**
-     * TR: Destroy referansı (cleanup için).
-     *
-     * EN: Destroy reference (for cleanup).
-     */
-    private readonly destroyRef: DestroyRef | null;
-
-    /**
-     * TR: EntityStore sınıfını başlatır.
-     * inject() çağrıları constructor parametre default değerleri olarak yapılmalıdır.
+     * TR:  EntityStore sınıfını başlatır.
+     * inject() kullanmadan platform kontrolü yapılır.
      *
      * EN: Initializes the EntityStore class.
-     * inject() calls must be made in constructor parameter default values.
+     * Platform check is done without using inject().
      *
-     * @param config - TR: Depo ayarları. / EN: Store settings.
-     * @param platformId - TR: Platform ID (SSR için). / EN: Platform ID (for SSR).
-     * @param destroyRef - TR: Destroy referansı (opsiyonel). / EN: Destroy reference (optional).
+     * @param config - TR: Depo ayarları.  / EN: Store settings.
      */
-    constructor(
-        config: StoreConfig<T>,
-        platformId: string | Object = inject(PLATFORM_ID),
-        destroyRef: DestroyRef | null = inject(DestroyRef, { optional: true })
-    ) {
-        // TR: Inject edilen değerleri ata
-        // EN: Assign injected values
-        this.platformId = platformId;
-        this.destroyRef = destroyRef;
+    constructor(config: StoreConfig<T>) {
+        // ✅ inject() KULLANMADAN platform kontrolü
+        // ✅ Platform check WITHOUT inject()
+        this.isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+
+        // TR: Config'i default değerlerle birleştir
+        // EN: Merge config with defaults
         this.config = {
             name: config.name,
-            selectId: config.selectId ?? ((e: T) => e.id),
+            selectId: config.selectId ??  ((e: T) => e.id),
             sortCompare: config.sortCompare ?? (() => 0),
-            defaultPageSize: config.defaultPageSize ?? 10,
+            defaultPageSize: config.defaultPageSize ??  10,
             cacheTTL: config.cacheTTL ?? 5 * 60 * 1000, // 5 dakika / 5 minutes
             optimistic: config.optimistic ?? true,
             localPagination: config.localPagination ?? false,
             // TR: Persistence varsayılanları
             // EN: Persistence defaults
-            persistence: config.persistence ? {
+            persistence: config.persistence ?  {
                 enabled: config.persistence.enabled,
-                key: config.persistence.key ?? `sig_store_${config.name}`,
+                key: config.persistence.key ??  `sig_store_${config.name}`,
                 storage: config.persistence.storage ?? 'sessionStorage',
                 paths: config.persistence.paths ?? ['filters', 'sort', 'pagination']
             }: { enabled: false }
         };
 
         // 1. Önce kayıtlı durumu yükle (State initialize edilmeden önce!)
-        const persistedState = this.loadPersistedState();
+        const persistedState = this. loadPersistedState();
 
         // 2. Başlangıç durumunu oluştur (Varsayılanlar + Kayıtlı Durum)
         const initialState = createInitialState(this.config);
@@ -153,7 +140,7 @@ export abstract class EntityStore<
         // TR: Kayıtlı verileri başlangıç state'ine merge et
         // EN: Merge persisted data into initial state
         if (persistedState) {
-            if (persistedState.filters) initialState.filters = persistedState.filters;
+            if (persistedState.filters) initialState.filters = persistedState. filters;
             if (persistedState.sort) initialState.sort = persistedState.sort;
             // Pagination, store state içinde değil PaginationState içindedir, aşağıda ayarlanır.
         }
@@ -175,42 +162,18 @@ export abstract class EntityStore<
         }
 
         // TR: Public sinyalleri oluştur
-        // EN: Create public signals
-        this.signals = this.createSignals();
+        // EN:  Create public signals
+        this.signals = this. createSignals();
 
-        if (this.config.persistence?.enabled && isPlatformBrowser(this.platformId)) {
+        // TR: Persistence effect'i sadece browser'da kur
+        // EN: Setup persistence effect only in browser
+        if (this.config.persistence?.enabled && this.isBrowser) {
             this.setupPersistenceEffect();
         }
-
-        // TR: Cleanup ayarla
-        // EN: Setup cleanup
-        if (this.destroyRef) {
-            this.destroyRef.onDestroy(() => {
-                this.cleanup();
-            });
-        }
     }
 
     /**
-     * TR: Cleanup işlemi - Kaynakları temizler.
-     *
-     * EN: Cleanup operation - Clears resources.
-     */
-    private cleanup(): void {
-        // TR: Devam eden istekleri iptal et
-        // EN: Cancel ongoing requests
-        if (this._loadController) {
-            this._loadController.abort();
-            this._loadController = null;
-        }
-
-        // TR: Refresh promise'i temizle
-        // EN: Clear refresh promise
-        this._refreshPromise = null;
-    }
-
-    /**
-     * TR: State değişimlerini izler ve storage'a yazar.
+     * TR:  State değişimlerini izler ve storage'a yazar.
      *
      * EN: Watches state changes and writes to storage.
      */
@@ -219,20 +182,20 @@ export abstract class EntityStore<
             const state = this._state();
             const page = this.pagination.page();
             const pageSize = this.pagination.pageSize();
-            const paths = this.config.persistence!.paths!;
-            const dataToSave: Record<string, any> = {};
+            const paths = this.config.persistence! .paths! ;
+            const dataToSave:  Record<string, any> = {};
 
             // TR: Sadece konfigürasyonda belirtilen alanları seç
             // EN: Select only fields specified in configuration
             if (paths.includes('filters')) dataToSave['filters'] = state.filters;
             if (paths.includes('sort')) dataToSave['sort'] = state.sort;
-            if (paths.includes('selection')) dataToSave['ids'] = state.selectedIds; // Veya adapter'a göre değişir
+            if (paths.includes('selection')) dataToSave['ids'] = state.selectedIds;
 
             if (paths.includes('pagination')) {
                 dataToSave['pagination'] = { page, pageSize };
             }
 
-            const storageKey = this.config.persistence!.key!;
+            const storageKey = this.config.persistence!.key! ;
             const storage = this.config.persistence!.storage === 'localStorage'
                 ? localStorage
                 : sessionStorage;
@@ -253,12 +216,12 @@ export abstract class EntityStore<
      * Safely returns null in SSR environment.
      */
     private loadPersistedState(): any | null {
-        if (!this.config.persistence?.enabled || !isPlatformBrowser(this.platformId)) {
+        if (!this.config.persistence?.enabled || !this.isBrowser) {
             return null;
         }
 
-        const storageKey = this.config.persistence.key!;
-        const storage = this.config.persistence.storage === 'localStorage'
+        const storageKey = this.config. persistence. key! ;
+        const storage = this. config.persistence.storage === 'localStorage'
             ? localStorage
             : sessionStorage;
 
@@ -271,7 +234,7 @@ export abstract class EntityStore<
     }
 
     /**
-     * TR: State üzerinden türetilmiş (computed) sinyalleri oluşturur.
+     * TR:  State üzerinden türetilmiş (computed) sinyalleri oluşturur.
      * Bu sinyaller, durum değiştiğinde otomatik olarak yeniden hesaplanır.
      *
      * EN: Creates computed signals derived from the state.
@@ -295,7 +258,7 @@ export abstract class EntityStore<
         // TR: Pagination sinyallerini eşleştir
         // EN: Map pagination signals
         const page = this.pagination.page;
-        const pageSize = this.pagination.pageSize;
+        const pageSize = this. pagination.pageSize;
         const total = this.pagination.total;
         const totalPages = this.pagination.totalPages;
         const hasNextPage = this.pagination.hasNext;
@@ -350,14 +313,14 @@ export abstract class EntityStore<
     protected abstract fetchAll(params: FetchParams): Promise<PaginatedResponse<T>>;
 
     /**
-     * TR: Tek bir kaydı API'den çeker.
+     * TR:  Tek bir kaydı API'den çeker.
      *
-     * EN: Fetches a single record from the API.
+     * EN:  Fetches a single record from the API.
      */
     protected abstract fetchOne(id: EntityId): Promise<T>;
 
     /**
-     * TR: Yeni kayıt oluşturur.
+     * TR:  Yeni kayıt oluşturur.
      *
      * EN: Creates a new record via API.
      */
@@ -384,13 +347,13 @@ export abstract class EntityStore<
     // =========================================================================
 
     /**
-     * TR: Filtre, sıralama ve sayfalama parametrelerine göre verileri yükler.
+     * TR:  Filtre, sıralama ve sayfalama parametrelerine göre verileri yükler.
      * ÖNCEKİ İSTEĞİ İPTAL EDER (Auto-Cancellation).
      *
-     * EN: Loads data based on filter, sort, and pagination parameters.
+     * EN:  Loads data based on filter, sort, and pagination parameters.
      * CANCELS PREVIOUS REQUEST (Auto-Cancellation).
      */
-    async loadAll(params?: Partial<FetchParams>): Promise<void> {
+    async loadAll(params?:  Partial<FetchParams>): Promise<void> {
         // TR: 1. Önceki istek devam ediyorsa iptal et!
         // EN: 1. If previous request is pending, cancel it!
         if (this._loadController) {
@@ -398,49 +361,48 @@ export abstract class EntityStore<
         }
 
         // TR: 2. Yeni bir kontrolcü oluştur
-        // EN: 2. Create a new controller
+        // EN:  2. Create a new controller
         this._loadController = new AbortController();
         const signal = this._loadController.signal;
 
-        this.setLoading('loading');
+        this. setLoading('loading');
         this.clearError();
 
         try {
             const fetchParams: FetchParams = {
                 page: params?.page ?? this.pagination.page(),
                 pageSize: params?.pageSize ?? this.pagination.pageSize(),
-                sort: params?.sort ?? this._state().sort ?? undefined,
+                sort: params?.sort ?? this._state().sort ??  undefined,
                 filters: params?.filters ?? this._state().filters,
                 signal,
             };
 
             const response = await this.fetchAll(fetchParams);
 
-            // TR: Eğer bu istek iptal edildiyse state'i güncelleme (Safety Check)
+            // TR:  Eğer bu istek iptal edildiyse state'i güncelleme (Safety Check)
             // EN: If this request was aborted, do not update state (Safety Check)
             if (signal.aborted) return;
 
             this._state.update((s) => ({
-                ...adapter.setAll(s, response.data, this.config.selectId),
+                ... adapter.setAll(s, response.data, this.config.selectId),
                 loading: 'success',
                 lastFetch: Date.now(),
             }));
 
             this.pagination.setTotal(response.total);
-            this.pagination.setPage(response.page);
-        } catch (e: any) { // 'any' is needed for DOMException check
-            // TR: Hata "AbortError" ise (İptal edildiyse) yoksay
+            this.pagination.setPage(response. page);
+        } catch (e:  any) {
+            // TR:  Hata "AbortError" ise (İptal edildiyse) yoksay
             // EN: If error is "AbortError" (Cancelled), ignore it
             if (e.name === 'AbortError' || signal.aborted) {
-                // Log: "Request cancelled - new one incoming"
                 return;
             }
 
             this.setError(e);
         } finally {
-            // TR: Kontrolcü temizliği
+            // TR:  Kontrolcü temizliği
             // EN: Cleanup controller
-            if (this._loadController?.signal === signal) {
+            if (this._loadController?. signal === signal) {
                 this._loadController = null;
             }
         }
@@ -483,28 +445,27 @@ export abstract class EntityStore<
             const entity = await this.createOne(data);
 
             this._state.update((s) => ({
-                ...adapter.addOne(s, entity, this.config.selectId),
+                ... adapter.addOne(s, entity, this.config.selectId),
                 loading: 'success',
             }));
 
             if (this.config.localPagination) {
-                this.pagination.setTotal(this.pagination.total() + 1);
+                this.pagination.setTotal(this. pagination.total() + 1);
             }
 
             return entity;
         } catch (e) {
-            this.setError(e);
+            this. setError(e);
             return null;
         }
     }
 
-
     /**
-     * TR: Mevcut kaydı günceller.
+     * TR:  Mevcut kaydı günceller.
      *
      * EN: Updates an existing record.
      */
-    async update(id: EntityId, data: UpdateDto): Promise<T | null> {
+    async update(id: EntityId, data:  UpdateDto): Promise<T | null> {
         this.setLoading('loading');
         this.clearError();
 
@@ -528,7 +489,7 @@ export abstract class EntityStore<
      *
      * EN: Deletes the record and removes it from the list.
      */
-    async delete(id: EntityId): Promise<boolean> {
+    async delete(id:  EntityId): Promise<boolean> {
         this.setLoading('loading');
         this.clearError();
 
@@ -557,9 +518,6 @@ export abstract class EntityStore<
      *
      * EN: Creates multiple records at once.
      * In case of partial success, only adds successful ones to state.
-     *
-     * @param items - TR: Oluşturulacak kayıtlar. / EN: Records to create.
-     * @returns TR: Başarılı ve başarısız sonuçlar. / EN: Successful and failed results.
      */
     async createMany(items: CreateDto[]): Promise<{ success: T[]; failed: { data: CreateDto; error: string }[] }> {
         if (items.length === 0) {
@@ -581,20 +539,18 @@ export abstract class EntityStore<
 
         results.forEach((result, index) => {
             if (result.status === 'fulfilled') {
-                success.push(result.value);
+                success.push(result. value);
             } else {
                 failed.push({
                     data: items[index],
-                    error: result.reason?.message ?? 'Unknown error',
+                    error:  result.reason?. message ??  'Unknown error',
                 });
             }
         });
 
-        // TR: Başarılı olanları toplu ekle (Tek state güncellemesi)
-        // EN: Add successful ones in batch (Single state update)
         if (success.length > 0) {
             this._state.update((s) => ({
-                ...adapter.addMany(s, success, this.config.selectId),
+                ...adapter. addMany(s, success, this.config.selectId),
                 loading: failed.length > 0 ? 'error' : 'success',
                 error: failed.length > 0
                     ? `${failed.length} kayıt oluşturulamadı`
@@ -611,13 +567,8 @@ export abstract class EntityStore<
 
     /**
      * TR: Birden fazla kaydı aynı anda günceller.
-     * Her kayıt için ayrı API çağrısı yapar, sonuçları toplu olarak state'e yansıtır.
      *
      * EN: Updates multiple records at once.
-     * Makes separate API call for each record, reflects results to state in batch.
-     *
-     * @param updates - TR: ID ve güncelleme verisi çiftleri. / EN: ID and update data pairs.
-     * @returns TR: Başarılı ve başarısız sonuçlar. / EN: Successful and failed results.
      */
     async updateMany(
         updates: Array<{ id: EntityId; data: UpdateDto }>
@@ -641,7 +592,7 @@ export abstract class EntityStore<
 
         results.forEach((result, index) => {
             if (result.status === 'fulfilled') {
-                success.push(result.value);
+                success. push(result.value);
             } else {
                 failed.push({
                     id: updates[index].id,
@@ -650,8 +601,6 @@ export abstract class EntityStore<
             }
         });
 
-        // TR: Başarılı olanları toplu güncelle (Tek state güncellemesi)
-        // EN: Update successful ones in batch (Single state update)
         if (success.length > 0) {
             this._state.update((s) => {
                 let newState = s;
@@ -667,7 +616,7 @@ export abstract class EntityStore<
                 };
             });
         } else {
-            this.setError(new Error('Tüm güncelleme işlemleri başarısız'));
+            this. setError(new Error('Tüm güncelleme işlemleri başarısız'));
         }
 
         return {success, failed};
@@ -675,12 +624,8 @@ export abstract class EntityStore<
 
     /**
      * TR: Birden fazla kaydı siler.
-     * Kısmi başarı durumunda sadece başarılı olanları state'den kaldırır.
      *
      * EN: Deletes multiple records.
-     * In case of partial success, only removes successful ones from state.
-     *
-     * @returns TR: Başarılı ve başarısız ID'lerin listesi. / EN: List of successful and failed IDs.
      */
     async deleteMany(ids: EntityId[]): Promise<{ success: EntityId[]; failed: EntityId[] }> {
         if (ids.length === 0) {
@@ -690,8 +635,8 @@ export abstract class EntityStore<
         this.setLoading('loading');
         this.clearError();
 
-        const results = await Promise.allSettled(
-            ids.map(async (id) => {
+        const results = await Promise. allSettled(
+            ids. map(async (id) => {
                 await this.deleteOne(id);
                 return id;
             })
@@ -710,20 +655,17 @@ export abstract class EntityStore<
             }
         });
 
-        // TR: Sadece başarılı olanları state'den kaldır
-        // EN: Only remove successful ones from state
-        if (success.length > 0) {
+        if (success. length > 0) {
             this._state.update((s) => ({
                 ...adapter.removeMany(s, success),
                 loading: failed.length > 0 ? 'error' : 'success',
                 error: failed.length > 0
-                    ? `${failed.length} kayıt silinemedi: ${errors.slice(0, 3).join(', ')}${errors.length > 3 ? '...' : ''}`
+                    ? `${failed.length} kayıt silinemedi:  ${errors.slice(0, 3).join(', ')}${errors.length > 3 ?  '...' : ''}`
                     : null,
             }));
 
             this.pagination.setTotal(Math.max(0, this.pagination.total() - success.length));
         } else {
-            // Hiçbiri başarılı olmadı
             this.setError(new Error(`Tüm silme işlemleri başarısız: ${errors[0]}`));
         }
 
@@ -732,179 +674,114 @@ export abstract class EntityStore<
 
     // =========================================================================
     // Optimistic updates
-    // TR: İyimser Güncellemeler (API yanıtı beklenmeden UI güncelleme)
-    // EN: Optimistic Updates (Update UI without waiting for API response)
     // =========================================================================
 
     /**
      * TR: İyimser kayıt oluşturma.
-     * Geçici bir ID ile kaydı hemen listeye ekler.
      *
-     * EN: Optimistic create.
-     * Immediately adds the record to the list with a temporary ID.
+     * EN:  Optimistic create.
      */
-    optimisticCreate(data: CreateDto & { id?: EntityId }): OptimisticResult {
-        const tempId = data.id ?? `temp-${Date.now()}`;
-        const tempEntity = {...data, id: tempId} as unknown as T;
+    optimisticCreate(data: CreateDto & { id?:  EntityId }): OptimisticResult {
+        const tempId = data.id ??  `temp-${Date.now()}`;
+        const tempEntity = {... data, id: tempId} as unknown as T;
 
-        // Add immediately
         this._state.update((s) => adapter.addOne(s, tempEntity, this.config.selectId));
 
         return {
             rollback: () => {
                 this._state.update((s) => adapter.removeOne(s, tempId));
             },
-            confirm: () => {
-                // Entity already added, nothing to do or replace temp ID with real ID
-            },
+            confirm: () => {},
         };
     }
 
     /**
      * TR: İyimser güncelleme.
-     * UI'da değişikliği hemen yansıtır, hata olursa eski haline (rollback) döndürür.
      *
      * EN: Optimistic update.
-     * Reflects change immediately in UI, rolls back to original state if error occurs.
      */
     optimisticUpdate(id: EntityId, data: UpdateDto): OptimisticResult {
-        const original = this._state().entities.get(id);
+        const original = this._state().entities. get(id);
 
-        if (!original) {
-            return {
-                rollback: () => {
-                }, confirm: () => {
-                }
-            };
+        if (! original) {
+            return { rollback: () => {}, confirm: () => {} };
         }
 
-        // Update immediately
         this._state.update((s) => adapter.updateOne(s, id, data as Partial<T>));
 
         return {
             rollback: () => {
                 this._state.update((s) => adapter.updateOne(s, id, original));
             },
-            confirm: () => {
-                // Already updated
-            },
+            confirm: () => {},
         };
     }
 
     /**
-     * TR: İyimser silme.
-     * Kaydı hemen listeden kaldırır.
+     * TR:  İyimser silme.
      *
-     * EN: Optimistic delete.
-     * Removes the record from the list immediately.
+     * EN:  Optimistic delete.
      */
-    optimisticDelete(id: EntityId): OptimisticResult {
+    optimisticDelete(id:  EntityId): OptimisticResult {
         const original = this._state().entities.get(id);
         const originalIndex = this._state().ids.indexOf(id);
 
         if (!original) {
-            return {
-                rollback: () => {
-                }, confirm: () => {
-                }
-            };
+            return { rollback: () => {}, confirm: () => {} };
         }
 
-        // Remove immediately
         this._state.update((s) => adapter.removeOne(s, id));
 
         return {
             rollback: () => {
-                // Restore entity at original position
                 this._state.update((s) => {
-                    const newState = adapter.addOne(s, original, this.config.selectId);
-                    // Restore position
-                    const ids = [...newState.ids.filter((i) => i !== id)];
+                    const newState = adapter.addOne(s, original, this. config.selectId);
+                    const ids = [... newState.ids. filter((i) => i !== id)];
                     ids.splice(originalIndex, 0, id);
-                    return {...newState, ids};
+                    return {... newState, ids};
                 });
             },
-            confirm: () => {
-                // Already removed
-            },
+            confirm: () => {},
         };
     }
 
     // =========================================================================
-    // Selection - TR: Seçim İşlemleri
+    // Selection
     // =========================================================================
 
-    /**
-     * TR: Tekil seçim yapma.
-     *
-     * EN: Select single entity.
-     */
     select(id: EntityId | null): void {
         this._state.update((s) => adapter.selectOne(s, id));
     }
 
-    /**
-     * TR: Seçimi tersine çevirme (Toggle).
-     *
-     * EN: Toggle selection.
-     */
     toggleSelect(id: EntityId): void {
         this._state.update((s) => adapter.toggleSelection(s, id));
     }
 
-    /**
-     * TR: Çoklu seçim yapma.
-     *
-     * EN: Select multiple entities.
-     */
     selectMany(ids: EntityId[]): void {
         this._state.update((s) => adapter.selectMany(s, ids));
     }
 
-    /**
-     * TR: Tümünü seçme.
-     *
-     * EN: Select all.
-     */
     selectAll(): void {
         this._state.update((s) => adapter.selectAll(s));
     }
 
-    /**
-     * TR: Seçimleri temizleme.
-     *
-     * EN: Clear selection.
-     */
     clearSelection(): void {
         this._state.update((s) => adapter.clearSelection(s));
     }
 
     // =========================================================================
-    // Filtering & Sorting - TR: Filtreleme ve Sıralama
+    // Filtering & Sorting
     // =========================================================================
 
-    /**
-     * TR: Filtreleri uygular ve veriyi yeniden yükler (Sayfa 1'e döner).
-     *
-     * EN: Applies filters and reloads data (Returns to Page 1).
-     */
     async setFilters(filters: FilterParams): Promise<void> {
-        this._state.update((s) => ({...s, filters}));
+        this._state.update((s) => ({... s, filters}));
         this.pagination.setPage(1);
         await this.loadAll();
     }
 
-    /**
-     * TR: Tek bir filtre kriterini günceller.
-     * Değer null ise filtreyi kaldırır.
-     *
-     * EN: Updates a single filter criterion.
-     * Removes filter if value is null.
-     */
     async updateFilter(key: string, value: unknown): Promise<void> {
-        const newFilters = {...this._state().filters, [key]: value};
+        const newFilters = {... this._state().filters, [key]: value};
 
-        // Remove null/undefined values
         if (value == null) {
             delete newFilters[key];
         }
@@ -912,20 +789,10 @@ export abstract class EntityStore<
         await this.setFilters(newFilters);
     }
 
-    /**
-     * TR: Tüm filtreleri temizler.
-     *
-     * EN: Clears all filters.
-     */
     async clearFilters(): Promise<void> {
         await this.setFilters({});
     }
 
-    /**
-     * TR: Sıralamayı uygular ve veriyi yeniden yükler.
-     *
-     * EN: Applies sort and reloads data.
-     */
     async setSort(sort: SortConfig | null): Promise<void> {
         this._state.update((s) => ({
             ...adapter.sortEntities(s, sort, this.config.sortCompare),
@@ -933,21 +800,16 @@ export abstract class EntityStore<
         await this.loadAll();
     }
 
-    /**
-     * TR: Verilen alan için sıralama yönünü değiştirir (ASC -> DESC -> None).
-     *
-     * EN: Toggles sort direction for the given field (ASC -> DESC -> None).
-     */
     async toggleSort(field: string): Promise<void> {
         const current = this._state().sort;
 
         let newSort: SortConfig | null;
 
-        if (current?.field === field) {
-            if (current.direction === 'asc') {
+        if (current?. field === field) {
+            if (current. direction === 'asc') {
                 newSort = {field, direction: 'desc'};
             } else {
-                newSort = null; // Remove sort
+                newSort = null;
             }
         } else {
             newSort = {field, direction: 'asc'};
@@ -957,24 +819,14 @@ export abstract class EntityStore<
     }
 
     // =========================================================================
-    // Pagination - TR: Sayfalama Kontrolleri
+    // Pagination
     // =========================================================================
 
-    /**
-     * TR: Belirtilen sayfaya gider.
-     *
-     * EN: Goes to specified page.
-     */
     async goToPage(page: number): Promise<void> {
-        this.pagination.setPage(page);
+        this. pagination.setPage(page);
         await this.loadAll();
     }
 
-    /**
-     * TR: Sonraki sayfaya gider.
-     *
-     * EN: Goes to next page.
-     */
     async nextPage(): Promise<void> {
         if (this.pagination.hasNext()) {
             this.pagination.nextPage();
@@ -982,145 +834,77 @@ export abstract class EntityStore<
         }
     }
 
-    /**
-     * TR: Önceki sayfaya gider.
-     *
-     * EN: Goes to previous page.
-     */
     async prevPage(): Promise<void> {
         if (this.pagination.hasPrev()) {
-            this.pagination.prevPage();
+            this. pagination.prevPage();
             await this.loadAll();
         }
     }
 
-    /**
-     * TR: Sayfa boyutunu değiştirir.
-     *
-     * EN: Changes page size.
-     */
     async setPageSize(size: number): Promise<void> {
         this.pagination.setPageSize(size);
         await this.loadAll();
     }
 
     // =========================================================================
-    // Getters - TR: Veri Okuma Metodları
+    // Getters
     // =========================================================================
 
-    /**
-     * TR: ID'ye göre varlık getirir (Store içinden).
-     *
-     * EN: Gets entity by ID (from Store).
-     */
     getById(id: EntityId): T | undefined {
         return this._state().entities.get(id);
     }
 
-    /**
-     * TR: ID listesine göre varlıkları getirir.
-     *
-     * EN: Gets entities by ID list.
-     */
     getByIds(ids: EntityId[]): T[] {
         return adapter.selectByIds(this._state(), ids);
     }
 
-    /**
-     * TR: Koşula uyan ilk varlığı bulur.
-     *
-     * EN: Finds first entity matching the predicate.
-     */
     find(predicate: (entity: T) => boolean): T | undefined {
         return adapter.findEntity(this._state(), predicate);
     }
 
-    /**
-     * TR: Koşula uyan tüm varlıkları filtreler.
-     *
-     * EN: Filters all entities matching the predicate.
-     */
     filter(predicate: (entity: T) => boolean): T[] {
         return adapter.filterEntities(this._state(), predicate);
     }
 
     // =========================================================================
-    // State management - TR: Durum Yönetimi
+    // State management
     // =========================================================================
 
-    /**
-     * TR: Yükleme durumunu günceller.
-     *
-     * EN: Updates loading state.
-     */
     protected setLoading(loading: LoadingState): void {
         this._state.update((s) => ({...s, loading}));
     }
 
-    /**
-     * TR: Hata durumunu günceller.
-     *
-     * EN: Updates error state.
-     */
     protected setError(error: unknown): void {
         const message = error instanceof Error ? error.message : 'Bir hata oluştu';
         this._state.update((s) => ({...s, loading: 'error', error: message}));
     }
 
-    /**
-     * TR: Hatayı temizler.
-     *
-     * EN: Clears error.
-     */
     clearError(): void {
         this._state.update((s) => ({...s, error: null}));
     }
 
-    /**
-     * TR: Depoyu başlangıç haline döndürür.
-     *
-     * EN: Resets store to initial state.
-     */
     reset(): void {
         this._state.set(createInitialState(this.config));
         this.pagination.reset();
     }
 
-    /**
-     * TR: Veri bayatlamışsa (Cache TTL dolmuşsa) yeniler.
-     * Eşzamanlı çağrıları tek bir request'e birleştirir (Deduplication).
-     *
-     * EN: Refreshes data if stale (Cache TTL expired).
-     * Deduplicates concurrent calls into a single request.
-     */
     async refreshIfStale(): Promise<void> {
-        if (!this.signals.isStale()) {
+        if (! this.signals.isStale()) {
             return;
         }
 
-        // TR: Zaten bir refresh devam ediyorsa, ona bağlan
-        // EN: If refresh is already in progress, join it
         if (this._refreshPromise) {
             return this._refreshPromise;
         }
 
-        this._refreshPromise = this.loadAll().finally(() => {
+        this._refreshPromise = this. loadAll().finally(() => {
             this._refreshPromise = null;
         });
 
         return this._refreshPromise;
     }
 
-    /**
-     * TR: Veriyi zorla yeniler.
-     * Eşzamanlı çağrıları tek bir request'e birleştirir (Deduplication).
-     *
-     * EN: Force refreshes data.
-     * Deduplicates concurrent calls into a single request.
-     */
     async refresh(): Promise<void> {
-        // TR: Zaten bir refresh devam ediyorsa, ona bağlan
-        // EN: If refresh is already in progress, join it
         if (this._refreshPromise) {
             return this._refreshPromise;
         }
