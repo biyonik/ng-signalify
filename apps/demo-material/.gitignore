@@ -1,0 +1,7 @@
+# See parent .gitignore for main exclusions
+
+# Demo app specific
+node_modules/
+dist/
+.angular/
+package-lock.json
