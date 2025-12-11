@@ -154,7 +154,8 @@ export class ProductStore extends EntityStore<Product> {
       data,
       total: filtered.length,
       page,
-      pageSize
+      pageSize,
+      totalPages: Math.ceil(filtered.length / pageSize)
     };
   }
 

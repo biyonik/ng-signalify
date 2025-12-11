@@ -163,7 +163,8 @@ export class UserStore extends EntityStore<User> {
       data,
       total: filtered.length,
       page,
-      pageSize
+      pageSize,
+      totalPages: Math.ceil(filtered.length / pageSize)
     };
   }
 
