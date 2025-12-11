@@ -52,17 +52,15 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
           <form *ngIf="!loading()" class="user-form">
             <!-- First Name -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.firstName.label }}</mat-label>
+              <mat-label>First Name</mat-label>
               <input 
                 matInput 
                 [value]="form.fields.firstName.value()"
                 (input)="form.fields.firstName.value.set($any($event.target).value)"
-                (blur)="form.fields.firstName.touch()"
+                (blur)="form.fields.firstName.touched.set(true)"
                 placeholder="Enter first name"
               />
-              @if (form.fields.firstName.hint) {
-                <mat-hint>{{ form.fields.firstName.hint }}</mat-hint>
-              }
+              <mat-hint>Enter your first name</mat-hint>
               @if (form.fields.firstName.error() && form.fields.firstName.touched()) {
                 <mat-error>{{ form.fields.firstName.error() }}</mat-error>
               }
@@ -70,12 +68,12 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Last Name -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.lastName.label }}</mat-label>
+              <mat-label>Last Name</mat-label>
               <input 
                 matInput 
                 [value]="form.fields.lastName.value()"
                 (input)="form.fields.lastName.value.set($any($event.target).value)"
-                (blur)="form.fields.lastName.touch()"
+                (blur)="form.fields.lastName.touched.set(true)"
                 placeholder="Enter last name"
               />
               @if (form.fields.lastName.error() && form.fields.lastName.touched()) {
@@ -85,18 +83,16 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Email -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.email.label }}</mat-label>
+              <mat-label>Email Address</mat-label>
               <input 
                 matInput 
                 type="email"
                 [value]="form.fields.email.value()"
                 (input)="form.fields.email.value.set($any($event.target).value)"
-                (blur)="form.fields.email.touch()"
+                (blur)="form.fields.email.touched.set(true)"
                 placeholder="Enter email"
               />
-              @if (form.fields.email.hint) {
-                <mat-hint>{{ form.fields.email.hint }}</mat-hint>
-              }
+              <mat-hint>We'll never share your email</mat-hint>
               @if (form.fields.email.error() && form.fields.email.touched()) {
                 <mat-error>{{ form.fields.email.error() }}</mat-error>
               }
@@ -104,13 +100,13 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Age -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.age.label }}</mat-label>
+              <mat-label>Age</mat-label>
               <input 
                 matInput 
                 type="number"
                 [value]="form.fields.age.value()"
                 (input)="form.fields.age.value.set(+$any($event.target).value)"
-                (blur)="form.fields.age.touch()"
+                (blur)="form.fields.age.touched.set(true)"
                 placeholder="Enter age"
               />
               @if (form.fields.age.error() && form.fields.age.touched()) {
@@ -120,11 +116,11 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Role -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.role.label }}</mat-label>
+              <mat-label>Role</mat-label>
               <mat-select 
                 [value]="form.fields.role.value()"
                 (selectionChange)="form.fields.role.value.set($event.value)"
-                (blur)="form.fields.role.touch()"
+                (blur)="form.fields.role.touched.set(true)"
               >
                 <mat-option value="admin">Administrator</mat-option>
                 <mat-option value="user">User</mat-option>
@@ -137,11 +133,11 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Status -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.status.label }}</mat-label>
+              <mat-label>Status</mat-label>
               <mat-select 
                 [value]="form.fields.status.value()"
                 (selectionChange)="form.fields.status.value.set($event.value)"
-                (blur)="form.fields.status.touch()"
+                (blur)="form.fields.status.touched.set(true)"
               >
                 <mat-option value="active">Active</mat-option>
                 <mat-option value="inactive">Inactive</mat-option>
@@ -154,17 +150,15 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Birth Date -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.birthDate.label }}</mat-label>
+              <mat-label>Birth Date</mat-label>
               <input 
                 matInput 
                 [matDatepicker]="picker"
                 [value]="form.fields.birthDate.value()"
                 (dateChange)="form.fields.birthDate.value.set($event.value)"
-                (blur)="form.fields.birthDate.touch()"
+                (blur)="form.fields.birthDate.touched.set(true)"
               />
-              @if (form.fields.birthDate.hint) {
-                <mat-hint>{{ form.fields.birthDate.hint }}</mat-hint>
-              }
+              <mat-hint>Your date of birth</mat-hint>
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
               @if (form.fields.birthDate.error() && form.fields.birthDate.touched()) {
@@ -178,25 +172,23 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
                 [checked]="form.fields.emailVerified.value()"
                 (change)="form.fields.emailVerified.value.set($event.checked)"
               >
-                {{ form.fields.emailVerified.label }}
+                Email Verified
               </mat-checkbox>
             </div>
 
             <!-- Bio -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>{{ form.fields.bio.label }}</mat-label>
+              <mat-label>Biography</mat-label>
               <textarea
                 matInput
                 [value]="form.fields.bio.value()"
                 (input)="form.fields.bio.value.set($any($event.target).value)"
-                (blur)="form.fields.bio.touch()"
+                (blur)="form.fields.bio.touched.set(true)"
                 rows="4"
                 placeholder="Tell us about yourself"
                 maxlength="500"></textarea>
               <mat-hint align="end">{{ form.fields.bio.value()?.length || 0 }}/500</mat-hint>
-              @if (form.fields.bio.hint) {
-                <mat-hint>{{ form.fields.bio.hint }}</mat-hint>
-              }
+              <mat-hint>Tell us about yourself (max 500 characters)</mat-hint>
               @if (form.fields.bio.error() && form.fields.bio.touched()) {
                 <mat-error>{{ form.fields.bio.error() }}</mat-error>
               }
@@ -294,9 +286,9 @@ export class UserFormComponent implements OnInit {
     lastName: '',
     email: '',
     age: 18,
-    role: 'user',
-    status: 'active',
-    birthDate: null,
+    role: 'user' as 'admin' | 'user' | 'guest',
+    status: 'active' as 'active' | 'inactive' | 'pending',
+    birthDate: null as Date | null,
     emailVerified: false,
     bio: ''
   });

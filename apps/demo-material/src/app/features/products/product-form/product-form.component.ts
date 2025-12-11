@@ -52,17 +52,15 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
           <form *ngIf="!loading()" class="product-form">
             <!-- Product Name -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.name.label }}</mat-label>
+              <mat-label>Product Name</mat-label>
               <input 
                 matInput 
                 [value]="form.fields.name.value()"
                 (input)="form.fields.name.value.set($any($event.target).value)"
-                (blur)="form.fields.name.touch()"
+                (blur)="form.fields.name.touched.set(true)"
                 placeholder="Enter product name"
               />
-              @if (form.fields.name.hint) {
-                <mat-hint>{{ form.fields.name.hint }}</mat-hint>
-              }
+              <mat-hint>Enter the product name</mat-hint>
               @if (form.fields.name.error() && form.fields.name.touched()) {
                 <mat-error>{{ form.fields.name.error() }}</mat-error>
               }
@@ -70,17 +68,15 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- SKU -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.sku.label }}</mat-label>
+              <mat-label>SKU</mat-label>
               <input 
                 matInput 
                 [value]="form.fields.sku.value()"
                 (input)="form.fields.sku.value.set($any($event.target).value)"
-                (blur)="form.fields.sku.touch()"
+                (blur)="form.fields.sku.touched.set(true)"
                 placeholder="Enter SKU"
               />
-              @if (form.fields.sku.hint) {
-                <mat-hint>{{ form.fields.sku.hint }}</mat-hint>
-              }
+              <mat-hint>Stock Keeping Unit</mat-hint>
               @if (form.fields.sku.error() && form.fields.sku.touched()) {
                 <mat-error>{{ form.fields.sku.error() }}</mat-error>
               }
@@ -88,19 +84,17 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Price -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.price.label }}</mat-label>
+              <mat-label>Price</mat-label>
               <input 
                 matInput 
                 type="number" 
                 step="0.01"
                 [value]="form.fields.price.value()"
                 (input)="form.fields.price.value.set(+$any($event.target).value)"
-                (blur)="form.fields.price.touch()"
+                (blur)="form.fields.price.touched.set(true)"
               />
               <span matTextPrefix>$&nbsp;</span>
-              @if (form.fields.price.hint) {
-                <mat-hint>{{ form.fields.price.hint }}</mat-hint>
-              }
+              <mat-hint>Product price in USD</mat-hint>
               @if (form.fields.price.error() && form.fields.price.touched()) {
                 <mat-error>{{ form.fields.price.error() }}</mat-error>
               }
@@ -108,18 +102,16 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Discount -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.discount.label }}</mat-label>
+              <mat-label>Discount %</mat-label>
               <input 
                 matInput 
                 type="number"
                 [value]="form.fields.discount.value()"
                 (input)="form.fields.discount.value.set(+$any($event.target).value)"
-                (blur)="form.fields.discount.touch()"
+                (blur)="form.fields.discount.touched.set(true)"
               />
               <span matTextSuffix>%</span>
-              @if (form.fields.discount.hint) {
-                <mat-hint>{{ form.fields.discount.hint }}</mat-hint>
-              }
+              <mat-hint>Discount percentage (0-100)</mat-hint>
               @if (form.fields.discount.error() && form.fields.discount.touched()) {
                 <mat-error>{{ form.fields.discount.error() }}</mat-error>
               }
@@ -127,12 +119,12 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Categories -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>{{ form.fields.categories.label }}</mat-label>
+              <mat-label>Categories</mat-label>
               <mat-select 
                 multiple
                 [value]="form.fields.categories.value()"
                 (selectionChange)="form.fields.categories.value.set($event.value)"
-                (blur)="form.fields.categories.touch()"
+                (blur)="form.fields.categories.touched.set(true)"
               >
                 <mat-option value="electronics">Electronics</mat-option>
                 <mat-option value="clothing">Clothing</mat-option>
@@ -148,12 +140,12 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Tags -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>{{ form.fields.tags.label }}</mat-label>
+              <mat-label>Tags</mat-label>
               <mat-select 
                 multiple
                 [value]="form.fields.tags.value()"
                 (selectionChange)="form.fields.tags.value.set($event.value)"
-                (blur)="form.fields.tags.touch()"
+                (blur)="form.fields.tags.touched.set(true)"
               >
                 <mat-option value="new">New Arrival</mat-option>
                 <mat-option value="sale">On Sale</mat-option>
@@ -168,7 +160,7 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Stock Level -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>{{ form.fields.stockLevel.label }}</mat-label>
+              <mat-label>Stock Level</mat-label>
               <mat-slider min="0" max="1000" step="10" discrete showTickMarks>
                 <input 
                   matSliderThumb 
@@ -176,9 +168,7 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
                   (valueChange)="form.fields.stockLevel.value.set($event)"
                 />
               </mat-slider>
-              @if (form.fields.stockLevel.hint) {
-                <mat-hint>Current stock: {{ form.fields.stockLevel.value() }}</mat-hint>
-              }
+              <mat-hint>Current stock: {{ form.fields.stockLevel.value() }}</mat-hint>
               @if (form.fields.stockLevel.error() && form.fields.stockLevel.touched()) {
                 <mat-error>{{ form.fields.stockLevel.error() }}</mat-error>
               }
@@ -186,17 +176,15 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
 
             <!-- Primary Color -->
             <mat-form-field appearance="outline">
-              <mat-label>{{ form.fields.primaryColor.label }}</mat-label>
+              <mat-label>Primary Color</mat-label>
               <input 
                 matInput 
                 type="color"
                 [value]="form.fields.primaryColor.value()"
                 (input)="form.fields.primaryColor.value.set($any($event.target).value)"
-                (blur)="form.fields.primaryColor.touch()"
+                (blur)="form.fields.primaryColor.touched.set(true)"
               />
-              @if (form.fields.primaryColor.hint) {
-                <mat-hint>{{ form.fields.primaryColor.hint }}</mat-hint>
-              }
+              <mat-hint>Main product color</mat-hint>
               @if (form.fields.primaryColor.error() && form.fields.primaryColor.touched()) {
                 <mat-error>{{ form.fields.primaryColor.error() }}</mat-error>
               }
@@ -208,25 +196,22 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
                 [checked]="form.fields.isActive.value()"
                 (change)="form.fields.isActive.value.set($event.checked)"
               >
-                {{ form.fields.isActive.label }}
+                Product is active
               </mat-checkbox>
             </div>
 
             <!-- Description -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>{{ form.fields.description.label }}</mat-label>
+              <mat-label>Description</mat-label>
               <textarea
                 matInput
                 [value]="form.fields.description.value()"
                 (input)="form.fields.description.value.set($any($event.target).value)"
-                (blur)="form.fields.description.touch()"
+                (blur)="form.fields.description.touched.set(true)"
                 rows="4"
                 placeholder="Enter product description"
                 maxlength="1000"></textarea>
               <mat-hint align="end">{{ form.fields.description.value()?.length || 0 }}/1000</mat-hint>
-              @if (form.fields.description.hint) {
-                <mat-hint>{{ form.fields.description.hint }}</mat-hint>
-              }
               @if (form.fields.description.error() && form.fields.description.touched()) {
                 <mat-error>{{ form.fields.description.error() }}</mat-error>
               }
@@ -322,8 +307,8 @@ export class ProductFormComponent implements OnInit {
     description: '',
     price: 0,
     discount: 0,
-    categories: [],
-    tags: [],
+    categories: [] as string[],
+    tags: [] as string[],
     stockLevel: 0,
     primaryColor: '#000000',
     isActive: true
