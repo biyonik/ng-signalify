@@ -297,7 +297,7 @@ describe('createEnhancedForm with async validation', () => {
 
         // Async validation effect bazlı çalıştığı için,
         // asyncValidate fonksiyonunun çağrıldığını kontrol et
-        expect(asyncValidate).toHaveBeenCalledWith('taken');
+        expect(asyncValidate).toHaveBeenCalledWith('taken', expect.any(AbortSignal));
 
         form.destroy();
     });

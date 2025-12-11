@@ -85,6 +85,13 @@ export interface OfflineQueueConfig {
     dbName?: string;
 
     /**
+     * TR: IndexedDB storage anahtarı.
+     *
+     * EN: IndexedDB storage key.
+     */
+    storageKey?: string;
+
+    /**
      * TR: İstek başına maksimum yeniden deneme sayısı.
      *
      * EN: Maximum retries per request.
@@ -188,6 +195,7 @@ export class OfflineQueue {
     ) {
         this.config = {
             dbName: config.dbName ?? 'ng-signalify-db',
+            storageKey: config.storageKey ?? 'ng-signalify-queue',
             maxRetries: config.maxRetries ?? 3,
             autoProcess: config.autoProcess ?? true,
             tokenProvider: config.tokenProvider ?? (() => ''),

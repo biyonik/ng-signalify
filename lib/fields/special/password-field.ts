@@ -323,7 +323,7 @@ export class PasswordField extends BaseField<string> {
     const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const lowercase = 'abcdefghijklmnopqrstuvwxyz';
     const numbers = '0123456789';
-    const special = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    const special = '!@#$%^&*';
     const all = uppercase + lowercase + numbers + special;
 
     let password = '';
