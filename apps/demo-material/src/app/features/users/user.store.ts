@@ -153,12 +153,27 @@ export class UserStore extends EntityStore<User> {
       });
     }
     
-    // Apply pagination with defaults
+    // ✅ PAGINATION - Use defaults if undefined
     const page = params.page ?? 1;
     const pageSize = params.pageSize ?? 10;
+    
+    // Debug logging
+    console.log('🔍 UserStore fetchAll Pagination:', { 
+      page, 
+      pageSize, 
+      totalFiltered: filtered.length,
+      paramsReceived: params 
+    });
+    
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
     const data = filtered.slice(start, end);
+    
+    console.log('🔍 UserStore Sliced Data:', { 
+      start, 
+      end, 
+      slicedCount: data.length 
+    });
     
     return {
       data,
