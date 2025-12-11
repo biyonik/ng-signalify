@@ -49,6 +49,8 @@ export abstract class BaseFormAdapter implements UIAdapter {
     // Bind disabled state if available
     // Note: FieldValue doesn't currently have an enabled signal in the codebase
     // This is future-proofing for when that feature is added
+    // The arrow function is intentional - it allows the component to reactively
+    // read the signal value rather than getting a static boolean
     if (instance[disabledProperty] !== undefined) {
       const fieldWithEnabled = field as any;
       if (typeof fieldWithEnabled.enabled === 'function') {

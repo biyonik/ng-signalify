@@ -49,7 +49,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   template: `
     <mat-form-field>
       <mat-label>Name</mat-label>
-      <input matInput [(value)]="form.fields.name.value" />
+      <input matInput 
+        [value]="form.fields.name.value()" 
+        (input)="form.fields.name.value.set($any($event.target).value)" />
       @if (form.fields.name.error() && form.fields.name.touched()) {
         <mat-error>{{ form.fields.name.error() }}</mat-error>
       }

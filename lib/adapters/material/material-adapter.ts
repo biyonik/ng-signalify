@@ -19,7 +19,7 @@ import { FieldValue } from '../../fields';
  */
 export class MaterialAdapter extends BaseFormAdapter {
   readonly name = 'angular-material';
-  readonly version = '17.0.0';
+  readonly version = '1.0.0';  // Adapter version, not Material library version
   
   getInputComponent(): Type<any> | null {
     return null;
