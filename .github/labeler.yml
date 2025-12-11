@@ -1,0 +1,30 @@
+'tests':
+  - '**/*.spec.ts'
+  - '**/*.test.ts'
+
+'documentation':
+  - '**/*.md'
+  - 'docs/**/*'
+
+'dependencies':
+  - 'package.json'
+  - 'package-lock.json'
+
+'build':
+  - 'ng-package.json'
+  - 'tsconfig.json'
+
+'api':
+  - 'lib/api/**/*'
+
+'fields':
+  - 'lib/fields/**/*'
+
+'store':
+  - 'lib/store/**/*'
+
+'adapters':
+  - 'lib/adapters/**/*'
+
+'validators':
+  - 'lib/validators/**/*'

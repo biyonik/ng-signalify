@@ -36,7 +36,7 @@ export * from './lib/store';
 // Components - UI components (v2.0: Core only)
 // ============================================================================
 export * from './lib/components/core';
-export * from './lib/components/_legacy';
+// export * from './lib/components/_legacy'; // TODO: _legacy components not yet implemented
 
 // ============================================================================
 // API - HTTP client, cache, retry, offline
