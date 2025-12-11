@@ -75,14 +75,15 @@
   },
   "sideEffects": false,
   "exports": {
-    "./components/core": {
-      "types": "./components/core/index.d.ts",
-      "default": "./components/core/index.js"
-    },
-    "./components/_legacy": {
-      "types": "./components/_legacy/index.d.ts",
-      "default": "./components/_legacy/index.js"
-    }
+    ". ": { "types": "./index.d.ts", "default": "./index.js" },
+    "./fields": { "types": "./fields/index.d.ts", "default": "./fields/index.js" },
+    "./schemas": { "types": "./schemas/index. d.ts", "default": "./schemas/index.js" },
+    "./store": { "types": "./store/index.d.ts", "default": "./store/index. js" },
+    "./api":  { "types": "./api/index.d.ts", "default":  "./api/index.js" },
+    "./adapters": { "types": "./adapters/index. d.ts", "default": "./adapters/index.js" },
+    "./validators": { "types": "./validators/index.d. ts", "default": "./validators/index.js" },
+    "./advanced": { "types": "./advanced/index.d.ts", "default": "./advanced/index.js" },
+    "./components/core": { "types": "./components/core/index.d.ts", "default": "./components/core/index.js" },
   },
   "typesVersions": {},
   "engines": {
