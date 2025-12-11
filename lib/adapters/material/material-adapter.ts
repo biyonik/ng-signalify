@@ -53,11 +53,11 @@ export class MaterialAdapter extends BaseFormAdapter {
     
     const instance = componentRef.instance;
     
-    if (instance['appearance'] !== undefined && !instance['appearance']) {
+    if (instance['appearance'] !== undefined && instance['appearance'] == null) {
       instance['appearance'] = 'outline';
     }
     
-    if (instance['floatLabel'] !== undefined && !instance['floatLabel']) {
+    if (instance['floatLabel'] !== undefined && instance['floatLabel'] == null) {
       instance['floatLabel'] = 'auto';
     }
   }
