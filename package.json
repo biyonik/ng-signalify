@@ -1,6 +1,6 @@
 {
   "name": "ng-signalify",
-  "version": "1.0.0-rc-2",
+  "version": "2.0.0-beta.1",
   "description": "Signal-first logic framework for Angular 17+ - Form management, state management, and API layer. UI-agnostic.",
   "author": "Ahmet ALTUN",
   "license": "MIT",
@@ -73,6 +73,16 @@
     "lint": "eslint \"lib/**/*.ts\""
   },
   "sideEffects": false,
+  "exports": {
+    "./components/core": {
+      "types": "./components/core/index.d.ts",
+      "default": "./components/core/index.js"
+    },
+    "./components/_legacy": {
+      "types": "./components/_legacy/index.d.ts",
+      "default": "./components/_legacy/index.js"
+    }
+  },
   "typesVersions": {},
   "engines": {
     "node": ">=18.0.0"

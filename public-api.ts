@@ -33,9 +33,10 @@ export * from './lib/services';
 export * from './lib/store';
 
 // ============================================================================
-// Components - UI bileşenleri
+// Components - UI components (v2.0: Core only)
 // ============================================================================
-export * from './lib/components';
+export * from './lib/components/core';
+export * from './lib/components/_legacy';
 
 // ============================================================================
 // API - HTTP client, cache, retry, offline
