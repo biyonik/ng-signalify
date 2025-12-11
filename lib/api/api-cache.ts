@@ -1,4 +1,5 @@
 import { signal, Signal } from '@angular/core';
+import { hasLocalStorage } from '../utils/platform.utils';
 
 /**
  * TR: Önbellek girişinin yapısını tanımlayan arayüz.
@@ -339,7 +340,7 @@ export class ApiCache {
   }
 
   private loadFromStorage(): void {
-    if (typeof localStorage === 'undefined') return;
+    if (!hasLocalStorage()) return;
 
     try {
       const keys = Object.keys(localStorage).filter((k) =>
@@ -374,7 +375,7 @@ export class ApiCache {
    * EN: Clears expired entries from LocalStorage.
    */
   private clearExpiredFromStorage(): number {
-    if (typeof localStorage === 'undefined') return 0;
+    if (!hasLocalStorage()) return 0;
 
     const now = Date.now();
     let cleared = 0;
@@ -420,7 +421,7 @@ export class ApiCache {
    * @param fraction - TR: Silinecek oran (0-1 arası). / EN: Fraction to evict (0-1).
    */
   private evictOldestFromStorage(fraction: number): number {
-    if (typeof localStorage === 'undefined') return 0;
+    if (!hasLocalStorage()) return 0;
 
     try {
       const entries: Array<{ key: string; timestamp: number }> = [];
@@ -475,7 +476,7 @@ export class ApiCache {
    * On quota exceeded (QuotaExceededError), clears old entries and retries.
    */
   private saveToStorage<T>(key: string, entry: CacheEntry<T>): void {
-    if (typeof localStorage === 'undefined') return;
+    if (!hasLocalStorage()) return;
 
     const storageKey = this.config.storagePrefix + key;
     const data = JSON.stringify(entry);
@@ -518,7 +519,7 @@ export class ApiCache {
   }
 
   private removeFromStorage(key: string): void {
-    if (typeof localStorage === 'undefined') return;
+    if (!hasLocalStorage()) return;
 
     try {
       localStorage.removeItem(this.config.storagePrefix + key);
@@ -528,7 +529,7 @@ export class ApiCache {
   }
 
   private clearStorage(): void {
-    if (typeof localStorage === 'undefined') return;
+    if (!hasLocalStorage()) return;
 
     try {
       const keys = Object.keys(localStorage).filter((k) =>
