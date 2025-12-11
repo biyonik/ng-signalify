@@ -51,7 +51,7 @@ export abstract class BaseFormAdapter implements UIAdapter {
     // This is future-proofing for when that feature is added
     if (instance[disabledProperty] !== undefined) {
       const fieldWithEnabled = field as any;
-      if (fieldWithEnabled.enabled) {
+      if (typeof fieldWithEnabled.enabled === 'function') {
         instance[disabledProperty] = () => !fieldWithEnabled.enabled();
       }
     }

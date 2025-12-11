@@ -54,7 +54,7 @@ export class HeadlessAdapter extends BaseFormAdapter {
     
     // Bind enabled state if available
     const fieldWithEnabled = field as any;
-    if (fieldWithEnabled.enabled) {
+    if (typeof fieldWithEnabled.enabled === 'function') {
       instance.fieldEnabled = fieldWithEnabled.enabled;
     }
   }
