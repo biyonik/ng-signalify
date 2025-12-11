@@ -76,7 +76,11 @@ import { generateId } from '../../../utils/a11y.utils';
       border: 2px solid #8b5cf6;
       border-right-color: transparent;
       border-radius: 50%;
-      animation: spin 0.6s linear infinite;
+      will-change: transform;
+      animation-name: spin;
+      animation-duration: 0.6s;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
   `]
