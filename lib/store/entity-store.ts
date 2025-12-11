@@ -505,6 +505,9 @@ export abstract class EntityStore<
                 this.pagination.setTotal(Math.max(0, this.pagination.total() - 1));
             }
 
+            // Reload data after delete to ensure sync with server/mock
+            await this.loadAll();
+
             return true;
         } catch (e) {
             this.setError(e);

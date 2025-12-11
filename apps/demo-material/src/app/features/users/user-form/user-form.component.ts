@@ -19,7 +19,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { UserStore } from '../user.store';
 import { userFields } from '../user.fields';
 import { User } from '../user.model';
-import { createEnhancedForm } from 'ng-signalify/schemas';
+import { createEnhancedForm, EnhancedForm } from 'ng-signalify/schemas';
 
 @Component({
   selector: 'app-user-form',
@@ -187,7 +187,7 @@ import { createEnhancedForm } from 'ng-signalify/schemas';
                 rows="4"
                 placeholder="Tell us about yourself"
                 maxlength="500"></textarea>
-              <mat-hint align="end">{{ form.fields.bio.value()?.length || 0 }}/500</mat-hint>
+              <mat-hint align="end">{{ form.fields.bio.value().length }}/500</mat-hint>
               <mat-hint>Tell us about yourself (max 500 characters)</mat-hint>
               @if (form.fields.bio.error() && form.fields.bio.touched()) {
                 <mat-error>{{ form.fields.bio.error() }}</mat-error>
@@ -281,17 +281,22 @@ export class UserFormComponent implements OnInit {
   isEditMode = signal(false);
   userId: number | null = null;
 
-  form = createEnhancedForm(userFields, {
-    firstName: '',
-    lastName: '',
-    email: '',
-    age: 18,
-    role: 'user' as 'admin' | 'user' | 'guest',
-    status: 'active' as 'active' | 'inactive' | 'pending',
-    birthDate: null as Date | null,
-    emailVerified: false,
-    bio: ''
-  });
+  form!: EnhancedForm<User>;
+
+  constructor() {
+    // Create form in constructor to ensure injection context for effect()
+    this.form = createEnhancedForm(userFields, {
+      firstName: '',
+      lastName: '',
+      email: '',
+      age: 18,
+      role: 'user' as 'admin' | 'user' | 'guest',
+      status: 'active' as 'active' | 'inactive' | 'pending',
+      birthDate: null as Date | null,
+      emailVerified: false,
+      bio: ''
+    });
+  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
