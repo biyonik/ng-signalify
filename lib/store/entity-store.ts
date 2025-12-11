@@ -1,4 +1,4 @@
-import {computed, effect, inject, PLATFORM_ID, signal, WritableSignal} from '@angular/core';
+import {computed, DestroyRef, effect, inject, PLATFORM_ID, signal, WritableSignal} from '@angular/core';
 import {
     createInitialState,
     Entity,
@@ -100,16 +100,32 @@ export abstract class EntityStore<
     private readonly platformId: string | Object;
 
     /**
+     * TR: Destroy referansı (cleanup için).
+     *
+     * EN: Destroy reference (for cleanup).
+     */
+    private readonly destroyRef: DestroyRef | null;
+
+    /**
      * TR: EntityStore sınıfını başlatır.
+     * inject() çağrıları constructor parametre default değerleri olarak yapılmalıdır.
      *
      * EN: Initializes the EntityStore class.
+     * inject() calls must be made in constructor parameter default values.
      *
      * @param config - TR: Depo ayarları. / EN: Store settings.
+     * @param platformId - TR: Platform ID (SSR için). / EN: Platform ID (for SSR).
+     * @param destroyRef - TR: Destroy referansı (opsiyonel). / EN: Destroy reference (optional).
      */
-    constructor(config: StoreConfig<T>) {
-        // TR: inject() çağrısı constructor içinde yapılmalıdır
-        // EN: inject() call must be made inside constructor
-        this.platformId = inject(PLATFORM_ID);
+    constructor(
+        config: StoreConfig<T>,
+        platformId: string | Object = inject(PLATFORM_ID),
+        destroyRef: DestroyRef | null = inject(DestroyRef, { optional: true })
+    ) {
+        // TR: Inject edilen değerleri ata
+        // EN: Assign injected values
+        this.platformId = platformId;
+        this.destroyRef = destroyRef;
         this.config = {
             name: config.name,
             selectId: config.selectId ?? ((e: T) => e.id),
@@ -165,6 +181,32 @@ export abstract class EntityStore<
         if (this.config.persistence?.enabled && isPlatformBrowser(this.platformId)) {
             this.setupPersistenceEffect();
         }
+
+        // TR: Cleanup ayarla
+        // EN: Setup cleanup
+        if (this.destroyRef) {
+            this.destroyRef.onDestroy(() => {
+                this.cleanup();
+            });
+        }
+    }
+
+    /**
+     * TR: Cleanup işlemi - Kaynakları temizler.
+     *
+     * EN: Cleanup operation - Clears resources.
+     */
+    private cleanup(): void {
+        // TR: Devam eden istekleri iptal et
+        // EN: Cancel ongoing requests
+        if (this._loadController) {
+            this._loadController.abort();
+            this._loadController = null;
+        }
+        
+        // TR: Refresh promise'i temizle
+        // EN: Clear refresh promise
+        this._refreshPromise = null;
     }
 
     /**
