@@ -16,6 +16,8 @@ import { Router } from '@angular/router';
 import { MaterialModule } from '../../shared/material.module';
 import { UserStore } from '../users/user.store';
 import { ProductStore } from '../products/product.store';
+import { User } from '../users/user.model';
+import { Product } from '../products/product.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -284,15 +286,15 @@ export class DashboardComponent implements OnInit {
   private productStore = inject(ProductStore);
   private router = inject(Router);
 
-  totalUsers = computed(() => this.userStore.total());
-  totalProducts = computed(() => this.productStore.total());
+  totalUsers = computed(() => this.userStore.pagination.total());
+  totalProducts = computed(() => this.productStore.pagination.total());
   
   activeUsers = computed(() => {
-    return this.userStore.entities().filter(u => u.status === 'active').length;
+    return this.userStore.signals.all().filter((u: User) => u.status === 'active').length;
   });
   
   totalStock = computed(() => {
-    return this.productStore.entities().reduce((sum, p) => sum + p.stockLevel, 0);
+    return this.productStore.signals.all().reduce((sum: number, p: Product) => sum + p.stockLevel, 0);
   });
 
   ngOnInit() {

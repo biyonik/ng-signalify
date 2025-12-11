@@ -55,7 +55,6 @@ export const userFields = [
   ], { required: true }),
   
   new DateField('birthDate', 'Birth Date', {
-    maxDate: new Date(),
     hint: 'Your date of birth'
   }),
   

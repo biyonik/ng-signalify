@@ -132,35 +132,38 @@ export class UserStore extends EntityStore<User> {
     let filtered = [...MOCK_USERS];
     
     // Apply search filter
-    if (params.filters?.search) {
-      const search = params.filters.search.toLowerCase();
-      filtered = filtered.filter(u => 
+    if (params.filters?.['search']) {
+      const search = String(params.filters['search']).toLowerCase();
+      filtered = filtered.filter((u: User) => 
         u.firstName.toLowerCase().includes(search) ||
         u.lastName.toLowerCase().includes(search) ||
         u.email.toLowerCase().includes(search)
       );
     }
     
-    // Apply sorting
+    // Apply sorting with null checks
     if (params.sort) {
       filtered.sort((a, b) => {
         const aVal = a[params.sort!.field as keyof User];
         const bVal = b[params.sort!.field as keyof User];
+        if (aVal == null || bVal == null) return 0;
         const modifier = params.sort!.direction === 'asc' ? 1 : -1;
         return aVal > bVal ? modifier : -modifier;
       });
     }
     
-    // Apply pagination
-    const start = (params.page - 1) * params.pageSize;
-    const end = start + params.pageSize;
+    // Apply pagination with defaults
+    const page = params.page ?? 1;
+    const pageSize = params.pageSize ?? 10;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
     const data = filtered.slice(start, end);
     
     return {
       data,
       total: filtered.length,
-      page: params.page,
-      pageSize: params.pageSize
+      page,
+      pageSize
     };
   }
 
