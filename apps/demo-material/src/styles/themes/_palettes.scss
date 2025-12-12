@@ -1,0 +1,38 @@
+@use '@angular/material' as mat;
+
+// Indigo palette
+.indigo-theme {
+  --primary-color: #3f51b5;
+}
+
+// Purple palette
+.purple-theme {
+  $primary: mat.m2-define-palette(mat.$m2-purple-palette);
+  $theme: mat.m2-define-light-theme((color: (primary: $primary)));
+  @include mat.all-component-colors($theme);
+  --primary-color: #9c27b0;
+}
+
+// Teal palette
+.teal-theme {
+  $primary: mat.m2-define-palette(mat.$m2-teal-palette);
+  $theme: mat.m2-define-light-theme((color: (primary: $primary)));
+  @include mat.all-component-colors($theme);
+  --primary-color: #009688;
+}
+
+// Pink palette
+.pink-theme {
+  $primary: mat.m2-define-palette(mat.$m2-pink-palette);
+  $theme: mat.m2-define-light-theme((color: (primary: $primary)));
+  @include mat.all-component-colors($theme);
+  --primary-color: #e91e63;
+}
+
+// Amber palette
+.amber-theme {
+  $primary: mat.m2-define-palette(mat.$m2-amber-palette);
+  $theme: mat.m2-define-light-theme((color: (primary: $primary)));
+  @include mat.all-component-colors($theme);
+  --primary-color: #ffc107;
+}
