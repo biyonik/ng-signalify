@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { MaterialThemeService } from 'ng-signalify/adapters';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
@@ -93,5 +93,5 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   `]
 })
 export class ThemeSwitcherComponent {
-  themeService = inject(MaterialThemeService);
+  constructor(public themeService: MaterialThemeService) {}
 }

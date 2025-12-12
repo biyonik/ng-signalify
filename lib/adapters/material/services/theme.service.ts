@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, effect, Inject } from '@angular/core';
+import { Injectable, signal, computed, effect, InjectionToken, Injector, runInInjectionContext } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -12,6 +12,7 @@ interface ThemePreferences {
 @Injectable({ providedIn: 'root' })
 export class MaterialThemeService {
   private readonly STORAGE_KEY = 'ng-signalify-theme';
+  private document!: Document;
   
   // Current theme mode
   private _mode = signal<ThemeMode>('auto');
@@ -30,13 +31,16 @@ export class MaterialThemeService {
     return mode;
   });
   
-  constructor(@Inject(DOCUMENT) private document: Document) {
-    this.loadPreferences();
-    this.watchSystemTheme();
-    
-    // Apply theme whenever it changes
-    effect(() => {
-      this.applyTheme();
+  constructor(private injector: Injector) {
+    runInInjectionContext(this.injector, () => {
+      this.document = this.injector.get(DOCUMENT);
+      this.loadPreferences();
+      this.watchSystemTheme();
+      
+      // Apply theme whenever it changes
+      effect(() => {
+        this.applyTheme();
+      });
     });
   }
   
