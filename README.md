@@ -2,16 +2,18 @@
 
 # ng-signalify
 
-### Signal-First Logic Framework for Angular
+### Modern, Type-Safe, Signal-Based State Management for Angular 19+
 
-**Not a UI library.** A powerful logic layer for forms, state, and APIs.  
-Use with **any** UI library you love.
+[![npm version](https://badge.fury.io/js/ng-signalify.svg)](https://www.npmjs.com/package/ng-signalify)
+[![Build Status](https://github.com/biyonik/ng-signalify/workflows/CI/badge.svg)](https://github.com/biyonik/ng-signalify/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://img.shields.io/npm/dm/ng-signalify.svg)](https://www.npmjs.com/package/ng-signalify)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5+-blue.svg)](https://www.typescriptlang.org/)
+[![Angular](https://img.shields.io/badge/Angular-19+-red.svg)](https://angular.dev/)
 
-[![Angular](https://img.shields.io/badge/Angular-17%2B%20%7C%2018%2B%20%7C%2019%2B-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.2%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](LICENSE)
-[![Coverage](https://img.shields.io/badge/Coverage-98%25-22C55E?style=for-the-badge)](https://github.com/biyonik/ng-signalify)
-[![npm](https://img.shields.io/badge/npm-2.0.0--beta.1-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/ng-signalify)
+<br />
+
+**🇬🇧 [English](#english) | 🇹🇷 [Türkçe](#türkçe)**
 
 <br />
 
@@ -21,76 +23,41 @@ Use with **any** UI library you love.
 
 ---
 
+<a id="english"></a>
+
+# 🇬🇧 English</div>
+
 ## 🎯 What is ng-signalify?
 
-**ng-signalify** is a **UI-agnostic** logic framework for Angular applications. It provides:
+**ng-signalify** is a **modern, type-safe, signal-based state management framework** for Angular 19+ applications. Unlike traditional all-in-one libraries, ng-signalify is **UI-agnostic**, giving you complete freedom to choose your preferred UI library.
 
-- ✅ **Signal-based form management** - Type-safe, reactive forms with Zod validation
-- ✅ **Entity state management** - CRUD operations, caching, pagination out of the box  
-- ✅ **API layer** - Type-safe HTTP client with retry, circuit breaker, offline queue
-- ✅ **Rich field types** - 24+ field types with import/export capabilities
-- ✅ **Advanced features** - Wizards, repeaters, WebSocket, i18n, and more
+### Key Features
 
-**The key difference:** ng-signalify handles the **logic**, you choose the **UI**.
+| Feature | Description |
+|---------|-------------|
+| 🎯 **Signal-Based Forms** | Type-safe, reactive form management with Zod validation and async validators |
+| 🏪 **Entity Store** | Complete CRUD state management with caching, pagination, and optimistic updates |
+| 🌐 **HTTP Client** | Type-safe API layer with retry logic, circuit breaker, and offline queue |
+| 📝 **24+ Field Types** | Rich field types from primitives to complex structures with import/export |
+| 🔄 **Real-time Support** | WebSocket management with auto-reconnect and presence tracking |
+| 🎨 **UI Agnostic** | Use with Material, PrimeNG, Spartan, or build your own components |
+| ✅ **Turkish Validators** | Built-in validators for TC Kimlik, IBAN, phone numbers, and more |
+| 🧪 **Testing Utilities** | Comprehensive testing helpers for forms, stores, and signals |
+| 🌍 **i18n Support** | Signal-based internationalization with lazy loading |
+| 📦 **Tree-Shakeable** | Small bundle size - only include what you use |
 
-### Why Not a Full UI Library?
+### Why Choose ng-signalify?
 
-Traditional all-in-one libraries bundle logic + UI together, forcing you into their design choices. We believe:
+Traditional libraries bundle logic and UI together, locking you into their design system. ng-signalify separates these concerns:
 
-> **"Separate concerns, maximize flexibility"**
-
-With ng-signalify:
-- 🎨 **Use Angular Material** - For enterprise-grade UI components
-- 🎨 **Use Spartan/shadcn** - For modern, accessible components  
-- 🎨 **Use PrimeNG** - For feature-rich components
-- 🎨 **Build custom UI** - Complete design freedom
-- 🎨 **Mix and match** - Use different libraries in the same app
-
-**The migration from v1.x?** Your business logic code stays the same. Only UI layer changes.  
-[See Migration Guide →](MIGRATION.md)
-
----
-
-## 🏗️ Architecture
-
-ng-signalify uses the **Adapter Pattern** to separate logic from UI:
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         YOUR UI LAYER                               │
-│     Angular Material | Spartan | PrimeNG | Custom Components       │
-├─────────────────────────────────────────────────────────────────────┤
-│                         ADAPTER LAYER                               │
-│           MaterialAdapter | HeadlessAdapter | CustomAdapter         │
-├─────────────────────────────────────────────────────────────────────┤
-│                      ng-signalify LOGIC LAYER                       │
-│                                                                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
-│  │   FIELDS     │  │   SCHEMAS    │  │    STORE     │             │
-│  │              │  │              │  │              │             │
-│  │ • String     │  │ • Form       │  │ • CRUD       │             │
-│  │ • Integer    │  │ • Validation │  │ • Caching    │             │
-│  │ • Date       │  │ • Dependencies│  │ • Pagination │             │
-│  │ • Enum       │  │ • History    │  │ • Optimistic │             │
-│  │ • 20+ more   │  │ • Auto-save  │  │ • Filtering  │             │
-│  └──────────────┘  └──────────────┘  └──────────────┘             │
-│                                                                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
-│  │     API      │  │   ADVANCED   │  │ INFRASTRUCTURE│             │
-│  │              │  │              │  │              │             │
-│  │ • HttpClient │  │ • Wizard     │  │ • i18n       │             │
-│  │ • Retry      │  │ • Repeater   │  │ • DevTools   │             │
-│  │ • Circuit    │  │ • WebSocket  │  │ • Testing    │             │
-│  │ • Offline    │  │ • Presence   │  │ • Validators │             │
-│  └──────────────┘  └──────────────┘  └──────────────┘             │
-└─────────────────────────────────────────────────────────────────────┘
-```
+> **"Powerful logic layer + Your choice of UI = Maximum flexibility"**
 
 **Benefits:**
-- 📦 **Smaller bundles** - Only include what you use
-- 🔄 **Easy migration** - Switch UI libraries without rewriting logic
-- 🎯 **Better testing** - Test logic and UI separately
-- 🚀 **Future-proof** - Adapt to new UI trends easily
+- 🎨 **Complete Design Freedom** - Use Material, PrimeNG, Spartan, or custom components
+- 📦 **Smaller Bundles** - Tree-shake unused features, no forced UI dependencies
+- 🔄 **Easy Migration** - Switch UI libraries without rewriting business logic
+- 🧪 **Better Testing** - Test logic and UI independently
+- 🚀 **Future-Proof** - Adapt to new UI trends without major refactoring
 
 ---
 
@@ -104,82 +71,72 @@ pnpm add ng-signalify zod
 yarn add ng-signalify zod
 ```
 
-### Choose Your UI Strategy
-
-**Option A: Use Angular Material (Recommended for most apps)**
+**Optional:** Install Angular Material or your preferred UI library
 
 ```bash
 ng add @angular/material
 ```
 
-**Option B: Use Headless (For custom UI)**
-
-No additional dependencies needed.
-
-**Option C: Keep v1.x components temporarily**
-
-Available in `ng-signalify/components/_legacy` (will be removed in v3.0)
-
 ---
 
 ## 🚀 Quick Start
 
-### 1. Configure Adapter
-
-**For Angular Material:**
+### 1. Define Your Fields
 
 ```typescript
-// app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideSigUI, MaterialAdapter } from 'ng-signalify/adapters';
+import { StringField, DecimalField, MultiEnumField, BooleanField } from 'ng-signalify/fields';
 
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideSigUI(new MaterialAdapter()),
-    // ... other providers
-  ]
-};
+const productFields = [
+  new StringField('name', 'Product Name', {
+    required: true,
+    min: 3,
+    max: 100
+  }),
+  
+  new StringField('sku', 'SKU', {
+    required: true,
+    min: 3,
+    max: 50
+  }),
+  
+  new DecimalField('price', 'Price', {
+    required: true,
+    min: 0,
+    precision: 2
+  }),
+  
+  new MultiEnumField('categories', 'Categories', [
+    { id: 'electronics', label: 'Electronics' },
+    { id: 'clothing', label: 'Clothing' },
+    { id: 'books', label: 'Books' }
+  ], { required: true }),
+  
+  new BooleanField('isActive', 'Active')
+];
 ```
 
-**For Headless (Custom UI):**
-
-```typescript
-// app.config.ts
-import { provideSigUI, HeadlessAdapter } from 'ng-signalify/adapters';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideSigUI(new HeadlessAdapter()),
-    // ... other providers
-  ]
-};
-```
-
-### 2. Create a Form with Material UI
+### 2. Create Enhanced Form
 
 ```typescript
 import { Component } from '@angular/core';
-import { StringField, IntegerField, EnumField } from 'ng-signalify/fields';
 import { createEnhancedForm } from 'ng-signalify/schemas';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButtonModule } from '@angular/material/button';
+
+interface ProductForm {
+  name: string;
+  sku: string;
+  price: number;
+  categories: string[];
+  isActive: boolean;
+}
 
 @Component({
-  selector: 'app-user-form',
+  selector: 'app-product-form',
   standalone: true,
-  imports: [
-    MatInputModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    MatButtonModule,
-  ],
   template: `
     <form (ngSubmit)="onSubmit()">
-      <!-- Name Field -->
+      <!-- Use with any UI library - Angular Material example -->
       <mat-form-field appearance="outline">
-        <mat-label>Full Name</mat-label>
+        <mat-label>Product Name</mat-label>
         <input matInput
           [value]="form.fields.name.value()"
           (input)="form.fields.name.value.set($any($event.target).value)"
@@ -189,27 +146,14 @@ import { MatButtonModule } from '@angular/material/button';
         }
       </mat-form-field>
 
-      <!-- Age Field -->
       <mat-form-field appearance="outline">
-        <mat-label>Age</mat-label>
+        <mat-label>Price</mat-label>
         <input matInput type="number"
-          [value]="form.fields.age.value()"
-          (input)="form.fields.age.value.set(+$any($event.target).value)" />
-        @if (form.fields.age.error() && form.fields.age.touched()) {
-          <mat-error>{{ form.fields.age.error() }}</mat-error>
+          [value]="form.fields.price.value()"
+          (input)="form.fields.price.value.set(+$any($event.target).value)" />
+        @if (form.fields.price.error() && form.fields.price.touched()) {
+          <mat-error>{{ form.fields.price.error() }}</mat-error>
         }
-      </mat-form-field>
-
-      <!-- Role Select -->
-      <mat-form-field appearance="outline">
-        <mat-label>Role</mat-label>
-        <mat-select
-          [value]="form.fields.role.value()"
-          (selectionChange)="form.fields.role.value.set($event.value)">
-          @for (role of roleOptions; track role.id) {
-            <mat-option [value]="role.id">{{ role.label }}</mat-option>
-          }
-        </mat-select>
       </mat-form-field>
 
       <button mat-raised-button color="primary" type="submit" 
@@ -219,438 +163,699 @@ import { MatButtonModule } from '@angular/material/button';
     </form>
   `
 })
-export class UserFormComponent {
-  // Define fields with ng-signalify
-  private fields = [
-    new StringField('name', 'Full Name', { required: true, min: 2, max: 100 }),
-    new IntegerField('age', 'Age', { required: true, min: 18, max: 120 }),
-    new EnumField('role', 'Role', [
-      { id: 'admin', label: 'Administrator' },
-      { id: 'user', label: 'User' },
-      { id: 'guest', label: 'Guest' },
-    ], { required: true }),
-  ];
-
-  // Create reactive form
-  protected form = createEnhancedForm(this.fields, {
+export class ProductFormComponent {
+  protected form = createEnhancedForm<ProductForm>(productFields, {
     name: '',
-    age: 18,
-    role: 'user'
-  });
-
-  protected roleOptions = [
-    { id: 'admin', label: 'Administrator' },
-    { id: 'user', label: 'User' },
-    { id: 'guest', label: 'Guest' },
-  ];
-
-  async onSubmit() {
-    if (await this.form.validateAll()) {
-      console.log('Form Data:', this.form.getValues());
-    }
-  }
-}
-```
-
-### 3. Create a Form with Headless UI
-
-```typescript
-import { Component } from '@angular/core';
-import { StringField, IntegerField } from 'ng-signalify/fields';
-import { createEnhancedForm } from 'ng-signalify/schemas';
-import { SigFormField } from 'ng-signalify/components/core';
-
-@Component({
-  selector: 'app-user-form',
-  standalone: true,
-  imports: [SigFormField],
-  template: `
-    <form (ngSubmit)="onSubmit()">
-      <!-- Use SigFormField wrapper with your own input -->
-      <sig-form-field 
-        label="Full Name" 
-        [error]="form.fields.name.combinedError()"
-        [touched]="form.fields.name.touched()"
-        [required]="true">
-        <input type="text"
-          [value]="form.fields.name.value()"
-          (input)="form.fields.name.value.set($any($event.target).value)"
-          (blur)="form.fields.name.touch()"
-          placeholder="Enter your name" />
-      </sig-form-field>
-
-      <sig-form-field 
-        label="Age"
-        [error]="form.fields.age.combinedError()">
-        <input type="number"
-          [value]="form.fields.age.value()"
-          (input)="form.fields.age.value.set(+$any($event.target).value)" />
-      </sig-form-field>
-
-      <button type="submit" [disabled]="!form.valid()">
-        Submit
-      </button>
-    </form>
-  `
-})
-export class UserFormComponent {
-  private fields = [
-    new StringField('name', 'Full Name', { required: true, min: 2 }),
-    new IntegerField('age', 'Age', { required: true, min: 18 }),
-  ];
-
-  protected form = createEnhancedForm(this.fields, {
-    name: '',
-    age: 18
+    sku: '',
+    price: 0,
+    categories: [],
+    isActive: true
   });
 
   async onSubmit() {
     if (await this.form.validateAll()) {
       console.log('Form Data:', this.form.getValues());
+      // API call here
     }
   }
 }
 ```
 
-**Notice:** The form logic (fields, validation, state) is **identical** in both approaches!
-
-### 4. Entity Store (State Management)
+### 3. Implement Entity Store
 
 ```typescript
 import { Injectable } from '@angular/core';
 import { EntityStore, PaginatedResponse, FetchParams, EntityId } from 'ng-signalify/store';
 import { createHttpClient } from 'ng-signalify/api';
 
-interface User {
+interface Product {
   id: number;
   name: string;
-  email: string;
-  role: string;
+  sku: string;
+  price: number;
+  categories: string[];
+  isActive: boolean;
 }
 
 const http = createHttpClient({
   baseUrl: 'https://api.example.com',
-  timeout: 30000,
+  timeout: 30000
 });
 
 @Injectable({ providedIn: 'root' })
-export class UserStore extends EntityStore<User> {
+export class ProductStore extends EntityStore<Product> {
   constructor() {
     super({
-      name: 'users',
-      selectId: (user) => user.id,
+      name: 'products',
+      selectId: (product) => product.id,
       defaultPageSize: 20,
       cacheTTL: 5 * 60 * 1000, // 5 minutes
-      optimistic: true,
+      optimistic: true
     });
   }
 
-  protected async fetchAll(params: FetchParams): Promise<PaginatedResponse<User>> {
-    const response = await http.get<PaginatedResponse<User>>('/api/users', { params });
+  protected async fetchAll(params: FetchParams): Promise<PaginatedResponse<Product>> {
+    const response = await http.get<PaginatedResponse<Product>>('/api/products', { params });
     return response.data;
   }
 
-  protected async fetchOne(id: EntityId): Promise<User> {
-    const response = await http.get<User>(`/api/users/${id}`);
+  protected async fetchOne(id: EntityId): Promise<Product> {
+    const response = await http.get<Product>(`/api/products/${id}`);
     return response.data;
   }
 
-  protected async createOne(data: Partial<User>): Promise<User> {
-    const response = await http.post<User>('/api/users', { body: data });
+  protected async createOne(data: Partial<Product>): Promise<Product> {
+    const response = await http.post<Product>('/api/products', { body: data });
     return response.data;
   }
 
-  protected async updateOne(id: EntityId, data: Partial<User>): Promise<User> {
-    const response = await http.patch<User>(`/api/users/${id}`, { body: data });
+  protected async updateOne(id: EntityId, data: Partial<Product>): Promise<Product> {
+    const response = await http.patch<Product>(`/api/products/${id}`, { body: data });
     return response.data;
   }
 
   protected async deleteOne(id: EntityId): Promise<void> {
-    await http.delete(`/api/users/${id}`);
+    await http.delete(`/api/products/${id}`);
   }
 }
 ```
 
-**Usage in Component:**
+### 4. Use in Components with List & Pagination
 
 ```typescript
+import { Component, inject, OnInit } from '@angular/core';
+import { ProductStore } from './product.store';
+
 @Component({
+  selector: 'app-product-list',
+  standalone: true,
   template: `
     @if (store.signals.isLoading()) {
       <mat-spinner />
     }
 
-    @for (user of store.signals.all(); track user.id) {
-      <div>{{ user.name }} - {{ user.email }}</div>
+    @if (store.signals.error()) {
+      <mat-error>{{ store.signals.error() }}</mat-error>
     }
+
+    <table mat-table [dataSource]="store.signals.all()">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let product">{{ product.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="sku">
+        <th mat-header-cell *matHeaderCellDef>SKU</th>
+        <td mat-cell *matCellDef="let product">{{ product.sku }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef>Price</th>
+        <td mat-cell *matCellDef="let product">\${{ product.price }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let product">
+          <button mat-icon-button (click)="edit(product)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="delete(product.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
 
     <mat-paginator
       [length]="store.pagination.total()"
       [pageSize]="store.pagination.pageSize()"
       [pageIndex]="store.pagination.page() - 1"
-      (page)="store.goToPage($event.pageIndex + 1)"
+      [pageSizeOptions]="[10, 20, 50]"
+      (page)="onPageChange($event)"
     />
   `
 })
-export class UserListComponent {
-  store = inject(UserStore);
+export class ProductListComponent implements OnInit {
+  protected store = inject(ProductStore);
+  protected displayedColumns = ['name', 'sku', 'price', 'actions'];
 
   ngOnInit() {
     this.store.loadAll();
+  }
+
+  onPageChange(event: { pageIndex: number; pageSize: number }) {
+    this.store.goToPage(event.pageIndex + 1);
+  }
+
+  async edit(product: Product) {
+    // Open edit dialog
+  }
+
+  async delete(id: number) {
+    if (confirm('Are you sure?')) {
+      await this.store.delete(id);
+    }
   }
 }
 ```
 
 ---
 
-## 📚 Core Modules
+## 📊 Comparison with Other Solutions
 
-### Fields (24+ Types)
+| Feature | ng-signalify | NgRx | Akita | Angular Forms |
+|---------|--------------|------|-------|---------------|
+| **Signals Support** | ✅ Native | ⚠️ Via Signal Store | ❌ RxJS only | ⚠️ Partial |
+| **Type Safety** | ✅ Full with Zod | ✅ Full | ✅ Full | ⚠️ Limited |
+| **Boilerplate** | 🟢 Minimal | 🔴 High | 🟡 Medium | 🟢 Low |
+| **Learning Curve** | 🟢 Easy | 🔴 Steep | 🟡 Medium | 🟢 Easy |
+| **Form Validation** | ✅ Built-in Zod | ❌ Manual | ❌ Manual | ✅ Built-in |
+| **Entity CRUD** | ✅ Out-of-box | ⚠️ Via Entity | ✅ Built-in | ❌ No |
+| **Pagination** | ✅ Integrated | ❌ Manual | ⚠️ Plugin | ❌ No |
+| **State Persistence** | ✅ Built-in | ⚠️ Via Meta-Reducers | ✅ Built-in | ❌ No |
+| **Bundle Size** | 🟢 Small | 🔴 Large | 🟡 Medium | 🟢 Small |
+| **Async Validation** | ✅ Debounced | ❌ Manual | ❌ Manual | ✅ Manual |
+| **Optimistic Updates** | ✅ Built-in | ❌ Manual | ✅ Built-in | ❌ No |
+| **UI Agnostic** | ✅ Yes | ✅ Yes | ✅ Yes | ⚠️ Tied to Angular |
+| **DevTools** | ✅ Built-in | ✅ Extension | ✅ Extension | ⚠️ Limited |
+| **Real-time Support** | ✅ WebSocket | ❌ No | ❌ No | ❌ No |
 
-| Category | Types | Features |
-|----------|-------|----------|
-| **Primitives** | `StringField`, `IntegerField`, `DecimalField`, `BooleanField`, `TextAreaField` | Min/Max, Email, URL, Regex |
-| **Date/Time** | `DateField`, `TimeField`, `DateTimeField`, `DateRangeField` | Format handling, Timezone support |
-| **Selection** | `EnumField`, `MultiEnumField`, `RelationField` | Async options, Search, Cascade |
-| **Media** | `FileField`, `ImageField` | Size/type validation, Dimensions |
-| **Complex** | `ArrayField`, `JsonField` | Nested validation, Schema support |
-| **Special** | `PasswordField`, `ColorField`, `SliderField` | Strength check, Format conversion |
-
-[See all field types →](DOCUMENTATION.md#fields-alan-tipleri)
-
-### Form Features
-
-- ✅ **Async Validation** - Debounced API checks (email uniqueness, etc.)
-- ✅ **Field Dependencies** - Show/hide, computed values, cascading selects
-- ✅ **Cross-Field Validation** - Multi-field rules (startDate < endDate)
-- ✅ **Form History** - Undo/Redo with configurable depth
-- ✅ **Auto-Save** - Debounced auto-save callbacks
-- ✅ **Dirty Tracking** - Track modified fields for PATCH requests
-
-[See form documentation →](DOCUMENTATION.md#schemas-form--filter)
-
-### Store Features
-
-- ✅ **Smart Caching** - TTL-based with `isStale` signal
-- ✅ **Optimistic Updates** - Instant UI updates with rollback
-- ✅ **Pagination** - Built-in pagination state
-- ✅ **Filtering & Sorting** - Managed filter/sort state
-- ✅ **Batch Operations** - `createMany`, `updateMany`, `deleteMany`
-- ✅ **Selection** - Single/multi selection support
-
-[See store documentation →](DOCUMENTATION.md#entity-store-state-management)
-
-### API Layer
-
-- ✅ **Type-Safe HTTP Client** - Built on fetch API with interceptors
-- ✅ **Retry Handler** - Exponential backoff with jitter
-- ✅ **Circuit Breaker** - Fail-fast for degraded services
-- ✅ **API Cache** - Response caching with TTL
-- ✅ **Offline Queue** - Store-and-forward pattern
-
-[See API documentation →](DOCUMENTATION.md#api-layer)
-
-### Advanced Features
-
-- ✅ **Wizard** - Multi-step form state machine
-- ✅ **Repeater** - Dynamic form arrays with drag & drop
-- ✅ **WebSocket** - Real-time with auto-reconnect
-- ✅ **i18n** - Signal-based internationalization
-- ✅ **DevTools** - Performance tracking, logging
-
-[See advanced features →](DOCUMENTATION.md#advanced-features)
+**Legend:** ✅ Excellent | ⚠️ Partial | ❌ Not Available | 🟢 Good | 🟡 Average | 🔴 Poor
 
 ---
 
-## 🎨 Adapter Options
+## 📚 Documentation
 
-### Material Adapter
-
-For Angular Material projects:
-
-```typescript
-import { provideSigUI, MaterialAdapter } from 'ng-signalify/adapters';
-
-provideSigUI(new MaterialAdapter())
-```
-
-**Pros:** Enterprise-grade, WCAG compliant, rich components  
-**Cons:** Larger bundle, Material design language
-
-[Material Example →](examples/material-adapter-example.ts)
-
-### Headless Adapter
-
-For custom UI or other libraries:
-
-```typescript
-import { provideSigUI, HeadlessAdapter } from 'ng-signalify/adapters';
-
-provideSigUI(new HeadlessAdapter())
-```
-
-**Pros:** Complete design freedom, smaller bundle  
-**Cons:** Build UI components yourself
-
-[Headless Example →](examples/headless-adapter-example.ts)
-
-### Custom Adapter
-
-Create your own:
-
-```typescript
-import { BaseFormAdapter } from 'ng-signalify/adapters';
-
-export class MyCustomAdapter extends BaseFormAdapter {
-  readonly name = 'my-ui-library';
-  readonly version = '1.0.0';
-  
-  // Implement adapter methods
-}
-```
-
-[Adapter Documentation →](lib/adapters/README.md)
+- **[Complete Documentation](DOCUMENTATION.md)** - Full API reference and guides
+- **[Migration Guide](MIGRATION.md)** - Upgrade from v1.x to v2.x
+- **[Examples](examples/)** - Working code examples
+- **[Demo App](https://github.com/biyonik/ng-signalify/tree/main/apps/demo-material)** - Full-featured demo application
 
 ---
 
-## 🔄 Migration from v1.x
+## 🎨 Demo Applications
 
-**Good news:** Your business logic code is **100% backward compatible**.
+Explore our fully functional demo applications:
 
-Only UI layer needs updates:
-
-```typescript
-// ❌ v1.x (deprecated)
-import { SigInput, SigSelect } from 'ng-signalify/components';
-
-// ✅ v2.x with Material
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-
-// ✅ v2.x with Headless
-import { SigFormField } from 'ng-signalify/components/core';
-```
-
-**Migration strategies:**
-- 🟢 **Gradual** - Migrate page by page (2-4 weeks)
-- 🔵 **Big Bang** - Migrate everything at once (1-2 weeks)
-- 🟡 **Hybrid** - Migrate critical paths first (3-4 weeks)
-
-[Complete Migration Guide →](MIGRATION.md)
-
----
-
-## 📖 Examples
-
-Explore complete, runnable examples:
-
-- [Material Adapter Example](examples/material-adapter-example.ts) - Full CRUD with Material UI
-- [Headless Adapter Example](examples/headless-adapter-example.ts) - Custom UI components
-- [Examples README](examples/README.md) - Usage guide and tips
-
----
-
-## 🧪 Turkish Validators
-
-Built-in validators for Turkish-specific data:
-
-```typescript
-import { tcKimlikNo, phoneNumber, iban, vergiNo, plaka } from 'ng-signalify/validators';
-
-// TC ID Number (11 digits with algorithm check)
-const tcField = new StringField('tc', 'TC Kimlik No', {
-  required: true,
-  customSchema: tcKimlikNo
-});
-
-// Phone (Turkish formats: 05551234567, +905551234567)
-const phoneField = new StringField('phone', 'Telefon', {
-  customSchema: phoneNumber
-});
-
-// IBAN (TR + 24 digits)
-const ibanField = new StringField('iban', 'IBAN', {
-  customSchema: iban
-});
-
-// Tax Number (10 digits)
-const vergiField = new StringField('vergi', 'Vergi No', {
-  customSchema: vergiNo
-});
-
-// License Plate (Turkish format)
-const plakaField = new StringField('plaka', 'Plaka', {
-  customSchema: plaka
-});
-```
-
----
-
-## 📋 Roadmap
-
-### v2.1 (Q1 2025)
-- [ ] Form Builder UI (drag & drop)
-- [ ] Additional adapters (Spartan, PrimeNG)
-- [ ] Enhanced DevTools extension
-
-### v2.5 (Q2 2025)
-- [ ] Legacy components show warnings
-- [ ] GraphQL client support
-- [ ] VS Code extension
-
-### v3.0 (Q1 2026)
-- [ ] Remove legacy components
-- [ ] Angular 20+ support
-- [ ] Performance optimizations
-
-[See full roadmap →](DOCUMENTATION.md#gelecek-özellikler)
+- **[Material Demo](apps/demo-material)** - Complete app using Angular Material
+  - Product management with CRUD operations
+  - User management with pagination
+  - Field examples showcase
+  - Dashboard with real-time updates
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome!
+We welcome contributions! Here's how you can help:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing`)
-3. Commit changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing`)
-5. Open a Pull Request
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'feat: add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
 
-**Commit Convention:** `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`
+### Commit Convention
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: Add new feature
+fix: Bug fix
+docs: Documentation changes
+style: Code style changes (formatting, etc.)
+refactor: Code refactoring
+test: Adding or updating tests
+chore: Maintenance tasks
+```
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/biyonik/ng-signalify.git
+cd ng-signalify
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Build the library
+npm run build
+
+# Run demo app
+cd apps/demo-material
+npm start
+```
 
 ---
 
 ## 📄 License
 
-MIT License - See [LICENSE](LICENSE) for details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-## 📞 Support
-
-- **Documentation:** [DOCUMENTATION.md](DOCUMENTATION.md)
-- **Examples:** [examples/](examples/)
-- **Issues:** [GitHub Issues](https://github.com/biyonik/ng-signalify/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/biyonik/ng-signalify/discussions)
-- **Email:** ahmet.altun60@gmail.com
-
----
-
-<div align="center">
 
 ## 👨‍💻 Author
 
 **Ahmet ALTUN**
 
-[![GitHub](https://img.shields.io/badge/GitHub-biyonik-181717?style=for-the-badge&logo=github)](https://github.com/biyonik)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-biyonik-0A66C2?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/biyonik)
-[![Email](https://img.shields.io/badge/Email-ahmet.altun60%40gmail.com-EA4335?style=for-the-badge&logo=gmail)](mailto:ahmet.altun60@gmail.com)
+- GitHub: [@biyonik](https://github.com/biyonik)
+- LinkedIn: [linkedin.com/in/biyonik](https://linkedin.com/in/biyonik)
+- Email: ahmet.altun60@gmail.com
 
 ---
 
-**If you find ng-signalify useful, give it a ⭐!**
+<div align="center">
 
-**ng-signalify v2.0** - Developed with ❤️ for the Angular community
+**If you find ng-signalify useful, please give it a ⭐!**
+
+Made with ❤️ for the Angular community
+
+</div>
+
+---
+---
+
+<a id="türkçe"></a>
+
+# 🇹🇷 Türkçe
+
+## 🎯 ng-signalify Nedir?
+
+**ng-signalify**, Angular 19+ uygulamaları için **modern, tip-güvenli, signal-tabanlı bir state management framework**'tür. Geleneksel hepsi-bir-arada kütüphanelerden farklı olarak, ng-signalify **UI-agnostik**'tir ve tercih ettiğiniz UI kütüphanesini kullanma özgürlüğü sunar.
+
+### Temel Özellikler
+
+| Özellik | Açıklama |
+|---------|----------|
+| 🎯 **Signal-Tabanlı Formlar** | Zod validasyonu ve async validator'lar ile tip-güvenli, reaktif form yönetimi |
+| 🏪 **Entity Store** | Önbellekleme, sayfalama ve iyimser güncellemelerle eksiksiz CRUD state yönetimi |
+| 🌐 **HTTP İstemcisi** | Yeniden deneme, circuit breaker ve offline kuyruk ile tip-güvenli API katmanı |
+| 📝 **24+ Alan Tipi** | Temel tiplerden karmaşık yapılara import/export destekli zengin alan tipleri |
+| 🔄 **Gerçek Zamanlı Destek** | Otomatik yeniden bağlanma ve presence tracking ile WebSocket yönetimi |
+| 🎨 **UI Bağımsız** | Material, PrimeNG, Spartan veya kendi bileşenlerinizle kullanın |
+| ✅ **Türkçe Validator'lar** | TC Kimlik, IBAN, telefon numarası ve daha fazlası için yerleşik validator'lar |
+| 🧪 **Test Araçları** | Formlar, store'lar ve signal'ler için kapsamlı test yardımcıları |
+| 🌍 **i18n Desteği** | Lazy loading ile signal-tabanlı uluslararasılaştırma |
+| 📦 **Tree-Shakeable** | Küçük paket boyutu - sadece kullandığınızı dahil edin |
+
+### Neden ng-signalify'ı Seçmelisiniz?
+
+Geleneksel kütüphaneler mantık ve UI'ı birlikte paketleyerek sizi tasarım sistemlerine kilitler. ng-signalify bu endişeleri ayırır:
+
+> **"Güçlü mantık katmanı + UI tercihiniz = Maksimum esneklik"**
+
+**Faydalar:**
+- 🎨 **Tam Tasarım Özgürlüğü** - Material, PrimeNG, Spartan veya özel bileşenler kullanın
+- 📦 **Daha Küçük Paketler** - Kullanılmayan özellikleri tree-shake edin, zorla UI bağımlılıkları yok
+- 🔄 **Kolay Geçiş** - İş mantığını yeniden yazmadan UI kütüphanelerini değiştirin
+- 🧪 **Daha İyi Test** - Mantık ve UI'ı bağımsız test edin
+- 🚀 **Geleceğe Hazır** - Büyük yeniden yapılandırma olmadan yeni UI trendlerine uyum sağlayın
+
+---
+
+## 📦 Kurulum
+
+```bash
+npm install ng-signalify zod
+# veya
+pnpm add ng-signalify zod
+# veya
+yarn add ng-signalify zod
+```
+
+**İsteğe Bağlı:** Angular Material veya tercih ettiğiniz UI kütüphanesini yükleyin
+
+```bash
+ng add @angular/material
+```
+
+---
+
+## 🚀 Hızlı Başlangıç
+
+### 1. Alanlarınızı Tanımlayın
+
+```typescript
+import { StringField, DecimalField, MultiEnumField, BooleanField } from 'ng-signalify/fields';
+
+const productFields = [
+  new StringField('name', 'Ürün Adı', {
+    required: true,
+    min: 3,
+    max: 100
+  }),
+  
+  new StringField('sku', 'Stok Kodu', {
+    required: true,
+    min: 3,
+    max: 50
+  }),
+  
+  new DecimalField('price', 'Fiyat', {
+    required: true,
+    min: 0,
+    precision: 2
+  }),
+  
+  new MultiEnumField('categories', 'Kategoriler', [
+    { id: 'electronics', label: 'Elektronik' },
+    { id: 'clothing', label: 'Giyim' },
+    { id: 'books', label: 'Kitap' }
+  ], { required: true }),
+  
+  new BooleanField('isActive', 'Aktif')
+];
+```
+
+### 2. Gelişmiş Form Oluşturun
+
+```typescript
+import { Component } from '@angular/core';
+import { createEnhancedForm } from 'ng-signalify/schemas';
+
+interface ProductForm {
+  name: string;
+  sku: string;
+  price: number;
+  categories: string[];
+  isActive: boolean;
+}
+
+@Component({
+  selector: 'app-product-form',
+  standalone: true,
+  template: `
+    <form (ngSubmit)="onSubmit()">
+      <!-- Herhangi bir UI kütüphanesi ile kullanın - Angular Material örneği -->
+      <mat-form-field appearance="outline">
+        <mat-label>Ürün Adı</mat-label>
+        <input matInput
+          [value]="form.fields.name.value()"
+          (input)="form.fields.name.value.set($any($event.target).value)"
+          (blur)="form.fields.name.touch()" />
+        @if (form.fields.name.error() && form.fields.name.touched()) {
+          <mat-error>{{ form.fields.name.error() }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fiyat</mat-label>
+        <input matInput type="number"
+          [value]="form.fields.price.value()"
+          (input)="form.fields.price.value.set(+$any($event.target).value)" />
+        @if (form.fields.price.error() && form.fields.price.touched()) {
+          <mat-error>{{ form.fields.price.error() }}</mat-error>
+        }
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" 
+        [disabled]="!form.valid()">
+        Gönder
+      </button>
+    </form>
+  `
+})
+export class ProductFormComponent {
+  protected form = createEnhancedForm<ProductForm>(productFields, {
+    name: '',
+    sku: '',
+    price: 0,
+    categories: [],
+    isActive: true
+  });
+
+  async onSubmit() {
+    if (await this.form.validateAll()) {
+      console.log('Form Verisi:', this.form.getValues());
+      // API çağrısı burada
+    }
+  }
+}
+```
+
+### 3. Entity Store Uygulayın
+
+```typescript
+import { Injectable } from '@angular/core';
+import { EntityStore, PaginatedResponse, FetchParams, EntityId } from 'ng-signalify/store';
+import { createHttpClient } from 'ng-signalify/api';
+
+interface Product {
+  id: number;
+  name: string;
+  sku: string;
+  price: number;
+  categories: string[];
+  isActive: boolean;
+}
+
+const http = createHttpClient({
+  baseUrl: 'https://api.example.com',
+  timeout: 30000
+});
+
+@Injectable({ providedIn: 'root' })
+export class ProductStore extends EntityStore<Product> {
+  constructor() {
+    super({
+      name: 'products',
+      selectId: (product) => product.id,
+      defaultPageSize: 20,
+      cacheTTL: 5 * 60 * 1000, // 5 dakika
+      optimistic: true
+    });
+  }
+
+  protected async fetchAll(params: FetchParams): Promise<PaginatedResponse<Product>> {
+    const response = await http.get<PaginatedResponse<Product>>('/api/products', { params });
+    return response.data;
+  }
+
+  protected async fetchOne(id: EntityId): Promise<Product> {
+    const response = await http.get<Product>(`/api/products/${id}`);
+    return response.data;
+  }
+
+  protected async createOne(data: Partial<Product>): Promise<Product> {
+    const response = await http.post<Product>('/api/products', { body: data });
+    return response.data;
+  }
+
+  protected async updateOne(id: EntityId, data: Partial<Product>): Promise<Product> {
+    const response = await http.patch<Product>(`/api/products/${id}`, { body: data });
+    return response.data;
+  }
+
+  protected async deleteOne(id: EntityId): Promise<void> {
+    await http.delete(`/api/products/${id}`);
+  }
+}
+```
+
+### 4. Bileşenlerde Liste ve Sayfalama ile Kullanın
+
+```typescript
+import { Component, inject, OnInit } from '@angular/core';
+import { ProductStore } from './product.store';
+
+@Component({
+  selector: 'app-product-list',
+  standalone: true,
+  template: `
+    @if (store.signals.isLoading()) {
+      <mat-spinner />
+    }
+
+    @if (store.signals.error()) {
+      <mat-error>{{ store.signals.error() }}</mat-error>
+    }
+
+    <table mat-table [dataSource]="store.signals.all()">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Ürün Adı</th>
+        <td mat-cell *matCellDef="let product">{{ product.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="sku">
+        <th mat-header-cell *matHeaderCellDef>Stok Kodu</th>
+        <td mat-cell *matCellDef="let product">{{ product.sku }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef>Fiyat</th>
+        <td mat-cell *matCellDef="let product">{{ product.price }} ₺</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>İşlemler</th>
+        <td mat-cell *matCellDef="let product">
+          <button mat-icon-button (click)="edit(product)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="delete(product.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <mat-paginator
+      [length]="store.pagination.total()"
+      [pageSize]="store.pagination.pageSize()"
+      [pageIndex]="store.pagination.page() - 1"
+      [pageSizeOptions]="[10, 20, 50]"
+      (page)="onPageChange($event)"
+    />
+  `
+})
+export class ProductListComponent implements OnInit {
+  protected store = inject(ProductStore);
+  protected displayedColumns = ['name', 'sku', 'price', 'actions'];
+
+  ngOnInit() {
+    this.store.loadAll();
+  }
+
+  onPageChange(event: { pageIndex: number; pageSize: number }) {
+    this.store.goToPage(event.pageIndex + 1);
+  }
+
+  async edit(product: Product) {
+    // Düzenleme diyalogu aç
+  }
+
+  async delete(id: number) {
+    if (confirm('Emin misiniz?')) {
+      await this.store.delete(id);
+    }
+  }
+}
+```
+
+---
+
+## 📊 Diğer Çözümlerle Karşılaştırma
+
+| Özellik | ng-signalify | NgRx | Akita | Angular Forms |
+|---------|--------------|------|-------|---------------|
+| **Signals Desteği** | ✅ Native | ⚠️ Signal Store ile | ❌ Sadece RxJS | ⚠️ Kısmi |
+| **Tip Güvenliği** | ✅ Zod ile Tam | ✅ Tam | ✅ Tam | ⚠️ Sınırlı |
+| **Boilerplate** | 🟢 Minimal | 🔴 Yüksek | 🟡 Orta | 🟢 Düşük |
+| **Öğrenme Eğrisi** | 🟢 Kolay | 🔴 Dik | 🟡 Orta | 🟢 Kolay |
+| **Form Validasyonu** | ✅ Yerleşik Zod | ❌ Manuel | ❌ Manuel | ✅ Yerleşik |
+| **Entity CRUD** | ✅ Hazır | ⚠️ Entity ile | ✅ Yerleşik | ❌ Yok |
+| **Sayfalama** | ✅ Entegre | ❌ Manuel | ⚠️ Eklenti | ❌ Yok |
+| **State Kalıcılığı** | ✅ Yerleşik | ⚠️ Meta-Reducer ile | ✅ Yerleşik | ❌ Yok |
+| **Paket Boyutu** | 🟢 Küçük | 🔴 Büyük | 🟡 Orta | 🟢 Küçük |
+| **Async Validasyon** | ✅ Debounced | ❌ Manuel | ❌ Manuel | ✅ Manuel |
+| **İyimser Güncellemeler** | ✅ Yerleşik | ❌ Manuel | ✅ Yerleşik | ❌ Yok |
+| **UI Bağımsız** | ✅ Evet | ✅ Evet | ✅ Evet | ⚠️ Angular'a Bağlı |
+| **DevTools** | ✅ Yerleşik | ✅ Eklenti | ✅ Eklenti | ⚠️ Sınırlı |
+| **Gerçek Zamanlı Destek** | ✅ WebSocket | ❌ Yok | ❌ Yok | ❌ Yok |
+
+**Açıklama:** ✅ Mükemmel | ⚠️ Kısmi | ❌ Mevcut Değil | 🟢 İyi | 🟡 Orta | 🔴 Zayıf
+
+---
+
+## 📚 Dokümantasyon
+
+- **[Tam Dokümantasyon](DOCUMENTATION.md)** - Eksiksiz API referansı ve rehberler
+- **[Geçiş Rehberi](MIGRATION.md)** - v1.x'ten v2.x'e yükseltme
+- **[Örnekler](examples/)** - Çalışan kod örnekleri
+- **[Demo Uygulaması](https://github.com/biyonik/ng-signalify/tree/main/apps/demo-material)** - Tam özellikli demo uygulama
+
+---
+
+## 🎨 Demo Uygulamaları
+
+Tam işlevsel demo uygulamalarımızı keşfedin:
+
+- **[Material Demo](apps/demo-material)** - Angular Material kullanan eksiksiz uygulama
+  - CRUD işlemleri ile ürün yönetimi
+  - Sayfalama ile kullanıcı yönetimi
+  - Alan örnekleri vitrini
+  - Gerçek zamanlı güncellemelerle dashboard
+
+---
+
+## 🤝 Katkıda Bulunma
+
+Katkılarınızı bekliyoruz! Nasıl yardımcı olabilirsiniz:
+
+1. Depoyu **fork** edin
+2. Özellik dalı **oluşturun** (`git checkout -b feature/harika-ozellik`)
+3. Değişikliklerinizi **commit** edin (`git commit -m 'feat: harika özellik eklendi'`)
+4. Dala **push** yapın (`git push origin feature/harika-ozellik`)
+5. Bir **Pull Request açın**
+
+### Commit Konvansiyonu
+
+[Conventional Commits](https://www.conventionalcommits.org/) standardını takip ediyoruz:
+
+```
+feat: Yeni özellik
+fix: Hata düzeltme
+docs: Dokümantasyon değişiklikleri
+style: Kod stili değişiklikleri (formatlama vb.)
+refactor: Kod yeniden yapılandırma
+test: Test ekleme veya güncelleme
+chore: Bakım işleri
+```
+
+### Geliştirme Ortamı Kurulumu
+
+```bash
+# Depoyu klonlayın
+git clone https://github.com/biyonik/ng-signalify.git
+cd ng-signalify
+
+# Bağımlılıkları yükleyin
+npm install
+
+# Testleri çalıştırın
+npm test
+
+# Kütüphaneyi derleyin
+npm run build
+
+# Demo uygulamayı çalıştırın
+cd apps/demo-material
+npm start
+```
+
+---
+
+## 📄 Lisans
+
+Bu proje **MIT Lisansı** ile lisanslanmıştır - detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+---
+
+## 👨‍💻 Yazar
+
+**Ahmet ALTUN**
+
+- GitHub: [@biyonik](https://github.com/biyonik)
+- LinkedIn: [linkedin.com/in/biyonik](https://linkedin.com/in/biyonik)
+- E-posta: ahmet.altun60@gmail.com
+
+---
+
+<div align="center">
+
+**ng-signalify'ı faydalı buluyorsanız, lütfen bir ⭐ verin!**
+
+Angular topluluğu için ❤️ ile yapıldı
 
 </div>
