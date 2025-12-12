@@ -12,11 +12,12 @@
  */
 import { Component, Output, EventEmitter } from '@angular/core';
 import { MaterialModule } from '../../shared/material.module';
+import { ThemeSwitcherComponent } from '../../components/theme-switcher/theme-switcher.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [MaterialModule],
+  imports: [MaterialModule, ThemeSwitcherComponent],
   template: `
     <mat-toolbar color="primary" class="header">
       <button mat-icon-button (click)="menuToggle.emit()">
@@ -24,6 +25,7 @@ import { MaterialModule } from '../../shared/material.module';
       </button>
       <span class="title">ng-signalify Material Demo</span>
       <span class="spacer"></span>
+      <app-theme-switcher />
       <button mat-icon-button [matMenuTriggerFor]="menu">
         <mat-icon>more_vert</mat-icon>
       </button>
