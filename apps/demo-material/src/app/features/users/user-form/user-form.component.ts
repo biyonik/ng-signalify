@@ -19,7 +19,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { UserStore } from '../user.store';
 import { userFields } from '../user.fields';
 import { User } from '../user.model';
-import { createEnhancedForm, EnhancedForm } from 'ng-signalify/schemas';
+import { createEnhancedForm, EnhancedFormState } from 'ng-signalify/schemas';
 
 @Component({
   selector: 'app-user-form',
@@ -281,7 +281,7 @@ export class UserFormComponent implements OnInit {
   isEditMode = signal(false);
   userId: number | null = null;
 
-  form!: EnhancedForm<User>;
+  form!: EnhancedFormState<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>;
 
   constructor() {
     // Create form in constructor to ensure injection context for effect()

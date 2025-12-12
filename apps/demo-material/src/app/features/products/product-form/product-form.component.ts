@@ -19,7 +19,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { ProductStore } from '../product.store';
 import { Product } from '../product.model';
 import { productFields } from '../product.fields';
-import { createEnhancedForm, EnhancedForm } from 'ng-signalify/schemas';
+import { createEnhancedForm, EnhancedFormState } from 'ng-signalify/schemas';
 
 @Component({
   selector: 'app-product-form',
@@ -301,7 +301,7 @@ export class ProductFormComponent implements OnInit {
   isEditMode = signal(false);
   productId: number | null = null;
 
-  form!: EnhancedForm<Product>;
+  form!: EnhancedFormState<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'productImage'>>;
 
   constructor() {
     // Create form in constructor to ensure injection context for effect()

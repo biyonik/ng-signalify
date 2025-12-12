@@ -144,12 +144,26 @@ export class ProductStore extends EntityStore<Product> {
       });
     }
     
-    // Apply pagination with defaults
+    // ✅ PAGINATION - Use defaults if undefined
     const page = params.page ?? 1;
     const pageSize = params.pageSize ?? 10;
+    
+    console.log('🔍 ProductStore fetchAll Pagination:', { 
+      page, 
+      pageSize, 
+      totalFiltered: filtered.length,
+      paramsReceived: params 
+    });
+    
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
     const data = filtered.slice(start, end);
+    
+    console.log('🔍 ProductStore Sliced Data:', { 
+      start, 
+      end, 
+      slicedCount: data.length 
+    });
     
     return {
       data,
