@@ -363,6 +363,8 @@ See working examples:
 
 ## Fields (Alan Tipleri)
 
+> **📖 Kapsamlı Dokümantasyon:** [Field Types Guide](docs/fields.md) | [Türkçe](docs/tr/fields.md)
+
 Fields, form alanlarının tip-güvenli tanımını sağlar. Her field tipi:
 - Zod schema üretir (validation)
 - Import/Export dönüşümü yapar

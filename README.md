@@ -351,6 +351,7 @@ export class ProductListComponent implements OnInit {
 ## 📚 Documentation
 
 - **[Complete Documentation](DOCUMENTATION.md)** - Full API reference and guides
+- **[Field Types Guide](docs/fields.md)** - Comprehensive field types documentation ([Türkçe](docs/tr/fields.md))
 - **[Migration Guide](MIGRATION.md)** - Upgrade from v1.x to v2.x
 - **[Examples](examples/)** - Working code examples
 - **[Demo App](https://github.com/biyonik/ng-signalify/tree/main/apps/demo-material)** - Full-featured demo application
@@ -771,6 +772,7 @@ export class ProductListComponent implements OnInit {
 ## 📚 Dokümantasyon
 
 - **[Tam Dokümantasyon](DOCUMENTATION.md)** - Eksiksiz API referansı ve rehberler
+- **[Alan Tipleri Rehberi](docs/tr/fields.md)** - Kapsamlı alan tipleri dokümantasyonu ([English](docs/fields.md))
 - **[Geçiş Rehberi](MIGRATION.md)** - v1.x'ten v2.x'e yükseltme
 - **[Örnekler](examples/)** - Çalışan kod örnekleri
 - **[Demo Uygulaması](https://github.com/biyonik/ng-signalify/tree/main/apps/demo-material)** - Tam özellikli demo uygulama
